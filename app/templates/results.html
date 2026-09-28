@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}JobSetu — {{ role }} in {{ location }}{% endblock %}
+{% block content %}
+<section class="results-head">
+  <p class="crumb"><a href="/">← New search</a> · <a href="/profile">Profile</a></p>
+  <h1>{{ role }} <span class="muted">in {{ location }} · {{ experience }}</span></h1>
+  <div class="pipeline" aria-label="Processing summary">
+    <div><strong>{{ raw_count }}</strong><span>listings found</span></div>
+    <div class="arrow">↓</div>
+    <div><strong>{{ dup_removed }}</strong><span>duplicates removed</span></div>
+    <div class="arrow">↓</div>
+    <div><strong>{{ canonical_count }}</strong><span>unique jobs</span></div>
+  </div>
+  <p>
+    {% if is_live %}
+      <span class="badge live">LIVE</span>
+    {% else %}
+      <span class="badge cached">CACHED · retrieved {{ age }}</span>
+    {% endif %}
+  </p>
+  {% if stale %}
+  <p class="stale-banner" role="alert">Live search unavailable. Showing cached results from {{ age }}.</p>
+  {% endif %}
+  {% if not has_profile %}
+  <p class="profile-nudge" role="note"><a href="/profile">Create your profile</a> to see match scores and skill gaps.</p>
+  {% endif %}
+</section>
+
+{% if gaps %}
+<section class="card gaps">
+  <h2>What should I learn next?</h2>
+  <p class="muted">Missing skills across these {{ canonical_count }} jobs (counted from real listings, not estimates):</p>
+  <ul>
+    {% for gap in gaps %}
+    <li><strong>{{ gap.skill }}</strong> — missing in {{ gap.missing_in }} of {{ gap.total_jobs }} jobs</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if not jobs %}
+<section class="card">
+  <h2>No jobs found for this search.</h2>
+  <p class="muted">Try a different role wording (e.g. “Backend Developer” instead of “Python Backend Developer”) or another city.</p>
+</section>
+{% endif %}
+
+{% for job in jobs %}
+{% set match = matches.get(job.id) %}
+{% set job_skills = skills_by_job.get(job.id, []) %}
+<article class="card">
+  <h2>{{ job.title_raw or "Untitled role" }}</h2>
+  <p class="company">{{ job.company.name_raw or "Unknown company" }} · {{ job.location_raw or location }}</p>
+  {% if match %}
+  <p class="match-score">{{ match.total }}% MATCH</p>
+  <p class="skills-line">
+    {% for s in match.matched_skills %}<span class="chip chip-yes">✓ {{ display_skill(s) }}</span>{% endfor %}
+  </p>
+  {% if match.missing_skills %}
+  <p class="gap-line"><span class="muted">Skill gap:</span> {% for s in match.missing_skills %}{{ display_skill(s) }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+  {% endif %}
+  <details class="why">
+    <summary>WHY THIS MATCHES</summary>
+    <table class="breakdown">
+      <tr><td>Skills</td><td>{{ match.skill_pts }} / 50</td></tr>
+      <tr><td>Title</td><td>{{ match.title_pts }} / 20</td></tr>
+      <tr><td>Experience</td><td>{{ match.exp_pts }} / 15</td></tr>
+      <tr><td>Location</td><td>{{ match.loc_pts }} / 10</td></tr>
+      <tr><td>Type</td><td>{{ match.type_pts }} / 5</td></tr>
+      <tr class="total"><td>Total</td><td>{{ match.total }} / 100</td></tr>
+    </table>
+    <ul>
+      {% for reason in match.reasons %}<li>{{ reason }}</li>{% endfor %}
+    </ul>
+    <p class="muted">Rule-based score, not AI judgment. Company evidence is search-backed — see VERIFY below.</p>
+  </details>
+  {% else %}
+  {% if job_skills %}
+  <p class="skills-line"><span class="muted">Detected skills:</span>
+    {% for s in job_skills %}<span class="chip">{{ display_skill(s) }}</span>{% endfor %}
+  </p>
+  {% endif %}
+  {% endif %}
+  {% if job.posted_text or job.salary_text or job.via_display %}
+  <p class="meta">
+    {% if job.posted_text %}<span>Posted: {{ job.posted_text }}</span>{% endif %}
+    {% if job.salary_text %}<span> · {{ job.salary_text }}</span>{% endif %}
+    {% if job.via_display %}<span> · via {{ job.via_display }}</span>{% endif %}
+    {% if job.dup_count %}<span> · {{ job.dup_count + 1 }} listings merged</span>{% endif %}
+  </p>
+  {% endif %}
+  {% set ver = verify.get(job.id) %}
+  {% if ver and ver.status != 'unavailable' %}
+  <div class="verify verify-{{ ver.status }}">
+    <p class="verify-head">
+      {% if ver.is_supporting %}🟢{% elif ver.is_warning %}🔴{% else %}🟡{% endif %}
+      <strong>VERIFY · {{ ver.label }}</strong>
+      <span class="muted">· {{ ver.source_count }} source{{ "s" if ver.source_count != 1 }} · {{ "LIVE" if ver.live else "CACHED · " + ver.age }}</span>
+    </p>
+    <ul class="verify-reasons">
+      {% for reason in ver.reasons %}<li>{{ reason }}</li>{% endfor %}
+    </ul>
+    <p><a class="link" href="/jobs/{{ job.id }}/evidence">VIEW EVIDENCE</a></p>
+  </div>
+  {% elif ver %}
+  <p class="muted">Verification unavailable — the live check failed and no cached evidence exists. No status shown rather than a guess.</p>
+  {% else %}
+  <p class="muted">Verification runs for top matches only — this listing was not checked.</p>
+  {% endif %}
+  {% set nw = news.get(job.id) %}
+  {% if nw and (nw['items'] or nw['state'] in ('empty', 'ambiguous', 'stale', 'unavailable')) %}
+  <div class="news">
+    <p class="news-head"><strong>NEWS CONTEXT</strong>
+      <span class="muted">· {{ "LIVE · checked just now" if nw['live'] else ("CACHED · checked earlier" if nw['state'] in ('ok', 'stale') else "") }}</span>
+    </p>
+    {% if nw['state'] == 'ok' or (nw['state'] == 'stale' and nw['items']) %}
+    {% if nw['stale'] %}<p class="stale-banner" role="alert">News context temporarily unavailable. Showing cached items.</p>{% endif %}
+    <ul class="news-list">
+      {% for item in nw['items'] %}
+      <li>{% if item['attention'] %}⚠{% else %}📰{% endif %} {{ item['title'] }}<br />
+        <span class="muted">{{ item['source'] }} · {{ item['date_display'] }} · {{ item['label'] }}</span></li>
+      {% endfor %}
+    </ul>
+    {% if nw['items'] and nw['items'] | selectattr('attention') | list %}
+    <p class="muted">Recent news includes sensitive company activity. Read the source before drawing conclusions.</p>
+    {% endif %}
+    <p><a class="link" href="/jobs/{{ job.id }}/evidence#news">VIEW SOURCES</a></p>
+    {% elif nw['state'] == 'empty' %}
+    <p class="muted">No matching news results found for this company.</p>
+    {% elif nw['state'] == 'ambiguous' %}
+    <p class="muted">News context unavailable — ambiguous company identity.</p>
+    {% else %}
+    <p class="muted">News context temporarily unavailable.</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="muted">News context is checked for top matches only.</p>
+  {% endif %}
+  {% if job.description %}
+  <p class="desc">{{ job.description[:300] }}{% if job.description|length > 300 %}…{% endif %}</p>
+  {% endif %}
+  <p class="apply-row">
+    {% if job.apply_link and safe_url(job.apply_link) %}
+      <a class="btn" href="{{ safe_url(job.apply_link) }}" target="_blank" rel="noopener">Apply</a>
+    {% else %}
+      <span class="muted">Application link unavailable.</span>
+    {% endif %}
+    {% for extra in extra_links.get(job.id, []) %}
+      <a class="btn btn-ghost" href="{{ extra.url }}" target="_blank" rel="noopener">Also via {{ extra.source }}</a>
+    {% endfor %}
+  </p>
+</article>
+{% endfor %}
+{% endblock %}

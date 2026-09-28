@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}JobSetu — Candidate profile{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Your profile</h1>
+  <p class="sub">JobSetu matches this profile against live listings. No account needed — it stays on this server.</p>
+  <p><a class="link" href="/profile?demo=1">Fill sample demo profile</a> <span class="muted">(Python · FastAPI · Django · PostgreSQL · Git — clearly labeled sample data, saved only when you submit)</span></p>
+  {% if demo %}<p class="demo-banner" role="note">Showing sample demo data. Press “Save profile” to use it, or edit freely.</p>{% endif %}
+  {% if saved %}<p class="saved-banner" role="status">Profile saved. <a href="/">Search jobs</a> to see your match scores.</p>{% endif %}
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <form class="search-form" action="/profile" method="post" aria-label="Candidate profile">
+    <div class="field-row">
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" value="{{ current.name }}" maxlength="200" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="experience">Experience</label>
+        <select id="experience" name="experience">
+          {% for choice in experience_choices %}
+          <option value="{{ choice }}" {% if current.experience == choice %}selected{% endif %}>{{ choice }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="preferred_role">Preferred role</label>
+        <input id="preferred_role" name="preferred_role" type="text" value="{{ current.preferred_role }}" maxlength="200" required autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="location">Preferred location</label>
+        <input id="location" name="location" type="text" value="{{ current.location }}" maxlength="200" required autocomplete="off" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="job_type_pref">Employment type</label>
+      <select id="job_type_pref" name="job_type_pref">
+        {% for choice in type_choices %}
+        <option value="{{ choice }}" {% if current.job_type_pref == choice %}selected{% endif %}>{{ "No preference" if choice == "any" else choice }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label for="skills">Skills (comma- or line-separated)</label>
+      <textarea id="skills" name="skills" rows="4">{% if current.skills %}{{ current.skills }}{% else %}{{ skills | map(attribute=0) | join(', ') }}{% endif %}</textarea>
+    </div>
+    <button class="cta cta-enabled" type="submit">Save profile</button>
+  </form>
+  {% if skills and not demo %}
+  <h2>Saved skills</h2>
+  <p>{% for norm, label in skills %}<span class="chip">{{ label }}</span>{% endfor %}</p>
+  {% endif %}
+</section>
+{% endblock %}

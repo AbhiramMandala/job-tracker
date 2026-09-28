@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}JobSetu — Find jobs worth applying to{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">JOBSETU · India&rsquo;s fresher job radar</p>
+  <h1>Find jobs worth applying to.</h1>
+  <p class="sub">Search &rarr; Match &rarr; Verify &rarr; Learn. JobSetu checks which fresher listings are relevant, verifiable, and worth your time — starting with Hyderabad.</p>
+  <div class="hero-steps" aria-label="How it works">
+    <span>Search live listings</span><span>Match your profile</span><span>Verify with evidence</span><span>Learn what&rsquo;s missing</span>
+  </div>
+  {% if error %}<p class="form-error" role="alert">{{ error }}</p>{% endif %}
+  <form id="search-form" class="search-form" action="/search" method="post" aria-label="Job search">
+    <div class="field">
+      <label for="role">Role</label>
+      <input id="role" name="role" type="text" value="{{ role }}" maxlength="200" required autocomplete="off" />
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="location">Location</label>
+        <select id="location" name="location">
+          <option {% if location == "Hyderabad" %}selected{% endif %}>Hyderabad</option>
+          <option {% if location == "Bengaluru" %}selected{% endif %}>Bengaluru</option>
+          <option {% if location == "Chennai" %}selected{% endif %}>Chennai</option>
+          <option {% if location == "Remote (India)" %}selected{% endif %}>Remote (India)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="experience">Experience</label>
+        <select id="experience" name="experience">
+          <option {% if experience == "Fresher" %}selected{% endif %}>Fresher</option>
+          <option {% if experience == "0–1 years" %}selected{% endif %}>0–1 years</option>
+          <option {% if experience == "1–2 years" %}selected{% endif %}>1–2 years</option>
+        </select>
+      </div>
+    </div>
+    <button id="search-btn" class="cta" type="submit">Find jobs</button>
+  </form>
+  <p class="note">Live results via SerpApi Google Jobs. Repeated searches reuse cached results for 24 hours.</p>
+</section>
+<script>
+document.getElementById("search-form").addEventListener("submit", function () {
+  var btn = document.getElementById("search-btn");
+  btn.disabled = true;
+  btn.textContent = "Searching live listings…";
+});
+</script>
+{% endblock %}

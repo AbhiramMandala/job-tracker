@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}JobSetu — Evidence for {{ job.title_raw }}{% endblock %}
+{% block content %}
+<section class="results-head">
+  <p class="crumb"><a href="/">← New search</a></p>
+  <h1>{{ job.title_raw or "Untitled role" }}</h1>
+  <p class="company">{{ company_name }} · {{ job.location_raw }}</p>
+  <p class="muted">Every claim below cites a real retrieved search result. Nothing here is AI-generated.</p>
+</section>
+
+{% if notices %}
+<section class="card">
+  <h2>Notices</h2>
+  <ul>
+    {% for notice in notices %}<li>{{ notice }}</li>{% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% if not has_evidence %}
+<section class="card">
+  <h2>Verification unavailable.</h2>
+  <p class="muted">No evidence has been collected for this listing yet — live verification may have failed. No status is shown rather than a guess.</p>
+</section>
+{% endif %}
+
+{% for source in sources %}
+<article class="card source">
+  <p class="src-engine">Google Search · <q>{{ source.query }}</q></p>
+  <h2><a href="{{ source.url }}" target="_blank" rel="noopener">{{ source.title }}</a></h2>
+  <p class="src-domain">{{ source.domain }}</p>
+  {% if source.snippet %}<p class="desc">{{ source.snippet }}</p>{% endif %}
+  <p class="meta"><span>{{ source.type.replace('_', ' ') }} · {{ source.category }}</span> · <span>Retrieved {{ source.age }}</span></p>
+  <p><a class="btn btn-small" href="{{ source.url }}" target="_blank" rel="noopener">Open source</a></p>
+</article>
+{% endfor %}
+
+<section class="card" id="news">
+  <h2>NEWS CONTEXT</h2>
+  <p class="muted">Recent public information about this company — context for you to interpret, not a verdict. News never feeds the VERIFY status above.</p>
+  {% if news_state == 'ok' or (news_state == 'stale' and news_items) %}
+  {% if news_stale %}<p class="stale-banner" role="alert">News context temporarily unavailable. Showing cached items.</p>{% endif %}
+  {% for item in news_items %}
+  <article class="source">
+    <p class="src-engine">Google News · {{ item.label }}</p>
+    <h2><a href="{{ item.url }}" target="_blank" rel="noopener">{% if item.attention %}⚠ {% endif %}{{ item.title }}</a></h2>
+    <p class="src-domain">{{ item.source }} · {{ item.date_display }}</p>
+    <p><a class="btn btn-small" href="{{ item.url }}" target="_blank" rel="noopener">Open source</a></p>
+  </article>
+  {% endfor %}
+  {% elif news_state == 'empty' %}
+  <p class="muted">No matching news results found for this company.</p>
+  {% elif news_state == 'ambiguous' %}
+  <p class="muted">News context unavailable — ambiguous company identity.</p>
+  {% else %}
+  <p class="muted">News context temporarily unavailable.</p>
+  {% endif %}
+</section>
+{% endblock %}
