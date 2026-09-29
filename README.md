@@ -4,9 +4,9 @@ Evidence-powered job intelligence for Indian freshers.
 
 ## Status
 
-Slice 5 implemented (final feature slice). The full loop is live: DISCOVER →
-DEDUP → MATCH → VERIFY → NEWS CONTEXT → GAP → APPLY. Remaining work is
-rehearsal, deployment, screenshots/video, and submission — not features.
+Slices 1–10 complete, final QA done (88/88 green). **STOP CODING** — no new
+features. Remaining work is rehearsal, deployment, screenshots/video, and
+submission — not features.
 
 Slice 5 provides: Google News company context (rule-based categories,
 recency, sources), on-demand + pre-enriched news with failure isolation,

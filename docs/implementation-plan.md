@@ -38,16 +38,17 @@
 - Done when: evidence page shows engine+query+retrieved_at+links for every claim.
 - See docs/verification.md for the full design record.
 
-## Slice 7 — Polish
+## Slice 7 — Polish ✅ COMPLETE
 - Loading/empty/error states, LIVE/CACHED badges with age, responsive cards, apply links, saved jobs (localStorage or DB flag if trivial).
 - Done when: cold run + cached run + zero-result run all look intentional.
-- Status (Slice 5): loading/empty/error/stale states done; LIVE/CACHED on jobs,
+- Status (final QA): loading/empty/error/stale states done; LIVE/CACHED on jobs,
   verify, and news; news failure isolated; hero + card hierarchy polished.
+  Friendly 400/503/404 manually verified, no tracebacks; empty states done.
 
-## Slice 8 — Reliability
+## Slice 8 — Reliability ✅ COMPLETE
 - Tests: normalizer, dedup, matcher, cache TTL, malformed SerpApi payloads, API-failure fallback (stale cache → error, never fake). Request logging redaction check.
 - Done when: `pytest` covers P0 paths, fallback manually verified by revoking key.
-- Status (Slice 5): 87 tests green covering all of the above; key-absent and
+- Status (final QA): 88 tests green covering all of the above; key-absent and
   failure paths verified manually; live-key run still blocked (no key).
 
 ## Slice 9 — Deployment
