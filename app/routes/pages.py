@@ -26,8 +26,12 @@ def index(request: Request):
 
 @router.get("/tools", response_class=HTMLResponse)
 def tools(request: Request):
+    resources = valid_resources()
+    counts = {cat: sum(1 for r in resources if r["category"] == cat)
+              for cat in CATEGORIES}
     return templates.TemplateResponse(
         request,
         "tools.html",
-        {"resources": valid_resources(), "categories": list(CATEGORIES)},
+        {"resources": resources, "categories": list(CATEGORIES),
+         "counts": counts, "total": len(resources)},
     )

@@ -115,9 +115,12 @@ def job_evidence(request: Request, job_id: int, db: Session = Depends(get_db)):
             "news_items": news_items,
             "news_state": news_state,
             "news_stale": news_stale,
-            "iv": interview_display_dict(summarize_interview_reports(job.id, rows)),
+            "iv": interview_display_dict(summarize_interview_reports(
+                job.id, rows,
+                company_norm=(job.company.name_norm if job.company else ""))),
             "company_type": classification["type"],
             "company_confidence": classification["confidence"],
+            "company_basis": classification.get("basis", ""),
             "official_site": official_site,
             "job_skills": job_skills,
             "job_skill_labels": job_skill_labels,

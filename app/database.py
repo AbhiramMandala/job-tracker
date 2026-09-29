@@ -2,7 +2,7 @@
 
 import logging
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.config import get_settings
@@ -21,7 +21,19 @@ def _connect_args(url: str) -> dict:
 def build_engine(url: str | None = None):
     settings = get_settings()
     db_url = url or settings.DATABASE_URL
-    return create_engine(db_url, connect_args=_connect_args(db_url), future=True)
+    engine = create_engine(db_url, connect_args=_connect_args(db_url), future=True)
+    if db_url.startswith("sqlite"):
+        # The results page fires verify/news/interview enrichment concurrently;
+        # WAL + a busy timeout lets those writers coexist instead of raising
+        # "database is locked".
+        @event.listens_for(engine, "connect")
+        def _sqlite_pragmas(dbapi_conn, _connection_record):
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL")
+            cursor.execute("PRAGMA synchronous=NORMAL")
+            cursor.execute("PRAGMA busy_timeout=5000")
+            cursor.close()
+    return engine
 
 
 engine = build_engine()

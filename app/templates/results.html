@@ -41,7 +41,7 @@
         <option value="">All types</option>
         <option value="government">Government / PSU</option>
         <option value="established">Established employer</option>
-        <option value="unknown">Unknown</option>
+        <option value="private">Private Company</option>
       </select>
     </div>
   </div>
@@ -68,17 +68,18 @@
 </section>
 {% endif %}
 
+<div id="results" data-search-id="{{ search_id }}">
 {% for job in jobs %}
 {% set match = matches.get(job.id) %}
 {% set job_skills = skills_by_job.get(job.id, []) %}
-{% set ver = verify.get(job.id) %}
 {% set co = company.get(job.id) %}
-<article class="card job-card" data-verify="{{ ver.status if ver else 'unchecked' }}" data-company-type="{{ co.filter if co else 'unknown' }}">
+<article class="card job-card" data-verify="unchecked" data-company-type="{{ co.filter if co else 'private' }}">
   <h2>{{ job.title_raw or "Untitled role" }}</h2>
   <p class="company">{{ job.company.name_raw or "Unknown company" }} · {{ job.location_raw or location }}</p>
   {% if co %}<p class="company-type">Company type: {{ co.type }} · Confidence: {{ co.confidence }}</p>{% endif %}
   {% if match %}
   <p class="match-score">{{ match.total }}% MATCH</p>
+  <div class="match-bar" role="img" aria-label="{{ match.total }} percent match"><span style="width: {{ match.total }}%"></span></div>
   <p class="skills-line">
     {% for s in match.matched_skills %}<span class="chip chip-yes">✓ {{ display_skill(s) }}</span>{% endfor %}
   </p>
@@ -115,20 +116,10 @@
     {% if job.dup_count %}<span> · {{ job.dup_count + 1 }} listings merged</span>{% endif %}
   </p>
   {% endif %}
-  {% if ver and ver.status != 'unavailable' %}
-  <div class="verify verify-{{ ver.status }}">
-    <p class="verify-head">
-      {% if ver.is_supporting %}🟢{% elif ver.is_warning %}🔴{% else %}🟡{% endif %}
-      <strong>VERIFY · {{ ver.label }}</strong>
-      <span class="muted">· {{ ver.source_count }} source{{ "s" if ver.source_count != 1 }} · {{ "LIVE" if ver.live else "CACHED · " + ver.age }}</span>
-    </p>
-    <ul class="verify-reasons">
-      {% for reason in ver.reasons %}<li>{{ reason }}</li>{% endfor %}
-    </ul>
-    <p><a class="link" href="/jobs/{{ job.id }}/evidence">VIEW EVIDENCE</a></p>
+  {% if job.id in enrich_ids.verify %}
+  <div data-enrich="verify" data-job="{{ job.id }}">
+    <p class="muted">Checking supporting evidence…</p>
   </div>
-  {% elif ver %}
-  <p class="muted">Verification unavailable — the live check failed and no cached evidence exists. No status shown rather than a guess.</p>
   {% else %}
   <p class="muted">Verification runs for top matches only — this listing was not checked.</p>
   {% endif %}
@@ -136,38 +127,17 @@
   {% if auth %}
   {% include "_authenticity.html" %}
   {% endif %}
-  {% set nw = news.get(job.id) %}
-  {% if nw and (nw['items'] or nw['state'] in ('empty', 'ambiguous', 'stale', 'unavailable')) %}
-  <div class="news">
-    <p class="news-head"><strong>NEWS CONTEXT</strong>
-      <span class="muted">· {{ "LIVE · checked just now" if nw['live'] else ("CACHED · checked earlier" if nw['state'] in ('ok', 'stale') else "") }}</span>
-    </p>
-    {% if nw['state'] == 'ok' or (nw['state'] == 'stale' and nw['items']) %}
-    {% if nw['stale'] %}<p class="stale-banner" role="alert">News context temporarily unavailable. Showing cached items.</p>{% endif %}
-    <ul class="news-list">
-      {% for item in nw['items'] %}
-      <li>{% if item['attention'] %}⚠{% else %}📰{% endif %} {{ item['title'] }}<br />
-        <span class="muted">{{ item['source'] }} · {{ item['date_display'] }} · {{ item['label'] }}</span></li>
-      {% endfor %}
-    </ul>
-    {% if nw['items'] and nw['items'] | selectattr('attention') | list %}
-    <p class="muted">Recent news includes sensitive company activity. Read the source before drawing conclusions.</p>
-    {% endif %}
-    <p><a class="link" href="/jobs/{{ job.id }}/evidence#news">VIEW SOURCES</a></p>
-    {% elif nw['state'] == 'empty' %}
-    <p class="muted">No matching news results found for this company.</p>
-    {% elif nw['state'] == 'ambiguous' %}
-    <p class="muted">News context unavailable — ambiguous company identity.</p>
-    {% else %}
-    <p class="muted">News context temporarily unavailable.</p>
-    {% endif %}
+  {% if job.id in enrich_ids.news %}
+  <div data-enrich="news" data-job="{{ job.id }}">
+    <p class="muted">Loading relevant news…</p>
   </div>
   {% else %}
   <p class="muted">News context is checked for top matches only.</p>
   {% endif %}
-  {% set iv = interview.get(job.id) %}
-  {% if iv %}
-  {% include "_interview.html" %}
+  {% if job.id in enrich_ids.interview %}
+  <div data-enrich="interview" data-job="{{ job.id }}">
+    <p class="muted">Finding public interview evidence…</p>
+  </div>
   {% endif %}
   {% if job.description %}
   <p class="desc">{{ job.description[:300] }}{% if job.description|length > 300 %}…{% endif %}</p>
@@ -185,6 +155,45 @@
   </p>
 </article>
 {% endfor %}
+</div>
+<script>
+/* Progressive enrichment: cards render fast with loading placeholders above;
+   each section is fetched in parallel and injected per job. A fresh search
+   loads a new page, which abandons these in-flight requests automatically. */
+(function () {
+  var mount = document.getElementById("results");
+  if (!mount) return;
+  var searchId = mount.getAttribute("data-search-id");
+  if (!searchId) return;
+  ["verify", "news", "interview"].forEach(function (kind) {
+    var slots = Array.prototype.slice.call(
+      mount.querySelectorAll('[data-enrich="' + kind + '"]'));
+    if (!slots.length) return;
+    fetch("/api/enrich/" + kind + "?search_id=" + encodeURIComponent(searchId))
+      .then(function (response) { return response.ok ? response.json() : null; })
+      .then(function (data) {
+        if (!data || !data.items) throw new Error("bad payload");
+        if (data.statuses) {
+          slots.forEach(function (el) {
+            var card = el.closest(".job-card");
+            var status = data.statuses[el.getAttribute("data-job")];
+            if (card && status) card.setAttribute("data-verify", status);
+          });
+        }
+        slots.forEach(function (el) {
+          var html = data.items[el.getAttribute("data-job")];
+          if (html) { el.outerHTML = html; }
+          else { el.innerHTML = '<p class="muted">Additional information unavailable.</p>'; }
+        });
+      })
+      .catch(function () {
+        slots.forEach(function (el) {
+          el.innerHTML = '<p class="muted">Additional information unavailable.</p>';
+        });
+      });
+  });
+})();
+</script>
 <script>
 (function () {
   var vSel = document.getElementById("filter-verify");

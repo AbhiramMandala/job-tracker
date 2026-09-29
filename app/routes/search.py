@@ -1,23 +1,29 @@
-"""POST /search. Thin route: validate form, call services, render."""
+"""POST /search. Fast path: discovery → normalize → dedup → match → render.
+
+Heavy enrichment (VERIFY evidence, news, interviews) does NOT block this
+response. Cards render loading placeholders; the page fetches each section
+from GET /api/enrich/{verify,news,interview} in parallel. Pure derivations
+(authenticity score, company type) stay inline — one bounded local query,
+zero SerpApi calls.
+"""
 
 import json
 import logging
+import time
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.data.skills import display_skill
 from app.database import get_db
 from app.models import Evidence, JobSkill, Match
 from app.routes.profile import get_active_candidate
 from app.services.authenticity import analyze_job, display_dict
 from app.services.company import classify_company_type, filter_value
-from app.services.evidence import EvidenceService, STATUS_SUPPORTING, STATUS_WARNING
-from app.services.interview import InterviewService, display_dict as interview_display_dict
 from app.services.job_search import JobSearchService
-from app.services.news import NewsService
 from app.services.serpapi_client import SerpApiError
 from app.utils import age_text, safe_url
 
@@ -42,6 +48,7 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
     role = str(form.get("role") or "")
     location = str(form.get("location") or "")
     experience = str(form.get("experience") or "Fresher")
+    discovery_started = time.monotonic()
     try:
         result = JobSearchService(db).run(role, location, experience)
     except ValueError as exc:
@@ -67,6 +74,7 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
         )
     candidate = get_active_candidate(db)
     job_ids = [job.id for job in result.jobs]
+    fast_started = time.monotonic()
     matches: dict[int, Match] = {}
     skills_by_job: dict[int, list[str]] = {}
     if job_ids:
@@ -90,36 +98,16 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
     ]
     # VERIFY pillar: enrich top jobs by match score (or result order).
     totals = {job_id: match.total for job_id, match in matches.items()}
-    verify = EvidenceService(db).enrich(result.jobs, totals or None)
-    # NEWS CONTEXT: pre-enrich a smaller top-N; failures never break search.
-    try:
-        news_digests = NewsService(db).enrich_top(result.jobs, totals or None)
-    except Exception:
-        logger.exception("news pre-enrichment failed; continuing without news")
-        news_digests = {}
-    # INTERVIEW CONTEXT: pre-enrich a smaller top-N; failures never break search.
-    try:
-        interview_digests = InterviewService(db).enrich_top(result.jobs, totals or None)
-    except Exception:
-        logger.exception("interview pre-enrichment failed; continuing without it")
-        interview_digests = {}
-    interview_display = {
-        job_id: interview_display_dict(digest)
-        for job_id, digest in interview_digests.items()
+    # Enrichment happens lazily via /api/enrich — but the page needs to know
+    # WHICH cards get loading placeholders. Same ranking the services use
+    # (match totals, result order fallback), same per-service caps.
+    settings = get_settings()
+    ranked = sorted(result.jobs, key=lambda j: totals.get(j.id, 0), reverse=True)
+    enrich_ids = {
+        "verify": {job.id for job in ranked[: max(0, settings.EVIDENCE_MAX_JOBS)]},
+        "news": {job.id for job in ranked[: max(0, settings.NEWS_MAX_JOBS)]},
+        "interview": {job.id for job in ranked[: max(0, settings.INTERVIEW_MAX_JOBS)]},
     }
-    verify_display = {}
-    for job_id, summary in verify.items():
-        verify_display[job_id] = {
-            "status": summary.status,
-            "label": _verify_label(summary.status),
-            "reasons": summary.reasons,
-            "source_count": summary.source_count,
-            "age": age_text(summary.retrieved_at),
-            "live": summary.is_live,
-            "stale": summary.stale,
-            "is_supporting": summary.status == STATUS_SUPPORTING,
-            "is_warning": summary.status == STATUS_WARNING,
-        }
     extra_links: dict[int, list[dict]] = {}
     for job in result.jobs:
         try:
@@ -131,14 +119,6 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
             for e in links
             if isinstance(e, dict) and safe_url(e.get("link", ""))
         ][:3]
-    news_display = {}
-    for job_id, digest in news_digests.items():
-        news_display[job_id] = {
-            "state": digest.state,
-            "items": digest.items[:2],
-            "live": digest.is_live,
-            "stale": digest.stale,
-        }
     # AUTHENTICITY: pure derivation over stored rows + job fields. One bounded
     # query, zero SerpApi calls, never blocks or breaks search.
     auth_display: dict[int, dict] = {}
@@ -174,16 +154,22 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
                 )
             except Exception:
                 logger.exception("company classification failed job=%s", job.id)
-                classification = {"type": "Unknown", "confidence": "Low"}
+                classification = {"type": "Private Company", "confidence": "Low"}
             company_display[job.id] = {
                 "type": classification["type"],
                 "confidence": classification["confidence"],
                 "filter": filter_value(classification),
             }
+    fast_ms = int((time.monotonic() - fast_started) * 1000)
+    discovery_ms = int((fast_started - discovery_started) * 1000)
+    logger.info("search fast role=%r jobs=%d discovery_ms=%d fast_ms=%d",
+                role, len(result.jobs), discovery_ms, fast_ms)
     return templates.TemplateResponse(
         request,
         "results.html",
         {
+            "search_id": result.search.id,
+            "enrich_ids": enrich_ids,
             "role": result.search.role,
             "location": result.search.location,
             "experience": result.search.experience,
@@ -199,21 +185,12 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
             "skills_by_job": skills_by_job,
             "gaps": gap_display,
             "display_skill": display_skill,
-            "verify": verify_display,
+            "verify": {},
             "safe_url": safe_url,
             "extra_links": extra_links,
-            "news": news_display,
+            "news": {},
             "authenticity": auth_display,
-            "interview": interview_display,
+            "interview": {},
             "company": company_display,
         },
     )
-
-
-def _verify_label(status: str) -> str:
-    return {
-        "supporting": "Supporting evidence",
-        "needs_verification": "Needs verification",
-        "warning": "Warning signals",
-        "unavailable": "Verification unavailable",
-    }.get(status, "Verification unavailable")

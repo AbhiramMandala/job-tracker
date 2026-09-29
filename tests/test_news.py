@@ -259,8 +259,9 @@ def test_news_failure_isolation_in_search(client, monkeypatch):
         data={"role": "Python Backend Developer", "location": "Hyderabad",
               "experience": "Fresher"},
     )
-    assert response.status_code == 200  # jobs + verify still render
-    assert "News context temporarily unavailable" in response.text
+    assert response.status_code == 200  # jobs still render; news loads lazily
+    assert "Loading relevant news" in response.text
+    assert 'data-enrich="news"' in response.text
 
 
 def test_search_renders_news_context(client, monkeypatch):
@@ -281,9 +282,12 @@ def test_search_renders_news_context(client, monkeypatch):
               "experience": "Fresher"},
     )
     assert response.status_code == 200
-    assert "NEWS CONTEXT" in response.text
-    assert "Workforce reduction" in response.text
-    assert "Read the source before drawing conclusions" in response.text
+    # News loads lazily: fast cards carry placeholders, content arrives via
+    # GET /api/enrich/news (covered in tests/test_enrich.py).
+    assert "NEWS CONTEXT" not in response.text
+    assert "Loading relevant news" in response.text
+    assert 'data-enrich="news"' in response.text
+    assert 'data-search-id="' in response.text
 
 
 def test_evidence_page_separates_news(client):

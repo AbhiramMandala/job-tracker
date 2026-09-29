@@ -4,7 +4,7 @@
 <section class="hero">
   <p class="eyebrow">JOBSETU · USEFUL TOOLS</p>
   <h1>Career resources worth bookmarking.</h1>
-  <p class="sub">A small curated set for searching, researching employers, preparing, and building. External links open in a new tab.</p>
+  <p class="sub">A small curated set for searching, researching employers, preparing, and building. Labels describe each source's nature, not a quality guarantee. External links open in a new tab.</p>
   <div class="toolbar" role="search" aria-label="Filter resources">
     <div class="field">
       <label for="tool-q">Search</label>
@@ -13,8 +13,8 @@
     <div class="field">
       <label for="tool-cat">Category</label>
       <select id="tool-cat">
-        <option value="">All categories</option>
-        {% for cat in categories %}<option>{{ cat }}</option>{% endfor %}
+        <option value="">All categories ({{ total }})</option>
+        {% for cat in categories %}<option value="{{ cat }}">{{ cat }} ({{ counts[cat] }})</option>{% endfor %}
       </select>
     </div>
   </div>
@@ -24,8 +24,9 @@
       <h3>{{ r.name }}</h3>
       <p><span class="resource-cat">{{ r.category }}</span></p>
       <p>{{ r.description }}</p>
-      <p class="muted">Why useful: {{ r.why }}</p>
-      <p><a class="link" href="{{ r.url }}" target="_blank" rel="noopener">Visit ↗</a></p>
+      <p class="muted">Why useful for JobSetu: {{ r.why }}</p>
+      <p class="muted resource-trust">{{ r.trust }}</p>
+      <p><a class="link" href="{{ r.url }}" target="_blank" rel="noopener noreferrer">Open resource ↗</a></p>
     </article>
     {% endfor %}
   </div>
@@ -50,6 +51,10 @@
   }
   q.addEventListener("input", apply);
   cat.addEventListener("change", apply);
+  try {
+    var preset = new URLSearchParams(window.location.search).get("q");
+    if (preset) { q.value = preset; apply(); }
+  } catch (e) { /* older browsers: filters still work manually */ }
 })();
 </script>
 {% endblock %}

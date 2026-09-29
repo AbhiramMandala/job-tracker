@@ -135,7 +135,8 @@ class JobSearchService:
         client = self._client_or_default()
         pages: list[JobsPage] = []
         next_token = ""
-        for _ in range(self._max_pages):
+        page_stats: list[dict] = []
+        for index in range(self._max_pages):
             started = time.monotonic()
             try:
                 body = client.google_jobs(
@@ -154,12 +155,27 @@ class JobSearchService:
                     self._db.commit()
                 except Exception:
                     self._db.rollback()  # never mask the original search error
+                if pages:
+                    # Page 1 (or earlier) succeeded: return what we have
+                    # rather than failing the whole search. Page-1-only
+                    # failure keeps the existing raise path (stale/503).
+                    logger.warning(
+                        "discovery page %d failed kind=%s; returning %d earlier page(s)",
+                        index + 1, exc.kind, len(pages))
+                    break
                 raise
             page = _parse_page(body)
             pages.append(page)
+            page_stats.append({
+                "page": index + 1,
+                "ms": _elapsed_ms(started),
+                "raw": len(page.items),
+            })
             next_token = page.next_page_token
             if not next_token:
                 break
+        logger.info(
+            "discovery q=%r pages=%d stats=%s", params["q"], len(pages), page_stats)
         return pages
 
     def _persist_from_items(

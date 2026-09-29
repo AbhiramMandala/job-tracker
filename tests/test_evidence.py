@@ -385,7 +385,8 @@ def test_full_search_renders_verify_pillar(client, monkeypatch):
               "experience": "Fresher"},
     )
     assert response.status_code == 200
-    assert "VERIFY" in response.text
-    assert "Supporting evidence" in response.text
-    assert "VIEW EVIDENCE" in response.text
+    # Fast cards carry VERIFY placeholders; content arrives lazily via
+    # GET /api/enrich/verify (covered in tests/test_enrich.py).
+    assert "Checking supporting evidence" in response.text
+    assert 'data-enrich="verify"' in response.text
     assert "LIVE" in response.text

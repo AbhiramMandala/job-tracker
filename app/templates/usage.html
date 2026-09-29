@@ -4,6 +4,7 @@
 <section class="hero">
   <h1>API usage</h1>
   <p class="sub">Dev-only view. Counts every SerpApi attempt by engine and outcome. The API key is never shown.</p>
+  <div class="table-scroll">
   <table class="usage-table">
     <tr><th>Engine</th><th>Status</th><th>Calls</th></tr>
     {% for row in rows %}
@@ -11,6 +12,7 @@
     {% endfor %}
     <tr><td colspan="2"><strong>Total</strong></td><td><strong>{{ total }}</strong></td></tr>
   </table>
+  </div>
   <p class="muted">Cache entries: {{ cache_entries }} · Jobs stored: {{ jobs }} · Evidence rows: {{ evidence_rows }}</p>
   <p><a href="/">Back to search</a></p>
 </section>

@@ -44,8 +44,10 @@ usage-logged under the existing `google` engine label):
 4. Store one `Evidence` row per (report, stage): `evidence_type`
    `interview_<stage>`, category `context`, claim
    `Candidate-reported: <label> mentioned.` Deduplicated by normalized URL.
-5. Aggregate with `summarize_reports` (pure, no I/O): per-stage distinct
-   domains, anecdotal flags, limited flag, display sentences.
+5. Aggregate with `summarize_reports` (pure, no I/O): fingerprint-cluster
+   near-identical texts (>= 0.9) so reposts count once, per-stage distinct
+   domains, anecdotal flags, strength tiers (Official / Candidate-reported /
+   Community-reported / Search-derived), last-checked age, display sentences.
 
 ## Stage taxonomy
 
@@ -69,9 +71,18 @@ Telephonic screening. See `STAGE_RULES` in `app/services/interview.py`.
 `classify_company_type` (in `app/services/company.py`) derives a conservative
 label from the same stored rows: "Government / PSU" (High) on gov-domain or
 gov-name signals; "Established employer" (Moderate) on an official site plus
-≥3 independent corroborating domains; otherwise "Unknown" (Low). Startup,
-MNC, and size claims are deliberately never emitted — the evidence cannot
-support them. Every display pairs the label with its confidence.
+≥3 independent corroborating domains. Anything else falls back to the
+user-facing "Private Company" (Low) — the canonical internal value is
+`private_company`, and `normalize_company_type` maps every spelling variant
+to canonical form through a single layer (no scattered string comparisons).
+
+Honesty model: "Private Company" here means "no evidence for a more specific
+type on a private-sector job board," stated plainly via Low confidence and
+the basis string ("insufficient evidence for a specific type; private-sector
+default, not verified"). Startup, MNC, size, and non-profit claims are never
+emitted — the evidence cannot support them. The UI exposes no Unknown
+category; unrelated "Unknown ..." strings (location, salary, company name)
+are untouched.
 
 ## Credit bounds
 

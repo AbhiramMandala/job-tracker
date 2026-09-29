@@ -73,7 +73,9 @@ def test_government_classification_high_confidence():
     out = classify_company_type(
         "national informatics centre", "National Informatics Centre",
         [_site_row("https://www.nic.in/")])
-    assert out == {"type": "Government / PSU", "confidence": "High"}
+    assert out["type"] == "Government / PSU"
+    assert out["confidence"] == "High"
+    assert "nic.in" in out["basis"]
 
 
 def test_established_employer_needs_official_plus_corrobation():
@@ -82,20 +84,26 @@ def test_established_employer_needs_official_plus_corrobation():
             _row("company_presence", "https://linkedin.com/company/acme"),
             _row("company_presence", "https://crunchbase.com/acme")]
     out = classify_company_type("acme tech", "Acme Tech", rows)
-    assert out == {"type": "Established employer", "confidence": "Moderate"}
+    assert out["type"] == "Established employer"
+    assert out["confidence"] == "Moderate"
+    assert "corroborating domains" in out["basis"]
 
 
-def test_unknown_when_evidence_thin():
-    assert classify_company_type("acme tech", "Acme Tech", []) == \
-        {"type": "Unknown", "confidence": "Low"}
-    assert classify_company_type("", "", [])["confidence"] == "Low"
+def test_private_company_fallback_when_evidence_thin():
+    out = classify_company_type("acme tech", "Acme Tech", [])
+    assert out["type"] == "Private Company"
+    assert out["confidence"] == "Low"
+    assert "private-sector default" in out["basis"]
+    assert classify_company_type("", "", [])["type"] == "Private Company"
 
 
 def test_filter_values():
     assert filter_value({"type": "Government / PSU"}) == "government"
     assert filter_value({"type": "Established employer"}) == "established"
-    assert filter_value({"type": "Unknown"}) == "unknown"
-    assert filter_value({"type": "Weird"}) == "unknown"
+    assert filter_value({"type": "Private Company"}) == "private"
+    assert filter_value({"type": "Weird"}) == "private"
+    assert filter_value({}) == "private"
+    assert filter_value(None) == "private"
 
 
 # -- prep topics --------------------------------------------------------
@@ -146,7 +154,7 @@ def test_tools_page_renders_with_filters(client):
     assert 'id="tool-q"' in html
     assert 'id="tool-cat"' in html
     assert 'target="_blank"' in html
-    assert 'rel="noopener"' in html
+    assert 'rel="noopener noreferrer"' in html
     for res in valid_resources():
         assert res["name"] in html
 
@@ -230,7 +238,89 @@ def test_evidence_page_role_intelligence_blocks(client):
     html = client.get(f"/jobs/{job.id}/evidence").text
     assert "Company type" in html
     assert "Confidence:" in html
+    assert "insufficient evidence" in html  # classification basis shown
     assert "Official website" in html
     assert "Python" in html  # skill chip label
     assert "PREPARE FOR THIS ROLE" in html
+    assert "Practice in Useful Tools" in html
     assert "View sources" in html
+
+
+def test_tools_search_preset_from_query_string(client):
+    html = client.get("/tools").text
+    assert "URLSearchParams" in html
+
+
+def test_every_resource_has_valid_trust_label():
+    from app.data.resources import TRUST, valid_resources
+
+    assert set(TRUST.values()) <= {
+        "Official", "Established Resource", "Community Resource", "External Tool",
+    }
+    assert all(res["trust"] for res in valid_resources())
+
+
+# -- private-company fallback -------------------------------------------
+
+
+def test_normalize_company_type_variants():
+    from app.services.company import normalize_company_type
+
+    for variant in ("private_company", "Private Company", "private company",
+                    "PRIVATE_COMPANY", "  Private_Company  "):
+        assert normalize_company_type(variant) == {
+            "type": "Private Company", "filter": "private"}
+    assert normalize_company_type("government / psu") == {
+        "type": "Government / PSU", "filter": "government"}
+    assert normalize_company_type("nonsense") == {
+        "type": "Private Company", "filter": "private"}
+    assert normalize_company_type(None) == {
+        "type": "Private Company", "filter": "private"}
+
+
+def test_specific_types_never_become_private():
+    gov = classify_company_type("municipal corporation", "Municipal Corp", [])
+    assert gov["type"] == "Government / PSU"
+    for name in ("Acme Startup Labs", "Global MNC Services", "Helping Hands NGO",
+                 "Infosys", "Small Shop"):
+        out = classify_company_type(name.lower(), name, [])
+        assert out["type"] not in ("Startup", "MNC", "Non-profit",
+                                   "Large Indian Company", "Mid-size Company")
+
+
+def test_filter_shows_private_company_not_unknown(client, monkeypatch):
+    from app.services import serpapi_client as client_module
+    from tests._fixtures import EMPTY, PAGE_1
+
+    def fake_google_jobs(self, q, location, gl="in", hl="en", next_page_token=""):
+        return PAGE_1 if not next_page_token else EMPTY
+
+    monkeypatch.setattr(client_module.SerpApiClient, "google_jobs", fake_google_jobs)
+    html = client.post(
+        "/search",
+        data={"role": "Python Backend Developer", "location": "Hyderabad",
+              "experience": "Fresher"},
+    ).text
+    assert '<option value="private">Private Company</option>' in html
+    assert ">Unknown</option>" not in html
+    assert 'data-company-type="private"' in html
+    assert "Company type: Private Company" in html
+
+
+def test_role_intelligence_shows_private_company(client):
+    from app.database import SessionLocal
+    from app.models import Company, Job
+
+    db = SessionLocal()
+    company = Company(name_raw="Acme Tech", name_norm="acme tech")
+    db.add(company)
+    db.flush()
+    job = Job(company_id=company.id, title_raw="Dev", title_norm="dev",
+              location_raw="Hyderabad", location_norm="hyderabad",
+              source_key="private-co-intel-key")
+    job.company = company
+    db.add(job)
+    db.commit()
+    html = client.get(f"/jobs/{job.id}/evidence").text
+    assert "Private Company" in html
+    assert "Confidence: Low" in html

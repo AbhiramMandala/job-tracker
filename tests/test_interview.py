@@ -268,15 +268,92 @@ def test_display_sentence_format():
 
 
 def _row(etype, category="context", url="https://example.com/page",
-         claim="Candidate-reported: stage mentioned.", query="q"):
+         claim="Candidate-reported: stage mentioned.", query="q",
+         title="Title", snippet="Technical interview about Python."):
     return Evidence(
         engine="google", query=query, evidence_type=etype, claim=claim,
-        category=category, source_title="Title", source_url=url,
+        category=category, source_title=title, source_url=url,
+        source_snippet=snippet,
         retrieved_at=dt.datetime(2026, 9, 1, tzinfo=dt.timezone.utc),
     )
 
 
 def test_unrenderable_source_url_dropped_from_display_but_counted():
+    from app.services.interview import summarize_reports
+
+    good = _row("interview_technical", url="https://example.com/good")
+    bad = _row("interview_technical", url="not a url")
+    view = display_dict(summarize_reports(1, [good, bad]))
+    assert [r["url"] for r in view["reports"]] == ["https://example.com/good"]
+    tech = next(s for s in view["stages"] if s["stage"] == "technical")
+    assert tech["count"] == 1  # only the renderable domain counts
+
+
+def test_near_identical_reposts_cluster_into_one():
+    from app.services.interview import summarize_reports
+
+    text = ("Acme Tech interview experience with technical interview "
+            "about Python and data structures.")
+    rows = [
+        _row("interview_technical", url="https://agg-one.example/acme",
+             title="Acme Tech interview", snippet=text),
+        _row("interview_technical", url="https://agg-two.example/acme-jobs",
+             title="Acme Tech interview", snippet=text),
+    ]
+    digest = summarize_reports(1, rows, company_norm="acme tech")
+    assert digest.total_reports == 1
+    assert digest.duplicates_merged == 1
+    tech = next(s for s in digest.stages if s["stage"] == "technical")
+    assert tech["count"] == 1 and tech["anecdotal"] is True
+
+
+def test_distinct_experiences_never_merge():
+    from app.services.interview import summarize_reports
+
+    rows = [
+        _row("interview_technical", url="https://a.example/1",
+             title="Acme SDE interview", snippet="Technical interview on DSA."),
+        _row("interview_hr", url="https://a.example/2",
+             title="Acme HR discussion", snippet="HR round about relocation."),
+    ]
+    digest = summarize_reports(1, rows, company_norm="acme tech")
+    assert digest.total_reports == 2
+    assert digest.duplicates_merged == 0
+
+
+def test_report_strength_tiers():
+    from app.services.interview import report_strength
+
+    assert report_strength("https://acmetechnologies.com/careers",
+                           "acme tech") == "Official"
+    assert report_strength("https://www.glassdoor.co.in/acme-interview",
+                           "acme tech") == "Candidate-reported"
+    assert report_strength("https://www.reddit.com/r/cscareer/acme",
+                           "acme tech") == "Community-reported"
+    assert report_strength("https://randomblog.example/acme",
+                           "acme tech") == "Search-derived"
+
+
+def test_digest_carries_last_checked():
+    from app.services.interview import summarize_reports
+
+    view = display_dict(summarize_reports(1, [_row("interview_hr", url="https://a.example/1")]))
+    assert view["checked"], "last-checked age must be present"
+    assert view["duplicates_merged"] == 0
+
+
+def test_no_secrets_in_logs_on_failure(client, caplog):
+    import logging
+
+    from app.services.serpapi_client import SerpApiError
+
+    db = _db(client)
+    job = _acme_job(db, key="no-secret-logs-key")
+    fake = FakeSearch(error=SerpApiError("auth", "bad key", 401))
+    with caplog.at_level(logging.INFO):
+        InterviewService(db, client=fake).enrich_job(job)
+    assert "api_key" not in caplog.text
+    assert "abhiram" not in caplog.text.lower()
     from app.services.interview import summarize_reports
 
     good = _row("interview_technical", url="https://example.com/good")
@@ -320,9 +397,10 @@ def test_results_page_renders_interview_section(client, monkeypatch):
               "experience": "Fresher"},
     )
     assert response.status_code == 200
-    assert "SELECTION PROCESS" in response.text
-    assert "candidate-reported" in response.text
-    assert "available candidate report(s)" in response.text
+    # Interviews load lazily: fast cards carry placeholders, content arrives
+    # via GET /api/enrich/interview (covered in tests/test_enrich.py).
+    assert "Finding public interview evidence" in response.text
+    assert 'data-enrich="interview"' in response.text
 
 
 def test_evidence_page_renders_interview_section(client):

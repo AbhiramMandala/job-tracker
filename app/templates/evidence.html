@@ -12,7 +12,7 @@
   <h2>Company</h2>
   <dl class="kv">
     <dt>Name</dt><dd>{{ company_name }}</dd>
-    <dt>Company type</dt><dd>{{ company_type }} · Confidence: {{ company_confidence }}</dd>
+    <dt>Company type</dt><dd>{{ company_type }} · Confidence: {{ company_confidence }} <span class="muted">({{ company_basis }})</span></dd>
     <dt>Location</dt><dd>{{ job.location_raw or "—" }}</dd>
     {% if official_site %}<dt>Official website</dt><dd><a class="link" href="{{ official_site }}" target="_blank" rel="noopener">{{ official_site }}</a></dd>{% endif %}
   </dl>
@@ -55,6 +55,10 @@
 </section>
 
 {% for source in sources %}
+{% if loop.first %}
+<p class="eyebrow">SEARCH-RESULT EVIDENCE</p>
+<p class="muted">Independent search results about this employer and role — evidence to weigh, not verdicts.</p>
+{% endif %}
 <article class="card source">
   <p class="src-engine">Google Search · <q>{{ source.query }}</q></p>
   <h2><a href="{{ source.url }}" target="_blank" rel="noopener">{{ source.title }}</a></h2>
@@ -75,6 +79,7 @@
       {% if topic.pointers %}
       <br /><span class="muted">Starting points: {{ topic.pointers | join('; ') }}</span>
       {% endif %}
+      <br /><a class="link" href="/tools?q={{ topic.skill | urlencode }}">Practice in Useful Tools →</a>
     </li>
     {% endfor %}
   </ul>

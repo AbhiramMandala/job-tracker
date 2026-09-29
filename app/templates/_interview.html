@@ -6,6 +6,7 @@
   </p>
   {% if iv['stale'] %}<p class="stale-banner" role="alert">Interview context temporarily unavailable. Showing cached items.</p>{% endif %}
   {% if iv['limited'] %}<p class="muted">Limited information — based on {{ iv['total_reports'] }} candidate report(s); treat as anecdotal.</p>{% endif %}
+  {% if iv['duplicates_merged'] %}<p class="muted">{{ iv['duplicates_merged'] }} near-identical report(s) merged — each experience counted once.</p>{% endif %}
   <ul class="news-list">
     {% for stage in iv['stages'] %}<li>📋 {{ stage.sentence }}</li>{% endfor %}
   </ul>
@@ -15,11 +16,12 @@
     <ul class="news-list">
       {% for rep in iv['reports'] %}
       <li><a href="{{ rep.url }}" target="_blank" rel="noopener">{{ rep.title }}</a><br />
-        <span class="muted">{{ rep.source }} · {{ rep.date_display }} · stages: {{ rep.stages | join(', ') if rep.stages else '—' }}</span></li>
+        <span class="muted">{{ rep.source }} · {{ rep.strength }} · {{ rep.date_display }} · stages: {{ rep.stages | join(', ') if rep.stages else '—' }}</span></li>
       {% endfor %}
     </ul>
   </details>
   {% endif %}
+  {% if iv['checked'] %}<p class="muted">Last checked: {{ iv['checked'] }}.</p>{% endif %}
   <p class="muted">{{ iv['disclaimer'] }}</p>
 </div>
 {% elif iv and iv['state'] == 'empty' %}

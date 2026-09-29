@@ -53,7 +53,8 @@ context → aggregate gaps. Every number is computed from retrieved data.
 
 SerpApi is the data backbone — remove it and the product has zero listings.
 Single `SerpApiClient` (`app/services/serpapi_client.py`); routes never see
-raw SerpApi JSON:
+raw SerpApi JSON. Discovery blocks the first render; everything else loads
+progressively (`GET /api/enrich/*`) under the same caps:
 - `engine=google_jobs` — discovery: `q=<role>`, `location=<city>, India`,
   `gl=in`, `hl=en`, ≤2 pages via `next_page_token`.
 - `engine=google` — VERIFY evidence per top-5 job: `"<company>" "<title>"`,

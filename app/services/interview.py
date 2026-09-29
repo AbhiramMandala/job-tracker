@@ -33,12 +33,21 @@ from app.models import ApiUsage, Evidence, Job
 from app.schemas.search import OrganicResult, parse_organic_results
 from app.services.cache import CacheService, make_key
 from app.services.serpapi_client import SerpApiClient, SerpApiError
+from app.services.deduplicator import pair_similarity
 from app.utils import age_text, domain_of, normalize_url, official_site_match, safe_url
 
 logger = logging.getLogger(__name__)
 
 ENGINE = "google"  # organic search; queries distinguish interview usage
 INTERVIEW_PREFIX = "interview_"
+
+# Near-identical reports (reposts, aggregators) cluster at this text
+# similarity so one report is never counted twice.
+FINGERPRINT_THRESHOLD = 0.9
+
+# Domain fragments marking candidate-experience platforms vs open discussion.
+CANDIDATE_PLATFORMS = ("glassdoor", "ambitionbox", "indeed")
+COMMUNITY_PLATFORMS = ("reddit", "quora", "teamblind")
 
 INTERVIEW_DISCLAIMER = (
     "Selection-process information is candidate-reported and reflects "
@@ -83,6 +92,18 @@ def stage_label(stage: str) -> str:
     return STAGE_LABELS.get(stage, "Interview stage")
 
 
+def report_strength(link: str, company_norm: str) -> str:
+    """Evidence tier for one report URL. Never a quality verdict."""
+    host = domain_of(link or "")
+    if company_norm and official_site_match(company_norm, link):
+        return "Official"
+    if any(fragment in host for fragment in CANDIDATE_PLATFORMS):
+        return "Candidate-reported"
+    if any(fragment in host for fragment in COMMUNITY_PLATFORMS):
+        return "Community-reported"
+    return "Search-derived"
+
+
 def relates_to_company(title: str, snippet: str, link: str, company_norm: str) -> bool:
     """Drop results that clearly concern a different organization.
 
@@ -119,18 +140,23 @@ class InterviewDigest:
     stages: list[dict] = field(default_factory=list)
     reports: list[dict] = field(default_factory=list)
     total_reports: int = 0
+    duplicates_merged: int = 0
+    checked: str = ""
     limited: bool = False
     is_live: bool = False
     stale: bool = False
 
 
 def summarize_reports(job_id: int, rows: list[Evidence],
+                      company_norm: str = "",
                       is_live: bool = False, stale: bool = False) -> InterviewDigest:
     """Pure aggregation over stored interview rows. No I/O.
 
-    A stage counts reports by DISTINCT source domains (independent reports).
-    Stages with < 2 domains are anecdotal. A digest with <= 2 total reports
-    is flagged limited.
+    Dedup works in two layers: identical URLs merge first, then
+    near-identical report texts cluster by fingerprint (>= 0.9 trigram
+    similarity) so reposts/aggregators never double-count. A stage counts
+    DISTINCT source domains (independent reports); stages with < 2 domains
+    are anecdotal. A digest with <= 2 total reports is flagged limited.
     """
     interview_rows = [r for r in rows
                       if (r.evidence_type or "").startswith(INTERVIEW_PREFIX)
@@ -141,9 +167,11 @@ def summarize_reports(job_id: int, rows: list[Evidence],
     by_url: dict[str, list[Evidence]] = {}
     for row in interview_rows:
         by_url.setdefault(normalize_url(row.source_url), []).append(row)
-    total = len(by_url)
-    by_stage: dict[str, list[Evidence]] = {}  # stage -> rows (one per report)
-    for url, url_rows in by_url.items():
+    clusters = _cluster_reports(by_url)
+    duplicates_merged = len(by_url) - len(clusters)
+    total = len(clusters)
+    by_stage: dict[str, list[Evidence]] = {}  # stage -> rows (one per cluster)
+    for _url, url_rows in clusters:
         seen_here: set[str] = set()
         for row in url_rows:
             stage = row.evidence_type[len(INTERVIEW_PREFIX):]
@@ -166,7 +194,7 @@ def summarize_reports(job_id: int, rows: list[Evidence],
             "anecdotal": count < 2,
         })
     report_dicts = []
-    for url, url_rows in by_url.items():
+    for url, url_rows in clusters:
         first = url_rows[0]
         link = safe_url(first.source_url or "")
         if not link:
@@ -178,13 +206,55 @@ def summarize_reports(job_id: int, rows: list[Evidence],
             "title": first.source_title or "(untitled)",
             "source": domain_of(first.source_url) or "source",
             "url": link,
+            "strength": report_strength(link, company_norm or ""),
             "date_display": age_text(first.retrieved_at),
             "stages": url_stages,
         })
+    checked = ""
+    moments = [r.retrieved_at for r in interview_rows if r.retrieved_at]
+    if moments:
+        newest = max(moments)
+        if newest.tzinfo is None:
+            newest = newest.replace(tzinfo=dt.timezone.utc)
+        checked = age_text(newest)
     state = "stale" if stale else "ok"
     return InterviewDigest(job_id=job_id, state=state, stages=stages,
                            reports=report_dicts, total_reports=total,
+                           duplicates_merged=duplicates_merged, checked=checked,
                            limited=total <= 2, is_live=is_live, stale=stale)
+
+
+def _cluster_reports(by_url: dict[str, list[Evidence]]) -> list[tuple[str, list[Evidence]]]:
+    """Greedy fingerprint clustering over report URLs.
+
+    Returns (representative_url, merged_rows) clusters. Two reports merge
+    only when their title+snippet texts are near-identical (>= 0.9), so
+    distinct experiences on one domain never collapse together.
+    """
+    clusters: list[tuple[str, list[Evidence]]] = []
+    for url in sorted(by_url):
+        rows = by_url[url]
+        first = rows[0]
+        placed = False
+        for index, (rep_url, rep_rows) in enumerate(clusters):
+            rep = rep_rows[0]
+            similarity = pair_similarity(
+                "", first.source_title or "", first.source_snippet or "",
+                "", rep.source_title or "", rep.source_snippet or "")
+            if similarity >= FINGERPRINT_THRESHOLD:
+                merged = list(rep_rows)
+                seen = {(r.evidence_type, normalize_url(r.source_url or "")) for r in merged}
+                for row in rows:
+                    key = (row.evidence_type, normalize_url(row.source_url or ""))
+                    if key not in seen:
+                        seen.add(key)
+                        merged.append(row)
+                clusters[index] = (rep_url, merged)
+                placed = True
+                break
+        if not placed:
+            clusters.append((url, list(rows)))
+    return clusters
 
 
 def display_dict(digest: InterviewDigest) -> dict:
@@ -202,6 +272,8 @@ def display_dict(digest: InterviewDigest) -> dict:
         "stages": stages,
         "reports": digest.reports,
         "total_reports": digest.total_reports,
+        "duplicates_merged": digest.duplicates_merged,
+        "checked": digest.checked,
         "limited": digest.limited,
         "live": digest.is_live,
         "stale": digest.stale,
@@ -247,15 +319,19 @@ class InterviewService:
 
     def ensure_for_job(self, job: Job) -> InterviewDigest:
         """On-demand refresh for the detail page: fetch only without fresh rows."""
+        company = job.company
+        company_norm = (company.name_norm if company else "" or "").strip()
         if self._has_fresh_rows(job.id):
-            return summarize_reports(job.id, self._interview_rows(job.id))
+            return summarize_reports(job.id, self._interview_rows(job.id),
+                                     company_norm=company_norm)
         try:
             return self.enrich_job(job, commit=True)
         except Exception:
             logger.exception("interview on-demand failed job=%s", job.id)
             rows = self._interview_rows(job.id)
             if rows:
-                return summarize_reports(job.id, rows, stale=True)
+                return summarize_reports(job.id, rows, company_norm=company_norm,
+                                         stale=True)
             return InterviewDigest(job_id=job.id, state="unavailable")
 
     def enrich_job(self, job: Job, commit: bool = False) -> InterviewDigest:
@@ -288,7 +364,8 @@ class InterviewService:
             # SerpApi unreachable and nothing stored: unavailable, not empty.
             return InterviewDigest(job_id=job.id, state="unavailable")
         return summarize_reports(
-            job.id, rows, is_live=http_made and not used_stale, stale=used_stale)
+            job.id, rows, company_norm=company_norm,
+            is_live=http_made and not used_stale, stale=used_stale)
 
     # -- internals -----------------------------------------------------
     def _fetch(self, query: str) -> tuple[dict | None, bool, bool]:

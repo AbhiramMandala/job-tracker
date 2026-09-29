@@ -4,6 +4,7 @@
 <section class="hero">
   <p class="eyebrow">JOBSETU · India&rsquo;s fresher job radar</p>
   <h1>Find jobs worth applying to.</h1>
+  <p class="rotate-line" aria-hidden="true"><span id="rotate-word">Verify opportunities.</span></p>
   <p class="sub">Search &rarr; Match &rarr; Verify &rarr; Learn. JobSetu checks which fresher listings are relevant, verifiable, and worth your time — starting with Hyderabad.</p>
   <div class="hero-steps" aria-label="How it works">
     <span>Search live listings</span><span>Match your profile</span><span>Verify with evidence</span><span>Learn what&rsquo;s missing</span>
@@ -41,6 +42,24 @@
   </details>
   <p class="note">Live results via SerpApi Google Jobs. Repeated searches reuse cached results for 24 hours.</p>
 </section>
+<script>
+(function () {
+  // Landing messaging rotation. Decorative only: the h1 keeps the full
+  // message, this line is hidden from assistive tech, and reduced-motion
+  // users always see the static first phrase.
+  var phrases = ["Verify opportunities.", "Match your skills.",
+                 "Prepare with evidence.", "Apply with confidence."];
+  var el = document.getElementById("rotate-word");
+  if (!el) return;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) return;
+  var i = 0;
+  setInterval(function () {
+    i = (i + 1) % phrases.length;
+    el.textContent = phrases[i];
+  }, 3000);
+})();
+</script>
 <script>
 (function () {
   var steps = ["Searching live job data…", "Finding matching roles…",

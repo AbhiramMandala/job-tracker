@@ -191,19 +191,23 @@ Dockerfile  .dockerignore  requirements.txt  .env.example
 
 ## API / search flow
 
-`POST /search` (form: `role`, `location`, `experience`):
+`POST /search` (form: `role`, `location`, `experience`) is the fast path —
+discovery only, then renders useful cards immediately:
 1. Validate input (empty → friendly 400 on the form, no traceback).
 2. Cache lookup (SQLite, 24h). Hit → render CACHED with age, 0 SerpApi calls.
 3. Miss → `SerpApiClient.google_jobs` (≤2 pages) → normalize → source-key
    upsert → TF-IDF fuzzy dedup → skill extraction → deterministic match
-   refresh → commit pipeline counts.
-4. VERIFY: `EvidenceService` re-searches each top company via
-   `engine=google`, stores cited rows, classifies
-   supporting / needs_verification / warning (no numeric trust scores).
-5. NEWS: `NewsService` fetches `engine=google_news` per top-3 job;
-   failures are isolated — search never breaks.
+   refresh → commit pipeline counts. Deduplication always precedes any
+   expensive work.
+4. Pure derivations inline (no HTTP): authenticity score, company-type
+   estimate. Cards render with loading placeholders for deep sections.
+5. The page then fetches `GET /api/enrich/{verify,news,interview}?search_id=N`
+   in parallel; each endpoint is cache-first under the existing caps and
+   renders server-side partials (or honest unavailable states). A fresh
+   search loads a new page, abandoning in-flight enrichment automatically.
 6. Failure anywhere → stale cache with warning banner; no stale cache →
-   friendly 503. Never fake data.
+   friendly 503. Never fake data. Optional-enrichment failure never breaks
+   the core search. Details: `docs/performance.md`.
 
 ## Selection process
 
@@ -223,8 +227,9 @@ Details, taxonomy, and limits: `docs/interviews.md`.
   before first paint (no flash), and disabled animation under
   `prefers-reduced-motion`. Every surface uses CSS variables.
 - **Useful Tools page** (`/tools`): a small curated set of career/developer
-  resources with search + category filters; external links open safely in a
-  new tab. Curated starter set — not scraped from anywhere.
+  resources with search + category filters (including `?q=` presets, used by
+  per-topic "Practice in Useful Tools" links); external links open safely in
+  a new tab. Curated starter set — not scraped from anywhere.
 - **Results filters:** verification-status and company-type filters work
   instantly on rendered cards (client-side, zero extra searches).
 - **Role intelligence:** each card links to its evidence page with company

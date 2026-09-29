@@ -187,3 +187,69 @@ def test_search_route_failure_without_cache_is_503(client, monkeypatch):
     assert response.status_code == 503
     assert "temporarily unavailable" in response.text
     assert "SERPAPI_KEY" not in response.text
+
+
+# -- adaptive discovery: page-level contribution + failure tolerance ------
+
+
+class PageTwoFailsClient(StubClient):
+    """Page 1 succeeds; page 2 raises (partial outage)."""
+
+    def google_jobs(self, q, location, gl="in", hl="en", next_page_token=""):
+        self.calls.append((q, location, next_page_token))
+        if next_page_token != "":
+            raise SerpApiError("timeout", "page 2 slow")
+        return self._pages[0]
+
+
+def test_page_two_failure_returns_page_one_results(client):
+    db = _db_session(client)
+    result = JobSearchService(
+        db, client=PageTwoFailsClient(pages=[PAGE_1, PAGE_2])
+    ).run("Dev", "Hyderabad", "Fresher")
+    assert result.is_live and not result.stale
+    assert result.raw_count == 3 and result.canonical_count == 2
+    rows = db.query(ApiUsage).order_by(ApiUsage.id).all()
+    assert [r.status for r in rows] == ["ok", "timeout"]
+
+
+def test_page_two_all_duplicates_merges_cleanly(client):
+    db = _db_session(client)
+    dup_page = {
+        "jobs_results": [dict(PAGE_1["jobs_results"][0])],
+        "serpapi_pagination": {},
+    }
+    result = JobSearchService(db, client=StubClient(pages=[PAGE_1, dup_page])).run(
+        "Dev", "Hyderabad", "Fresher"
+    )
+    assert result.raw_count == 4
+    assert result.canonical_count == 2  # nothing new from page 2
+    assert result.dup_removed == 2
+
+
+def test_discovery_logs_per_page_telemetry(client, caplog):
+    import logging
+
+    db = _db_session(client)
+    with caplog.at_level(logging.INFO, logger="app.services.job_search"):
+        JobSearchService(db, client=StubClient(pages=[PAGE_1, PAGE_2])).run(
+            "Dev", "Hyderabad", "Fresher"
+        )
+    assert any("discovery q=" in rec.message and "pages=2" in rec.message
+               for rec in caplog.records)
+
+
+def test_page_two_jobs_participate_in_ranking(client):
+    from app.models import Candidate, Match
+
+    db = _db_session(client)
+    db.add(Candidate(name="T", preferred_role="DevOps", location="Bengaluru",
+                     experience_years=0, job_type_pref="any", is_active=True))
+    db.commit()
+    JobSearchService(db, client=StubClient(pages=[PAGE_1, PAGE_2])).run(
+        "Dev", "Hyderabad", "Fresher"
+    )
+    page_two_job = db.query(Job).filter(Job.title_norm.like("%devops%")).one_or_none()
+    assert page_two_job is not None
+    match = db.query(Match).filter_by(job_id=page_two_job.id).one_or_none()
+    assert match is not None  # page-2 jobs are matched like all others

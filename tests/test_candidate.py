@@ -132,5 +132,7 @@ def test_search_without_profile_shows_nudge_not_scores(client, monkeypatch):
     assert "Create your profile" in response.text
     assert "% MATCH" not in response.text
     assert "Detected skills" in response.text  # intelligence visible regardless
-    # no key in this environment: VERIFY honestly reports unavailability
-    assert "Verification unavailable" in response.text
+    # VERIFY loads lazily now: fast cards carry a placeholder instead of
+    # blocking on evidence (content arrives via GET /api/enrich/verify).
+    assert "Checking supporting evidence" in response.text
+    assert 'data-enrich="verify"' in response.text
