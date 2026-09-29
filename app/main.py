@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import get_settings
 from app.database import init_db
-from app.routes import debug, evidence, health, pages, profile, search
+from app.routes import authenticity, debug, evidence, health, pages, profile, search
 
 logging.basicConfig(
     level=logging.INFO,
@@ -47,6 +47,7 @@ def create_app() -> FastAPI:
 
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
     app.include_router(health.router)
+    app.include_router(authenticity.router)
     app.include_router(pages.router)
     app.include_router(search.router)
     app.include_router(evidence.router)

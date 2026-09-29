@@ -63,7 +63,7 @@ the missing skill first.
 
 Closed skill vocabulary; keyword-based experience/news parsing; website
 heuristic can misfire on single-token names; small employers may show
-"needs verification"; cold searches are sequential (~15 calls max, warm is
+"needs verification"; cold searches are sequential (~21 calls max, warm is
 instant); Maps/Trends depth, alerts, and LLM explanations are future work.
 
 ## Demo instructions

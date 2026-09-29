@@ -1,0 +1,22 @@
+{# Authenticity panel. Expects `auth` display dict (see display_dict). #}
+<div class="auth auth-{{ auth.level }}">
+  <p class="auth-head">🛡 <strong>JOB AUTHENTICITY · {{ auth.score }}/100 — {{ auth.level_label }}</strong></p>
+  {% if not auth.available %}
+  <p class="muted">Insufficient independent evidence — this score reflects job-content signals only and is capped until evidence exists.</p>
+  {% endif %}
+  <ul class="verify-reasons">
+    {% for s in auth.signals %}
+    <li>{% if s.kind == "support" %}✓{% elif s.kind == "caution" %}⚠{% else %}•{% endif %} {{ s.text }}</li>
+    {% endfor %}
+    {% for c in auth.contradictions %}<li>⚠ {{ c }}</li>{% endfor %}
+  </ul>
+  <details class="why">
+    <summary>Why this score?</summary>
+    <table class="breakdown">
+      {% for cat in auth.categories %}<tr><td>{{ cat.name }}</td><td>{{ cat.got }} / {{ cat.max }}</td></tr>{% endfor %}
+      <tr class="total"><td>Total</td><td>{{ auth.score }} / 100</td></tr>
+    </table>
+  </details>
+  <p><a class="link" href="/jobs/{{ auth.job_id }}/authenticity">VIEW SCORE AS JSON</a></p>
+  <p class="muted auth-disclaimer">{{ auth.disclaimer }}</p>
+</div>

@@ -4,6 +4,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from app.data.resources import CATEGORIES, valid_resources
+
 templates = Jinja2Templates(directory="app/templates")
 router = APIRouter()
 
@@ -19,4 +21,13 @@ def index(request: Request):
             "experience": "Fresher",
             "search_available": True,
         },
+    )
+
+
+@router.get("/tools", response_class=HTMLResponse)
+def tools(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "tools.html",
+        {"resources": valid_resources(), "categories": list(CATEGORIES)},
     )

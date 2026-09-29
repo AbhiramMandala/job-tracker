@@ -8,6 +8,31 @@
   <p class="muted">Every claim below cites a real retrieved search result. Nothing here is AI-generated.</p>
 </section>
 
+<section class="card">
+  <h2>Company</h2>
+  <dl class="kv">
+    <dt>Name</dt><dd>{{ company_name }}</dd>
+    <dt>Company type</dt><dd>{{ company_type }} · Confidence: {{ company_confidence }}</dd>
+    <dt>Location</dt><dd>{{ job.location_raw or "—" }}</dd>
+    {% if official_site %}<dt>Official website</dt><dd><a class="link" href="{{ official_site }}" target="_blank" rel="noopener">{{ official_site }}</a></dd>{% endif %}
+  </dl>
+</section>
+
+<section class="card">
+  <h2>Role</h2>
+  {% if job_skill_labels %}
+  <p class="skills-line"><span class="muted">Detected skills:</span>
+    {% for s in job_skill_labels %}<span class="chip">{{ s }}</span>{% endfor %}
+  </p>
+  {% endif %}
+  <p class="meta">
+    {% if job.posted_text %}<span>Posted: {{ job.posted_text }}</span>{% endif %}
+    {% if job.salary_text %}<span> · {{ job.salary_text }}</span>{% endif %}
+    {% if job.via_display %}<span> · via {{ job.via_display }}</span>{% endif %}
+  </p>
+  {% if job.description %}<p class="desc">{{ job.description[:500] }}{% if job.description|length > 500 %}…{% endif %}</p>{% endif %}
+</section>
+
 {% if notices %}
 <section class="card">
   <h2>Notices</h2>
@@ -24,6 +49,11 @@
 </section>
 {% endif %}
 
+<section class="card">
+  <h2>Job authenticity</h2>
+  {% include "_authenticity.html" %}
+</section>
+
 {% for source in sources %}
 <article class="card source">
   <p class="src-engine">Google Search · <q>{{ source.query }}</q></p>
@@ -34,6 +64,30 @@
   <p><a class="btn btn-small" href="{{ source.url }}" target="_blank" rel="noopener">Open source</a></p>
 </article>
 {% endfor %}
+
+<section class="card" id="prep">
+  <h2>PREPARE FOR THIS ROLE</h2>
+  {% if prep_topics %}
+  <p class="muted">High-frequency topics — counted from this listing plus {{ iv.total_reports }} candidate report(s). These topics were frequently reported in the available candidate experiences; no company guarantees what it will ask.</p>
+  <ul class="prep-list">
+    {% for topic in prep_topics %}
+    <li><strong>{{ topic.label }}</strong> <span class="muted">— in {{ topic.reports }} report(s){% if topic.in_listing %} · also in this listing{% endif %}</span>
+      {% if topic.pointers %}
+      <br /><span class="muted">Starting points: {{ topic.pointers | join('; ') }}</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <p><a class="link" href="#interviews">View sources</a></p>
+  {% else %}
+  <p class="muted">No reliable topic evidence yet — too few candidate reports mention specific skills for this role. Nothing invented to fill this space.</p>
+  {% endif %}
+</section>
+
+<section class="card" id="interviews">
+  <h2>SELECTION PROCESS</h2>
+  {% include "_interview.html" %}
+</section>
 
 <section class="card" id="news">
   <h2>NEWS CONTEXT</h2>

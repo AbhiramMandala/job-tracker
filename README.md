@@ -25,6 +25,8 @@ black-box scores.
   with inspectable per-job evidence pages — every claim cites its source
 - News context (layoffs, funding, expansion…) with recency, categories, sources
 - Skill-gap frequency ("missing in N of M jobs")
+- Candidate-reported selection-process context (interview stages with
+  per-stage report counts; anecdotal stages labeled)
 - Credit-efficient SQLite caching with LIVE/CACHED transparency + stale fallback
 - Credit visibility: `/debug/usage` logs every SerpApi attempt per engine
 - Warm-cache demo seeding: `python -m app.demo_seed`
@@ -41,8 +43,10 @@ raw SerpApi JSON.
 | Discovery | `engine=google_jobs` | `q=<role>`, `location=<city>, India`, `gl=in`, `hl=en`, up to 2 pages via `next_page_token` | Job listings (`jobs_results[]`) |
 | VERIFY | `engine=google` | Per top-5 job: `"<company>" "<title>"` and `"<company>" <city>` | Independent company/role/location evidence |
 | News context | `engine=google_news` | Per top-3 job: `"<company>" <city>` | Recent headlines with dates/sources |
+| Selection process | `engine=google` | Per top-3 job: `"<company>" "<title>" interview experience` + `"<company>" interview process freshers` | Candidate-reported interview stages (never scraped, only search results) |
 
-Credit bounds per search: cold ≤15 calls (2 jobs + ≤10 evidence + ≤3 news),
+Credit bounds per search: cold ≤21 calls (2 jobs + ≤10 evidence + ≤3 news +
+≤6 interviews),
 warm 0 (SQLite cache: jobs 24h, evidence/news 7d). Every attempt is logged to
 `api_usage`, viewable at `/debug/usage`. Details: `docs/research.md`
 (verified params/responses), `docs/verification.md` (evidence rules).
@@ -201,6 +205,32 @@ Dockerfile  .dockerignore  requirements.txt  .env.example
 6. Failure anywhere → stale cache with warning banner; no stale cache →
    friendly 503. Never fake data.
 
+## Selection process
+
+Each card also shows a SELECTION PROCESS section built only from
+SerpApi organic-search results — JobSetu never scrapes review sites and
+never bypasses logins, CAPTCHAs, paywalls, or robots rules. Interview stages
+(online assessment, technical, HR, …) carry per-stage report counts
+("reported in 3 of 5 available candidate reports"); single-report stages are
+labeled anecdotal, and everything is marked candidate-reported — never
+official company policy. Every stage links to its sources for inspection.
+Details, taxonomy, and limits: `docs/interviews.md`.
+
+## Appearance & tools
+
+- **Light/dark theme:** toggle in the header (sun/moon button), persisted in
+  `localStorage`, falls back to the OS `prefers-color-scheme` setting, applied
+  before first paint (no flash), and disabled animation under
+  `prefers-reduced-motion`. Every surface uses CSS variables.
+- **Useful Tools page** (`/tools`): a small curated set of career/developer
+  resources with search + category filters; external links open safely in a
+  new tab. Curated starter set — not scraped from anywhere.
+- **Results filters:** verification-status and company-type filters work
+  instantly on rendered cards (client-side, zero extra searches).
+- **Role intelligence:** each card links to its evidence page with company
+  facts (type estimate + confidence, official site), role skills, interview
+  prep topics with report counts, selection process, news, and sources.
+
 ## Credit visibility
 
 `/debug/usage` (dev-only, no auth) shows real per-engine call counts,
@@ -248,6 +278,29 @@ verification, or Warning signals — no numeric trust scores, and every claim
 links to its source on `GET /jobs/{id}/evidence`. Rules and limitations:
 `docs/verification.md`.
 
+## Job Authenticity
+
+Each card also carries an evidence-based authenticity score (0–100) with
+explained signals — and a clear statement of what the score is NOT:
+
+- **What it checks:** company verification, job-post consistency across
+  independent sources, application-channel signals (official domain vs free
+  email / WhatsApp / Telegram / fee requests), and suspicious content patterns
+  (guaranteed income, no interview, urgency pile-ups).
+- **What it means:** 90+ Strong supporting evidence · 75+ Higher confidence ·
+  50+ Mixed — verify · 25+ Significant risk signals · 0–24 High risk — verify
+  carefully. UI categories, not fraud probabilities.
+- **What it does NOT mean:** it never claims a job is real/fake, legitimate/
+  fraudulent, or guaranteed anything. Scores without independent evidence are
+  capped at 49 and say so.
+- **SerpApi role:** the analyzer reuses already-stored SerpApi evidence and
+  makes zero new calls (no credit cost). Structured output:
+  `GET /jobs/{id}/authenticity`. Full formula: `docs/authenticity.md`.
+
+> "This score is an evidence-based risk indicator, not a guarantee that a job
+> is legitimate or fraudulent. Always verify the employer and application
+> channel before sharing sensitive information or making payments."
+
 ## Limitations
 
 - Closed skill vocabulary (curated list; misses niche/brand-new skills).
@@ -255,7 +308,7 @@ links to its source on `GET /jobs/{id}/evidence`. Rules and limitations:
 - Website heuristic can misfire on single-token company names.
 - Small employers with little web presence may show "needs verification"
   (wording guards against overreach; never claims scam/fake/safe).
-- Cold searches are sequential (~15 calls max); warm is instant.
+- Cold searches are sequential (~21 calls max); warm is instant.
 - Plain server-rendered visuals; no maps/trends depth, alerts, or LLM
   explanations.
 

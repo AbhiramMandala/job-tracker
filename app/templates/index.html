@@ -35,13 +35,28 @@
     </div>
     <button id="search-btn" class="cta" type="submit">Find jobs</button>
   </form>
+  <details class="filters-toggle">
+    <summary>More filters</summary>
+    <p class="filters-note">Verification-status and company-type filters appear on the results page and work instantly on your results — no extra searches needed.</p>
+  </details>
   <p class="note">Live results via SerpApi Google Jobs. Repeated searches reuse cached results for 24 hours.</p>
 </section>
 <script>
-document.getElementById("search-form").addEventListener("submit", function () {
-  var btn = document.getElementById("search-btn");
-  btn.disabled = true;
-  btn.textContent = "Searching live listings…";
-});
+(function () {
+  var steps = ["Searching live job data…", "Finding matching roles…",
+               "Checking supporting evidence…", "Loading company intelligence…"];
+  var form = document.getElementById("search-form");
+  form.addEventListener("submit", function () {
+    var btn = document.getElementById("search-btn");
+    btn.disabled = true;
+    var i = 0;
+    btn.textContent = steps[0];
+    btn.classList.add("loading-dots");
+    setInterval(function () {
+      i = (i + 1) % steps.length;
+      btn.textContent = steps[i];
+    }, 2500);
+  });
+})();
 </script>
 {% endblock %}

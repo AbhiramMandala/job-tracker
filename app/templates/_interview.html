@@ -1,0 +1,29 @@
+{# Interview selection-process panel. Expects `iv` display dict. #}
+{% if iv and iv['state'] in ('ok', 'stale') %}
+<div class="interview">
+  <p class="news-head"><strong>SELECTION PROCESS</strong>
+    <span class="muted">· candidate-reported, not official policy · {{ "LIVE" if iv['live'] else "CACHED" }}</span>
+  </p>
+  {% if iv['stale'] %}<p class="stale-banner" role="alert">Interview context temporarily unavailable. Showing cached items.</p>{% endif %}
+  {% if iv['limited'] %}<p class="muted">Limited information — based on {{ iv['total_reports'] }} candidate report(s); treat as anecdotal.</p>{% endif %}
+  <ul class="news-list">
+    {% for stage in iv['stages'] %}<li>📋 {{ stage.sentence }}</li>{% endfor %}
+  </ul>
+  {% if iv['reports'] %}
+  <details class="why">
+    <summary>Inspect supporting sources ({{ iv['total_reports'] }})</summary>
+    <ul class="news-list">
+      {% for rep in iv['reports'] %}
+      <li><a href="{{ rep.url }}" target="_blank" rel="noopener">{{ rep.title }}</a><br />
+        <span class="muted">{{ rep.source }} · {{ rep.date_display }} · stages: {{ rep.stages | join(', ') if rep.stages else '—' }}</span></li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+  <p class="muted">{{ iv['disclaimer'] }}</p>
+</div>
+{% elif iv and iv['state'] == 'empty' %}
+<p class="muted">No candidate interview reports found for this company.</p>
+{% elif iv %}
+<p class="muted">Interview context temporarily unavailable.</p>
+{% endif %}

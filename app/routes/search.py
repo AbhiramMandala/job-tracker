@@ -10,9 +10,12 @@ from sqlalchemy.orm import Session
 
 from app.data.skills import display_skill
 from app.database import get_db
-from app.models import JobSkill, Match
+from app.models import Evidence, JobSkill, Match
 from app.routes.profile import get_active_candidate
+from app.services.authenticity import analyze_job, display_dict
+from app.services.company import classify_company_type, filter_value
 from app.services.evidence import EvidenceService, STATUS_SUPPORTING, STATUS_WARNING
+from app.services.interview import InterviewService, display_dict as interview_display_dict
 from app.services.job_search import JobSearchService
 from app.services.news import NewsService
 from app.services.serpapi_client import SerpApiError
@@ -94,6 +97,16 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
     except Exception:
         logger.exception("news pre-enrichment failed; continuing without news")
         news_digests = {}
+    # INTERVIEW CONTEXT: pre-enrich a smaller top-N; failures never break search.
+    try:
+        interview_digests = InterviewService(db).enrich_top(result.jobs, totals or None)
+    except Exception:
+        logger.exception("interview pre-enrichment failed; continuing without it")
+        interview_digests = {}
+    interview_display = {
+        job_id: interview_display_dict(digest)
+        for job_id, digest in interview_digests.items()
+    }
     verify_display = {}
     for job_id, summary in verify.items():
         verify_display[job_id] = {
@@ -126,6 +139,47 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
             "live": digest.is_live,
             "stale": digest.stale,
         }
+    # AUTHENTICITY: pure derivation over stored rows + job fields. One bounded
+    # query, zero SerpApi calls, never blocks or breaks search.
+    auth_display: dict[int, dict] = {}
+    auth_by_job: dict[int, list] = {}
+    if job_ids:
+        try:
+            auth_rows = db.query(Evidence).filter(Evidence.job_id.in_(job_ids)).all()
+        except Exception:
+            logger.exception("authenticity evidence lookup failed; continuing")
+            auth_rows = []
+        for row in auth_rows:
+            auth_by_job.setdefault(row.job_id, []).append(row)
+        for job in result.jobs:
+            rows = auth_by_job.get(job.id, [])
+            news_ok = any(
+                (r.evidence_type or "").startswith("news_") and r.source_url
+                for r in rows
+            )
+            try:
+                auth_display[job.id] = display_dict(analyze_job(job, rows, news_ok=news_ok))
+            except Exception:
+                logger.exception("authenticity analysis failed job=%s", job.id)
+    # COMPANY TYPE: evidence-based estimate per card (pure, same rows).
+    company_display: dict[int, dict] = {}
+    if job_ids:
+        for job in result.jobs:
+            company = job.company
+            try:
+                classification = classify_company_type(
+                    company.name_norm if company else "",
+                    company.name_raw if company else "",
+                    auth_by_job.get(job.id, []) if job_ids else [],
+                )
+            except Exception:
+                logger.exception("company classification failed job=%s", job.id)
+                classification = {"type": "Unknown", "confidence": "Low"}
+            company_display[job.id] = {
+                "type": classification["type"],
+                "confidence": classification["confidence"],
+                "filter": filter_value(classification),
+            }
     return templates.TemplateResponse(
         request,
         "results.html",
@@ -149,6 +203,9 @@ async def run_search(request: Request, db: Session = Depends(get_db)):
             "safe_url": safe_url,
             "extra_links": extra_links,
             "news": news_display,
+            "authenticity": auth_display,
+            "interview": interview_display,
+            "company": company_display,
         },
     )
 

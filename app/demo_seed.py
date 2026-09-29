@@ -33,6 +33,7 @@ def main() -> int:
     try:
         candidate = _ensure_demo_profile(db)
         from app.services.evidence import EvidenceService
+        from app.services.interview import InterviewService
         from app.services.job_search import JobSearchService
         from app.services.news import NewsService
 
@@ -47,11 +48,12 @@ def main() -> int:
         } if candidate is not None else {}
         verify = EvidenceService(db).enrich(result.jobs, totals or None)
         news = NewsService(db).enrich_top(result.jobs, totals or None)
+        interviews = InterviewService(db).enrich_top(result.jobs, totals or None)
     finally:
         elapsed = time.monotonic() - started
         db.close()
 
-    _report(result, verify, news, elapsed)
+    _report(result, verify, news, interviews, elapsed)
     return 0
 
 
@@ -84,7 +86,7 @@ def _ensure_demo_profile(db):
     return candidate
 
 
-def _report(result, verify, news, elapsed) -> None:
+def _report(result, verify, news, interviews, elapsed) -> None:
     from app.database import SessionLocal
     from app.models import ApiUsage, CacheEntry
     from sqlalchemy import func
@@ -118,6 +120,10 @@ def _report(result, verify, news, elapsed) -> None:
     for digest in news.values():
         by_state[digest.state] = by_state.get(digest.state, 0) + 1
     print(f"news: {by_state or 'none'}")
+    by_interview: dict[str, int] = {}
+    for digest in interviews.values():
+        by_interview[digest.state] = by_interview.get(digest.state, 0) + 1
+    print(f"interviews: {by_interview or 'none'}")
     print("Done. Serve with: python -m uvicorn app.main:app")
 
 

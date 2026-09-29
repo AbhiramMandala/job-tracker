@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}JobSetu — Useful tools{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">JOBSETU · USEFUL TOOLS</p>
+  <h1>Career resources worth bookmarking.</h1>
+  <p class="sub">A small curated set for searching, researching employers, preparing, and building. External links open in a new tab.</p>
+  <div class="toolbar" role="search" aria-label="Filter resources">
+    <div class="field">
+      <label for="tool-q">Search</label>
+      <input id="tool-q" type="text" placeholder="e.g. interview" autocomplete="off" />
+    </div>
+    <div class="field">
+      <label for="tool-cat">Category</label>
+      <select id="tool-cat">
+        <option value="">All categories</option>
+        {% for cat in categories %}<option>{{ cat }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="resource-grid" id="resource-grid">
+    {% for r in resources %}
+    <article class="resource-card" data-name="{{ r.name | lower }} {{ r.description | lower }}" data-cat="{{ r.category }}">
+      <h3>{{ r.name }}</h3>
+      <p><span class="resource-cat">{{ r.category }}</span></p>
+      <p>{{ r.description }}</p>
+      <p class="muted">Why useful: {{ r.why }}</p>
+      <p><a class="link" href="{{ r.url }}" target="_blank" rel="noopener">Visit ↗</a></p>
+    </article>
+    {% endfor %}
+  </div>
+  <p class="muted" id="tool-empty" hidden>No resources match. Try a different search or category.</p>
+</section>
+<script>
+(function () {
+  var q = document.getElementById("tool-q");
+  var cat = document.getElementById("tool-cat");
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".resource-card"));
+  var empty = document.getElementById("tool-empty");
+  function apply() {
+    var needle = q.value.trim().toLowerCase();
+    var shown = 0;
+    cards.forEach(function (card) {
+      var ok = (!needle || card.getAttribute("data-name").indexOf(needle) !== -1) &&
+               (!cat.value || card.getAttribute("data-cat") === cat.value);
+      card.hidden = !ok;
+      if (ok) shown += 1;
+    });
+    empty.hidden = shown !== 0;
+  }
+  q.addEventListener("input", apply);
+  cat.addEventListener("change", apply);
+})();
+</script>
+{% endblock %}

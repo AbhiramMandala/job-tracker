@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     EVIDENCE_TTL_HOURS: int = 168  # 7 days
     NEWS_MAX_JOBS: int = 3
     NEWS_TTL_HOURS: int = 168  # 7 days
+    INTERVIEW_MAX_JOBS: int = 3
+    INTERVIEW_TTL_HOURS: int = 168  # 7 days
 
 
 @lru_cache

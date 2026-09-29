@@ -4,21 +4,40 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}JobSetu{% endblock %}</title>
+  <script>
+  /* Set the theme before CSS loads to avoid a light→dark flash. */
+  (function () {
+    try {
+      var saved = localStorage.getItem("jobsetu-theme");
+      var theme = saved === "dark" || saved === "light" ? saved :
+        (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  })();
+  </script>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
-    <div class="wrap">
+    <div class="wrap header-inner">
       <a class="brand" href="/">JobSetu</a>
       <span class="tagline">Evidence-powered job intelligence for Indian freshers</span>
-      <nav class="topnav"><a href="/">Search</a><a href="/profile">Profile</a></nav>
+      <nav class="topnav" aria-label="Main">
+        <a href="/">Search</a><a href="/profile">Profile</a><a href="/tools">Tools</a>
+      </nav>
+      <button id="theme-toggle" class="theme-toggle" type="button"
+              aria-label="Switch to dark theme" aria-pressed="false" title="Toggle theme">🌙</button>
     </div>
   </header>
-  <main class="wrap">
+  <main class="wrap" id="main">
     {% block content %}{% endblock %}
   </main>
   <footer class="site-footer">
     <div class="wrap"><small>JobSetu · job intelligence for Indian freshers · SerpApi-powered</small></div>
   </footer>
+  <script src="/static/theme.js" defer></script>
 </body>
 </html>

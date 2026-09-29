@@ -46,8 +46,8 @@ next.
 
 Search → deduplicate (exact + TF-IDF similarity) → extract skills → match
 deterministically (50/20/15/10/5) → verify against independent search evidence
-→ surface news context → aggregate gaps. Every number is computed from
-retrieved data.
+→ score authenticity signals (0–100, explained, disclaimed) → surface news
+context → aggregate gaps. Every number is computed from retrieved data.
 
 ## How SerpApi is used
 
@@ -59,7 +59,9 @@ raw SerpApi JSON:
 - `engine=google` — VERIFY evidence per top-5 job: `"<company>" "<title>"`,
   `"<company>" <city>`.
 - `engine=google_news` — NEWS CONTEXT per top-3 job: `"<company>" <city>`.
-Cold ≤15 calls/search; warm 0 (SQLite cache: jobs 24h, evidence/news 7d).
+- `engine=google` — SELECTION PROCESS per top-3 job (interview queries);
+  aggregated from search results only, never scraped.
+Cold ≤21 calls/search; warm 0 (SQLite cache: jobs 24h, evidence/news/interviews 7d).
 Every attempt logged to `api_usage`, visible at `/debug/usage`.
 
 ## Key features
@@ -67,6 +69,9 @@ Every attempt logged to `api_usage`, visible at `/debug/usage`.
 - Live fresher job search with exact + similarity dedup and pipeline counts
 - Explainable match breakdowns + skill-gap frequency panel
 - VERIFY badges with inspectable cited evidence pages (no trust scores)
+- Evidence-based authenticity score (0–100) with explained risk signals + disclaimer
+- Candidate-reported selection process (interview stages with report counts)
+- Light/dark theme, Useful Tools page, company-type estimates, prep topics
 - News context with recency, categories, sources
 - Credit-efficient caching with LIVE/CACHED transparency + stale fallback
 - Warm-cache demo seeding (`python -m app.demo_seed`) + usage dashboard

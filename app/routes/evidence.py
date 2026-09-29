@@ -8,7 +8,15 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, selectinload
 
 from app.database import get_db
-from app.models import Evidence, Job
+from app.data.skills import display_skill
+from app.models import Evidence, Job, JobSkill
+from app.services.company import classify_company_type
+from app.services.interview import (
+    derive_prep_topics,
+    display_dict as interview_display_dict,
+    summarize_reports as summarize_interview_reports,
+)
+from app.services.authenticity import analyze_job, display_dict
 from app.services.news import NewsService
 from app.utils import age_text, domain_of, safe_url
 
@@ -60,6 +68,24 @@ def job_evidence(request: Request, job_id: int, db: Session = Depends(get_db)):
         if row.evidence_type != "warning_signal" or row.claim
     ]
     warnings = [r for r in verify_rows if r.category == "warning"]
+    company = job.company
+    classification = classify_company_type(
+        company.name_norm if company else "",
+        company.name_raw if company else "",
+        rows,
+    )
+    official_site = ""
+    for row in verify_rows:
+        if row.evidence_type == "company_website" and safe_url(row.source_url):
+            official_site = safe_url(row.source_url)
+            break
+    job_skills = [
+        r.skill_norm for r in db.query(JobSkill).filter_by(job_id=job.id)
+        .order_by(JobSkill.id).all()
+    ]
+    job_skill_labels = [display_skill(s) for s in job_skills]
+    interview_only = [r for r in rows if (r.evidence_type or "").startswith("interview_")]
+    prep_topics = derive_prep_topics(job.description or "", interview_only)
     news_items = []
     news_state = "unavailable"
     news_stale = False
@@ -89,5 +115,15 @@ def job_evidence(request: Request, job_id: int, db: Session = Depends(get_db)):
             "news_items": news_items,
             "news_state": news_state,
             "news_stale": news_stale,
+            "iv": interview_display_dict(summarize_interview_reports(job.id, rows)),
+            "company_type": classification["type"],
+            "company_confidence": classification["confidence"],
+            "official_site": official_site,
+            "job_skills": job_skills,
+            "job_skill_labels": job_skill_labels,
+            "prep_topics": prep_topics,
+            "auth": display_dict(
+                analyze_job(job, rows, news_ok=bool(news_items))
+            ),
         },
     )

@@ -39,7 +39,9 @@ news context → gap aggregation. One card per job: apply, verify, learn.
 Three engines via one `SerpApiClient`: `google_jobs` for discovery
 (`q=<role>`, `location=<city>, India`, `gl=in`, `hl=en`, ≤2 pages);
 `google` for VERIFY evidence per top-5 job; `google_news` for company context
-per top-3 job. Cold ≤15 calls, warm 0 (SQLite cache 24h/7d). All calls logged
+per top-3 job; `google` again for candidate-reported interview stages per
+top-3 job (search results only, never scraped). Cold ≤21 calls, warm 0
+(SQLite cache 24h/7d). All calls logged
 at `/debug/usage`. Without SerpApi the product has no data — it says so
 instead of faking it.
 

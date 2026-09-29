@@ -24,6 +24,29 @@
   {% if not has_profile %}
   <p class="profile-nudge" role="note"><a href="/profile">Create your profile</a> to see match scores and skill gaps.</p>
   {% endif %}
+  {% if jobs %}
+  <div class="toolbar" role="search" aria-label="Filter results">
+    <div class="field">
+      <label for="filter-verify">Verification</label>
+      <select id="filter-verify">
+        <option value="">All statuses</option>
+        <option value="supporting">Supporting evidence</option>
+        <option value="needs_verification">Needs verification</option>
+        <option value="warning">Warning signals</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="filter-company">Company type</label>
+      <select id="filter-company">
+        <option value="">All types</option>
+        <option value="government">Government / PSU</option>
+        <option value="established">Established employer</option>
+        <option value="unknown">Unknown</option>
+      </select>
+    </div>
+  </div>
+  <p class="muted" id="filter-empty" hidden>No cards match these filters. <a href="#" id="filter-reset">Clear filters</a></p>
+  {% endif %}
 </section>
 
 {% if gaps %}
@@ -48,9 +71,12 @@
 {% for job in jobs %}
 {% set match = matches.get(job.id) %}
 {% set job_skills = skills_by_job.get(job.id, []) %}
-<article class="card">
+{% set ver = verify.get(job.id) %}
+{% set co = company.get(job.id) %}
+<article class="card job-card" data-verify="{{ ver.status if ver else 'unchecked' }}" data-company-type="{{ co.filter if co else 'unknown' }}">
   <h2>{{ job.title_raw or "Untitled role" }}</h2>
   <p class="company">{{ job.company.name_raw or "Unknown company" }} · {{ job.location_raw or location }}</p>
+  {% if co %}<p class="company-type">Company type: {{ co.type }} · Confidence: {{ co.confidence }}</p>{% endif %}
   {% if match %}
   <p class="match-score">{{ match.total }}% MATCH</p>
   <p class="skills-line">
@@ -89,7 +115,6 @@
     {% if job.dup_count %}<span> · {{ job.dup_count + 1 }} listings merged</span>{% endif %}
   </p>
   {% endif %}
-  {% set ver = verify.get(job.id) %}
   {% if ver and ver.status != 'unavailable' %}
   <div class="verify verify-{{ ver.status }}">
     <p class="verify-head">
@@ -106,6 +131,10 @@
   <p class="muted">Verification unavailable — the live check failed and no cached evidence exists. No status shown rather than a guess.</p>
   {% else %}
   <p class="muted">Verification runs for top matches only — this listing was not checked.</p>
+  {% endif %}
+  {% set auth = authenticity.get(job.id) %}
+  {% if auth %}
+  {% include "_authenticity.html" %}
   {% endif %}
   {% set nw = news.get(job.id) %}
   {% if nw and (nw['items'] or nw['state'] in ('empty', 'ambiguous', 'stale', 'unavailable')) %}
@@ -136,10 +165,15 @@
   {% else %}
   <p class="muted">News context is checked for top matches only.</p>
   {% endif %}
+  {% set iv = interview.get(job.id) %}
+  {% if iv %}
+  {% include "_interview.html" %}
+  {% endif %}
   {% if job.description %}
   <p class="desc">{{ job.description[:300] }}{% if job.description|length > 300 %}…{% endif %}</p>
   {% endif %}
   <p class="apply-row">
+    <a class="link" href="/jobs/{{ job.id }}/evidence">View role intelligence →</a><br />
     {% if job.apply_link and safe_url(job.apply_link) %}
       <a class="btn" href="{{ safe_url(job.apply_link) }}" target="_blank" rel="noopener">Apply</a>
     {% else %}
@@ -151,4 +185,30 @@
   </p>
 </article>
 {% endfor %}
+<script>
+(function () {
+  var vSel = document.getElementById("filter-verify");
+  var cSel = document.getElementById("filter-company");
+  if (!vSel || !cSel) return;
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".job-card"));
+  var empty = document.getElementById("filter-empty");
+  function apply() {
+    var shown = 0;
+    cards.forEach(function (card) {
+      var ok = (!vSel.value || card.getAttribute("data-verify") === vSel.value) &&
+               (!cSel.value || card.getAttribute("data-company-type") === cSel.value);
+      card.hidden = !ok;
+      if (ok) shown += 1;
+    });
+    if (empty) empty.hidden = shown !== 0;
+  }
+  vSel.addEventListener("change", apply);
+  cSel.addEventListener("change", apply);
+  var reset = document.getElementById("filter-reset");
+  if (reset) reset.addEventListener("click", function (e) {
+    e.preventDefault();
+    vSel.value = ""; cSel.value = ""; apply();
+  });
+})();
+</script>
 {% endblock %}
