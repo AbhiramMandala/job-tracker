@@ -3,8 +3,9 @@
 Setup (before recording): `python -m app.demo_seed` (needs `SERPAPI_KEY`),
 then `python -m uvicorn app.main:app`. Demo warm: instant, zero SerpApi calls,
 all badges show CACHED. Record the screen running locally; narration optional;
-may be sped up. Numbers below marked [FILL] must be read off the real screen —
-never invent them.
+may be sped up. Pipeline/top-score figures were measured from the real warm
+cache on 2026-09-29 — re-check them on screen before any recording, never
+invent them. (Demo video intentionally skipped by author.)
 
 ## 0:00–0:15 — Problem + intro
 

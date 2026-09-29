@@ -12,7 +12,7 @@
 - Cache-first (24h TTL), LIVE/CACHED + stale banners, api_usage per HTTP attempt
   (committed independently so failures are still logged).
 - Done when: mocked Hyderabad query renders titles/companies from DB. Live run
-  still pending an API key (no key in this environment).
+  succeeded 2026-09-29 (2 pages, 19 real jobs, warm cache verified).
 
 ## Slice 3 — Deduplication ✅ COMPLETE
 - Implemented docs/deduplication.md (+§7 impl notes); pure-Python TF-IDF
@@ -63,8 +63,9 @@
 - README (problem/solution/SerpApi/architecture/setup/env/API/tests), screenshots, architecture diagram export, 2-min demo script rehearsal, final QA against judge bar.
 - Done when: stranger can run from README + demo fits 3 min.
 - Status (final QA): README hackathon-ready (Why SerpApi, deploy, seeding);
-  Mermaid architecture diagram in README; `docs/demo.md` (90s, numbers marked
-  fill-after-seed); `docs/submission.md` draft; 3 honest UI screenshots in
-  `docs/screenshots/`; results/evidence screenshots + video pending live data.
+  Mermaid architecture diagram in README; `docs/demo.md` (2:45, live-measured
+  numbers); `docs/submission.md` draft; 6 UI screenshots in
+  `docs/screenshots/` (incl. live-seeded results page); video intentionally
+  skipped; deploy pending.
 
 P1 slices (only after Slice 8 green): News, Maps, Trends, PDF upload — each behind its flag, each independently revertible.

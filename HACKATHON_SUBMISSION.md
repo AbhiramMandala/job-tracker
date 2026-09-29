@@ -78,8 +78,9 @@ httpx, pytest. No LLM, no vector DB.
 
 ## Demo video
 
-[USER INPUT REQUIRED: public/unlisted video link — must open in incognito
-without requesting access. Script: `docs/demo.md` (2:45).]
+Skipped intentionally by user — no URL.
+NOTE: if the submission form mandates a video URL, this is a manual blocker
+for the author (record per `docs/demo.md` or accept form validation limits).
 
 ## Solo contributor
 
@@ -116,7 +117,7 @@ https://github.com/AbhiramMandala/jobsetu
 
 ## Demo
 
-[USER INPUT REQUIRED: video URL — same as Demo video above]
+Skipped intentionally by user — no URL (see Demo video above).
 
 ## Final notes
 
@@ -124,6 +125,7 @@ https://github.com/AbhiramMandala/jobsetu
 - Tests: 88 passed, SerpApi mocked (no key needed for `pytest`; if a real key
   sits in `.env`, run with `$env:SERPAPI_KEY='NO_KEY_FOR_TESTS'` so the suite
   stays hermetic).
-- Honest limits: deploy + results screenshots + video pending; live seed done
-  2026-09-29 (19 jobs, 5/5 supporting, news 2/3). Never claims scam/safe;
+- Honest limits: deploy + video pending (video intentionally skipped); live
+  seed done 2026-09-29 (19 jobs, 5/5 supporting, news 2/3) with results
+  screenshot in `docs/screenshots/usage-live.png`. Never claims scam/safe;
   never fabricates data.

@@ -53,7 +53,8 @@ https://github.com/AbhiramMandala/jobsetu
 
 ## Demo URL
 
-[USER INPUT REQUIRED: video link — public/unlisted, opens in incognito]
+Skipped intentionally by user — no URL. (If the form mandates it, record per
+`docs/demo.md` and paste the public/unlisted link here.)
 
 ## Solo contributor details
 

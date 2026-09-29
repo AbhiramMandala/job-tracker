@@ -151,15 +151,19 @@ python -m pytest
 
 ## Screenshots / demo
 
-Real UI captures (fresh database, no demo data fabricated):
+Real UI captures (no demo data fabricated; profile shows clearly-labeled
+sample data):
 
 - `docs/screenshots/01-landing.png` — search form
 - `docs/screenshots/02-profile.png` — profile with labeled sample prefill
 - `docs/screenshots/03-usage.png` — dev credit dashboard
+- `docs/screenshots/results.png` — search form (landing, live-seeded DB)
+- `docs/screenshots/profile.png` — profile page with demo fresher data
+- `docs/screenshots/usage-live.png` — live-seeded results page: 19 listings,
+  CACHED badge, 63% top MATCH, VERIFY supporting evidence, skill gaps
 
-Results/evidence/news screenshots require a live `SERPAPI_KEY` run
-(`python -m app.demo_seed`, then capture) — still pending.
-Demo script (2:45): `docs/demo.md`.
+Evidence-detail and `/debug/usage` captures are optional extras.
+Demo script (2:45, video intentionally skipped): `docs/demo.md`.
 
 ## Project structure
 
