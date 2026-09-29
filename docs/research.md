@@ -1,26 +1,37 @@
-# JobSetu — Research (verified 2026-09-28)
+# JobSetu — Research (verified 2026-09-28, hackathon facts re-verified 2026-09-29)
 
 ## 0. Verification status
-- Official HydPy x SerpApi hackathon page: NOT FOUND via automated search on 2026-09-28.
-  - `hydpy.org` fetched: no hackathon listing (only meetups / PyConf Hyderabad 2026).
-  - Web-search integration returned no results for "HydPy SerpApi India Hackathon 2026".
-  - Action: hackathon rules below are PROVISIONAL from user brief. Owner must paste official link if available.
+- Official hackathon pages: VERIFIED via direct fetch on 2026-09-29:
+  - https://serpapi.github.io/serpapi-india-hackathon-2026/index.html (tracks, prizes, checklist)
+  - https://serpapi.github.io/serpapi-india-hackathon-2026/rules.html (eligibility, submission, judging)
+  - https://serpapi.github.io/serpapi-india-hackathon-2026/terms.html (IP, license grant, privacy)
+- Confirmed facts: Sep 1–Oct 10, 2026; deadline **Oct 10, 2026 at 23:59 IST**;
+  India residents 18+; solo or teams ≤5; any language; new AND existing projects
+  welcome (existing must disclose + show meaningful SerpApi usage); AI tools
+  allowed with disclosure (no effect on judging); public GitHub repo + setup
+  instructions + demo video under 3 min (public/unlisted link opening in
+  incognito); one track per project; one competitive award per project.
+- Six tracks (verified): AI Agents · Open-Source Integrations ·
+  Travel & Local Discovery · Commerce & Market Intelligence ·
+  **Knowledge & Public Interest** (education, research, **jobs**, news literacy,
+  accessibility, civic info, patents) · Open Innovation (wildcard).
+  → JobSetu targets **Knowledge & Public Interest** (see §1).
+- Prizes: ₹2,00,000 cash pool (1st ₹1L, 2nd ₹40K, 3rd ₹20K) + 115,000 credits
+  competitive pool; 10,000 credits per Best-in-Track; ₹10K + 5,000 credits per
+  partner community; 1,000 credits per valid submission.
 - SerpApi documentation: VERIFIED via direct fetch of serpapi.com docs (see Sources).
 
-Provisional hackathon facts (from user, unverified):
-- Deadline: 2026-10-05, online, solo allowed, any SerpApi API allowed.
-- Prizes: 3L+ total, 1st 1L cash, HydPy special 10K + credits, 1000 credits per valid submission.
-
-## 1. Judging criteria (inferred, to be replaced by official rubric)
-Standard SerpApi/community hackathon rubric assumed:
-1. Meaningful SerpApi use (essential vs add-on)
-2. Innovation / originality
-3. Technical depth + Python quality (HydPy special)
-4. Completeness / working demo
-5. Real-world usefulness, India relevance
-6. Presentation: README, demo video (2-3 min), deployment
+## 1. Judging criteria (official — Rules §6, no fixed weights)
+1. Idea strength
+2. Originality
+3. Technical complexity
+4. Usefulness
+5. Meaningful SerpApi usage (SerpApi must make a MATERIAL contribution;
+   isolated/cosmetic calls are insufficient — Rules §3)
 
 Implication: JobSetu must prove it fails without live SerpApi data.
+It does: no SerpApi → no listings at all (verified: missing key → friendly
+503, never fake data).
 
 ## 2. SerpApi engines verified
 

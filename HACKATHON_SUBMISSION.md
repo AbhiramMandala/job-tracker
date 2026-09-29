@@ -1,0 +1,128 @@
+# SerpApi India Hackathon 2026 Submission — JobSetu
+
+## Project
+
+JobSetu — evidence-powered job intelligence for Indian freshers.
+
+## Repository
+
+https://github.com/AbhiramMandala/jobsetu
+
+## Track
+
+**Knowledge & Public Interest** (official track keywords: education, research,
+**jobs**, news literacy, accessibility, civic information, patents).
+JobSetu is a jobs + news-literacy tool: live listings, cited company evidence,
+and categorized news context for fresher decisions.
+
+Why not the others (verified against official track definitions):
+- AI Agents — JobSetu has no planning/acting agent loop (deterministic pipeline).
+- Open-Source Integrations — not a plugin/provider/connector for another platform.
+- Travel & Local Discovery — no flights/hotels/maps itineraries.
+- Commerce & Market Intelligence — not shopping/pricing/finance tooling.
+- Open Innovation — wildcard fallback only; K&PI names jobs explicitly, so it fits better.
+
+## One-line description
+
+Relevant matches, verifiable companies, and skill gaps for Indian freshers —
+one evidence-backed card per job.
+
+## Project description
+
+JobSetu ingests live job listings and returns decision cards: a deterministic
+match score with reasons, a VERIFY section backed by cited search evidence,
+recent company news context, and an aggregate skill-gap panel. Freshers drown
+in stale, duplicated, unverifiable listings; job boards answer "what exists"
+but never relevance, trust, or what to learn next. JobSetu answers all three
+with sources, not black-box scores.
+
+## Problem
+
+Freshers face stale, duplicated, unverifiable listings. Boards show jobs but
+never: is this relevant to me, can I trust this company, what should I learn
+next.
+
+## Solution
+
+Search → deduplicate (exact + TF-IDF similarity) → extract skills → match
+deterministically (50/20/15/10/5) → verify against independent search evidence
+→ surface news context → aggregate gaps. Every number is computed from
+retrieved data.
+
+## How SerpApi is used
+
+SerpApi is the data backbone — remove it and the product has zero listings.
+Single `SerpApiClient` (`app/services/serpapi_client.py`); routes never see
+raw SerpApi JSON:
+- `engine=google_jobs` — discovery: `q=<role>`, `location=<city>, India`,
+  `gl=in`, `hl=en`, ≤2 pages via `next_page_token`.
+- `engine=google` — VERIFY evidence per top-5 job: `"<company>" "<title>"`,
+  `"<company>" <city>`.
+- `engine=google_news` — NEWS CONTEXT per top-3 job: `"<company>" <city>`.
+Cold ≤15 calls/search; warm 0 (SQLite cache: jobs 24h, evidence/news 7d).
+Every attempt logged to `api_usage`, visible at `/debug/usage`.
+
+## Key features
+
+- Live fresher job search with exact + similarity dedup and pipeline counts
+- Explainable match breakdowns + skill-gap frequency panel
+- VERIFY badges with inspectable cited evidence pages (no trust scores)
+- News context with recency, categories, sources
+- Credit-efficient caching with LIVE/CACHED transparency + stale fallback
+- Warm-cache demo seeding (`python -m app.demo_seed`) + usage dashboard
+
+## Tech stack
+
+Python, FastAPI, SQLAlchemy, SQLite, Pydantic v2, Jinja2, vanilla CSS/JS,
+httpx, pytest. No LLM, no vector DB.
+
+## Demo video
+
+[PLACEHOLDER — add public/unlisted link; must open in incognito without access.
+Script: `docs/demo.md` (2:45).]
+
+## Solo contributor
+
+Abhiram Mandala
+
+## Participant information
+
+Name: Abhiram Mandala
+Email: [ENTER EMAIL]
+Phone: [ENTER PHONE]
+Occupation: [ENTER OCCUPATION]
+Years of experience: [ENTER YEARS]
+
+## Existing project disclosure
+
+New project built during the hackathon window: repository history shows the
+first commit on 2026-09-28 (hackathon runs Sep 1–Oct 10, 2026) and
+`docs/research.md` records an empty workspace at project start.
+[USER CONFIRMATION REQUIRED — confirm no JobSetu code existed anywhere before
+Sep 2026; if any part predates the hackathon, describe which part and what the
+submitted SerpApi work adds.]
+
+## AI tools used
+
+AI-assisted development was used, including the OpenCode coding assistant
+(this submission-prep session: repository audit, README/docs drafting,
+submission documents). [USER CONFIRMATION REQUIRED — list any other AI tools
+used during development, e.g. Copilot/ChatGPT/Claude, plus one line each on
+what they contributed. Leave no AI use undisclosed; AI use does not affect
+judging.]
+
+## Repository
+
+https://github.com/AbhiramMandala/jobsetu
+(setup instructions in README; test links in a private window before submitting)
+
+## Demo
+
+[Video URL — same as Demo video above]
+
+## Final notes
+
+- No secrets in the repo (`.env` + `*.db` git-ignored; key is env-only).
+- Tests: 88 passed, SerpApi mocked (no key needed for `pytest`).
+- Honest limits: live seed + deploy + results screenshots pending (need key);
+  see README Status. Never claims scam/safe; never fabricates data.
