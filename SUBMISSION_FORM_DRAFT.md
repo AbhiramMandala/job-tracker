@@ -58,21 +58,21 @@ https://github.com/AbhiramMandala/jobsetu
 ## Solo contributor details
 
 Name: Abhiram Mandala
-Email: [USER INPUT REQUIRED: email]
+Email: abhirammandala02@gmail.com
 Phone: [USER INPUT REQUIRED: phone]
 Occupation: [USER INPUT REQUIRED: occupation]
 Years of experience: [USER INPUT REQUIRED: years]
 
 ## How did you learn about the event?
 
-[USER INPUT REQUIRED: e.g. HydPy / SerpApi website / friend / social media]
+SerpApi website
 
 ## Existing-project disclosure
 
-New project built during the hackathon (first commit 2026-09-28).
-[USER CONFIRMATION REQUIRED before submitting.]
+New project built during the hackathon (first commit 2026-09-28; author-confirmed
+no JobSetu code existed before September 2026).
 
 ## AI-tool disclosure
 
-Includes OpenCode coding assistant (audit, README/docs, submission drafts).
-[USER INPUT REQUIRED: any other AI tools + one-line contributions each.]
+OpenCode (audit, README/docs, submission drafts); ChatGPT (writing/docs).
+AI use does not affect judging.

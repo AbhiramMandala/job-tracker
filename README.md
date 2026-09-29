@@ -278,5 +278,6 @@ links to its source on `GET /jobs/{id}/evidence`. Rules and limitations:
 ## Status
 
 Slices 1–10 complete, final QA done (88/88 green). **STOP CODING** — no new
-features. Remaining work is live seeding, deployment, screenshots/video, and
-submission — not features.
+features. Live seed succeeded 2026-09-29 (19 real jobs, VERIFY 5/5 supporting,
+news 2/3 with 1 honest unavailable). Remaining work is deployment,
+screenshots/video, and submission — not features.

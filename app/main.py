@@ -18,6 +18,10 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
+# httpx logs full request URLs at INFO, and SerpApi URLs carry api_key as a
+# query param — so the key would land in server logs on every live call.
+# Keep httpx at WARNING: errors still surface, keys never do.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger("jobsetu")
 
 BASE_DIR = Path(__file__).resolve().parent

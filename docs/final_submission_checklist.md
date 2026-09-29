@@ -14,12 +14,12 @@ answer) · MANUAL ACTION (you operate browser/GitHub/form).
 ## SerpApi
 
 - [x] Real integration (3 engines, one client, usage logging) — READY
-- [ ] API key in local `.env` — MANUAL ACTION (never paste key in chat; never commit `.env`)
-- [ ] Live seed executed (`python -m app.demo_seed`) — BLOCKED (see above)
-- [ ] `google_jobs` real results verified — BLOCKED
-- [ ] `google` verification verified — BLOCKED
-- [ ] `google_news` verified — BLOCKED
-- [ ] Usage + LIVE/CACHED evidence captured — BLOCKED
+- [x] API key in local `.env` — READY (user-provided, env-only, never committed)
+- [x] Live seed executed (`python -m app.demo_seed`) — READY (2026-09-29)
+- [x] `google_jobs` real results verified — READY (2 pages ok, 19 raw → 19 unique)
+- [x] `google` verification verified — READY (10 ok, 5/5 supporting)
+- [x] `google_news` verified — READY (2 ok; 1 persistent HTTP failure → honest unavailable)
+- [ ] Usage + LIVE/CACHED evidence captured — MANUAL ACTION (screenshots per specs below)
 
 ## Demo — screenshot specs (capture AFTER successful seed, app running)
 

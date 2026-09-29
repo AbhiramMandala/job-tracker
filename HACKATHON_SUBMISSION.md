@@ -83,33 +83,31 @@ without requesting access. Script: `docs/demo.md` (2:45).]
 
 ## Solo contributor
 
-Abhiram Mandala
+Abhiram Mandala (sole contributor — author-confirmed; no teammates).
 
 ## Participant information
 
 Name: Abhiram Mandala
-Email: [USER INPUT REQUIRED: email]
+Email: abhirammandala02@gmail.com
 Phone: [USER INPUT REQUIRED: phone]
 Occupation: [USER INPUT REQUIRED: occupation]
 Years of experience: [USER INPUT REQUIRED: years]
 
 ## Existing project disclosure
 
-New project built during the hackathon window: repository history shows the
-first commit on 2026-09-28 (hackathon runs Sep 1–Oct 10, 2026) and
-`docs/research.md` records an empty workspace at project start.
-[USER CONFIRMATION REQUIRED — confirm no JobSetu code existed anywhere before
-Sep 2026; if any part predates the hackathon, describe which part and what the
-submitted SerpApi work adds.]
+New project built during the hackathon window (author-confirmed): repository
+history shows the first commit on 2026-09-28 (hackathon runs Sep 1–Oct 10,
+2026) and `docs/research.md` records an empty workspace at project start.
+No JobSetu code existed anywhere before September 2026.
 
 ## AI tools used
 
-AI-assisted development was used, including the OpenCode coding assistant
-(this submission-prep session: repository audit, README/docs drafting,
-submission documents). [USER CONFIRMATION REQUIRED — list any other AI tools
-used during development, e.g. Copilot/ChatGPT/Claude, plus one line each on
-what they contributed. Leave no AI use undisclosed; AI use does not affect
-judging.]
+- OpenCode coding assistant — repository audit, README/docs drafting,
+  submission documents and checklists (submission-prep sessions).
+- ChatGPT — writing and documentation assistance during development.
+
+AI use does not affect judging (Rules §5); listed here for the disclosure
+requirement.
 
 ## Repository
 
@@ -123,6 +121,9 @@ https://github.com/AbhiramMandala/jobsetu
 ## Final notes
 
 - No secrets in the repo (`.env` + `*.db` git-ignored; key is env-only).
-- Tests: 88 passed, SerpApi mocked (no key needed for `pytest`).
-- Honest limits: live seed + deploy + results screenshots pending (need key);
-  see README Status. Never claims scam/safe; never fabricates data.
+- Tests: 88 passed, SerpApi mocked (no key needed for `pytest`; if a real key
+  sits in `.env`, run with `$env:SERPAPI_KEY='NO_KEY_FOR_TESTS'` so the suite
+  stays hermetic).
+- Honest limits: deploy + results screenshots + video pending; live seed done
+  2026-09-29 (19 jobs, 5/5 supporting, news 2/3). Never claims scam/safe;
+  never fabricates data.

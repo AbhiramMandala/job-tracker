@@ -30,11 +30,12 @@ never invent them.
 - SCREEN: `/` → results page.
 - ACTION:
   1. Enter Role `Python Backend Developer`, `Hyderabad`, `Fresher` → Find jobs.
-  2. Point at pipeline counts: [FILL e.g. "N listings found, M duplicates
-     removed, K unique jobs"] + the LIVE/CACHED badge.
-  3. Open the top card: score + breakdown
-     [FILL e.g. "78% MATCH — skills 33/50, title 20/20 …"], matched skills vs
-     gap; click WHY THIS MATCHES.
+  2. Point at pipeline counts (measured live 2026-09-29: "19 listings found,
+     0 duplicates removed, 19 unique jobs") + the LIVE/CACHED badge (warm demo
+     shows CACHED with age).
+  3. Open the top card: score + breakdown (measured live 2026-09-29: top card
+     63% MATCH — read its sub-scores off the screen, never from memory),
+     matched skills vs gap; click WHY THIS MATCHES.
   4. Scroll to the "What should I learn next?" panel.
 - SAY: "Same profile plus same job always gives the same number — no black
   box. And the gap panel aggregates what's missing across all K jobs."
@@ -81,7 +82,9 @@ never invent them.
 ## Presenter rules
 
 - Never claim scam/fake/safe; say "supporting evidence" / "needs verification".
-- Never quote numbers not on screen. All counts above are filled after seeding.
+- Never quote numbers not on screen. Pipeline/top-score figures in this
+  script were measured from the real warm cache on 2026-09-29; re-check them
+  on screen before recording (re-run `python -m app.demo_seed` if stale).
 - If live calls fail mid-demo, point at the CACHED badges and stale banners:
   the product degrades openly, never with fake data.
 - Keep it under 2:45: if long, speed up the search-wait section, never cut
