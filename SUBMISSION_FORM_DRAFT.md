@@ -53,26 +53,26 @@ https://github.com/AbhiramMandala/jobsetu
 
 ## Demo URL
 
-[PLACEHOLDER video link — public/unlisted, opens in incognito]
+[USER INPUT REQUIRED: video link — public/unlisted, opens in incognito]
 
 ## Solo contributor details
 
 Name: Abhiram Mandala
-Email: [ENTER EMAIL]
-Phone: [ENTER PHONE]
-Occupation: [ENTER OCCUPATION]
-Years of experience: [ENTER YEARS]
+Email: [USER INPUT REQUIRED: email]
+Phone: [USER INPUT REQUIRED: phone]
+Occupation: [USER INPUT REQUIRED: occupation]
+Years of experience: [USER INPUT REQUIRED: years]
 
 ## How did you learn about the event?
 
-[ENTER — e.g. HydPy / SerpApi website / friend / social media]
+[USER INPUT REQUIRED: e.g. HydPy / SerpApi website / friend / social media]
 
 ## Existing-project disclosure
 
 New project built during the hackathon (first commit 2026-09-28).
-[CONFIRM before submitting.]
+[USER CONFIRMATION REQUIRED before submitting.]
 
 ## AI-tool disclosure
 
 Includes OpenCode coding assistant (audit, README/docs, submission drafts).
-[ADD any other AI tools + one-line contributions each.]
+[USER INPUT REQUIRED: any other AI tools + one-line contributions each.]

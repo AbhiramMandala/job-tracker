@@ -78,8 +78,8 @@ httpx, pytest. No LLM, no vector DB.
 
 ## Demo video
 
-[PLACEHOLDER — add public/unlisted link; must open in incognito without access.
-Script: `docs/demo.md` (2:45).]
+[USER INPUT REQUIRED: public/unlisted video link — must open in incognito
+without requesting access. Script: `docs/demo.md` (2:45).]
 
 ## Solo contributor
 
@@ -88,10 +88,10 @@ Abhiram Mandala
 ## Participant information
 
 Name: Abhiram Mandala
-Email: [ENTER EMAIL]
-Phone: [ENTER PHONE]
-Occupation: [ENTER OCCUPATION]
-Years of experience: [ENTER YEARS]
+Email: [USER INPUT REQUIRED: email]
+Phone: [USER INPUT REQUIRED: phone]
+Occupation: [USER INPUT REQUIRED: occupation]
+Years of experience: [USER INPUT REQUIRED: years]
 
 ## Existing project disclosure
 
@@ -118,7 +118,7 @@ https://github.com/AbhiramMandala/jobsetu
 
 ## Demo
 
-[Video URL — same as Demo video above]
+[USER INPUT REQUIRED: video URL — same as Demo video above]
 
 ## Final notes
 
