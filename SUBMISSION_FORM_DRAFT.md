@@ -70,10 +70,10 @@ SerpApi website
 
 ## Existing-project disclosure
 
-New project built during the hackathon (first commit 2026-09-28; author-confirmed
-no JobSetu code existed before September 2026).
+No — new project built during the hackathon (first commit 2026-09-28;
+author-confirmed no JobSetu code existed before September 2026).
 
 ## AI-tool disclosure
 
-OpenCode (audit, README/docs, submission drafts); ChatGPT (writing/docs).
+OpenCode (software-development assistance); ChatGPT (writing/docs).
 AI use does not affect judging.

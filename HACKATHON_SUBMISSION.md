@@ -96,12 +96,18 @@ Years of experience: [USER INPUT REQUIRED: years]
 
 ## Existing project disclosure
 
-New project built during the hackathon window (author-confirmed): repository
-history shows the first commit on 2026-09-28 (hackathon runs Sep 1–Oct 10,
-2026) and `docs/research.md` records an empty workspace at project start.
-No JobSetu code existed anywhere before September 2026.
+Existing project before the hackathon: **No.**
+
+JobSetu was started during the SerpApi India Hackathon 2026 period
+(author-confirmed). The repository's first Git commit was on September 28,
+2026 (hackathon runs Sep 1–Oct 10, 2026), `docs/research.md` records an empty
+workspace at project start, and no JobSetu code existed anywhere before
+September 2026.
 
 ## AI tools used
+
+AI tools used: OpenCode for software-development assistance and ChatGPT for
+writing/documentation assistance.
 
 - OpenCode coding assistant — repository audit, README/docs drafting,
   submission documents and checklists (submission-prep sessions).

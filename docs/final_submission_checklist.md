@@ -53,23 +53,27 @@ clicks (search → top card → WHY → VIEW EVIDENCE → `/debug/usage` → new
 POST-RECORDING: duration < 3:00 · no key/secrets visible or audible · upload as
 public/unlisted (YouTube or Drive) · test link in incognito.
 
-- [ ] Video recorded — MANUAL ACTION (after seed)
-- [ ] Video ≤ 3 minutes — MANUAL ACTION
-- [ ] Video link inserted in `HACKATHON_SUBMISSION.md` + `SUBMISSION_FORM_DRAFT.md` — USER INPUT
-- [ ] Video link tested in incognito — MANUAL ACTION
+- [ ] Video — SKIPPED intentionally by user (no URL; if the form mandates one,
+  record per `docs/demo.md` and test the link in incognito) — USER DECISION
 
 ## Submission
 
 - [x] Track selected: Knowledge & Public Interest (jobs keyword verified) — READY
 - [x] Project description finalized — READY
 - [x] GitHub link inserted (`https://github.com/AbhiramMandala/jobsetu`) — READY
-- [ ] Participant details filled — USER INPUT
-- [ ] Existing-project disclosure confirmed — USER INPUT
-- [ ] AI disclosure confirmed — USER INPUT
-- [ ] Solo contributor confirmed — USER INPUT
-- [ ] Eligibility (India residency, 18+) confirmed — USER INPUT
-- [ ] Event discovery source filled — USER INPUT
-- [ ] Rules + Terms accepted on the form — MANUAL ACTION
+- [ ] Participant details filled (phone/occupation/years open) — USER INPUT
+- [x] Existing project before hackathon: **No** (first commit Sep 28, 2026) — READY
+- [x] AI tools disclosed: **OpenCode + ChatGPT** — READY
+- [x] Solo contributor confirmed — READY
+- [x] Eligibility (India residency, 18+) confirmed — READY
+- [x] Event discovery source filled (SerpApi website) — READY
+
+## Agreement (manual — acceptance happens only on the official form)
+
+- [ ] Read the official Rules: https://serpapi.github.io/serpapi-india-hackathon-2026/rules.html?utm_source=india_hackathon_26
+- [ ] Accept the official Rules (required: submission item 8, on the form)
+- [ ] Read the official Terms & Conditions: https://serpapi.github.io/serpapi-india-hackathon-2026/terms.html?utm_source=india_hackathon_26
+- [ ] Accept the official Terms & Conditions (required: submission item 8, on the form)
 
 ## Final verification
 
