@@ -1,0 +1,20 @@
+{
+  "name": "student-job-tracker-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply student_job_tracker --local",
+    "db:migrate:remote": "wrangler d1 migrations apply student_job_tracker --remote"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.8",
+    "wrangler": "^4.144.0",
+    "@cloudflare/workers-types": "^4.20241011.0"
+  }
+}
