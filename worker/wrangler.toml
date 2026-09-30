@@ -1,0 +1,37 @@
+name = "student-job-tracker-api"
+main = "src/index.ts"
+compatibility_date = "2024-10-01"
+
+[vars]
+APP_NAME = "Student Job Tracker"
+# Set in .dev.vars / GitHub Secrets:
+# SESSION_SECRET, FRONTEND_ORIGIN
+
+# Local dev database. Create with:
+#   wrangler d1 create student_job_tracker
+# then paste the database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "student_job_tracker"
+database_id = "local-student-job-tracker"
+migrations_dir = "../migrations"
+# For real deploys, replace database_id with the id from `wrangler d1 create`.
+
+# Resume file storage. Create with:
+#   wrangler r2 bucket create job-tracker-resumes
+[[r2_buckets]]
+binding = "RESUMES"
+bucket_name = "job-tracker-resumes"
+
+# Dashboard cache / non-sensitive config. Create with:
+#   wrangler kv namespace create CACHE
+[[kv_namespaces]]
+binding = "CACHE"
+id = "local-cache-id"
+# For real deploys, replace id with the real namespace id.
+# preview_id is optional for `wrangler dev`.
+preview_id = "local-cache-id"
+
+[observability]
+enabled = true
+# Workers Logs: view with `npx wrangler tail`.

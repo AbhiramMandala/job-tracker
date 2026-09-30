@@ -1,0 +1,14 @@
+{
+  "name": "student-job-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["frontend", "worker"],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "dev:worker": "npm run dev --workspace=student-job-tracker-worker",
+    "dev:frontend": "npm run dev --workspace=student-job-tracker-frontend",
+    "test": "npm run test --workspace=student-job-tracker-worker",
+    "typecheck": "npm run typecheck --workspace=student-job-tracker-worker && npm run typecheck --workspace=student-job-tracker-frontend",
+    "build": "npm run build --workspace=student-job-tracker-frontend"
+  }
+}
