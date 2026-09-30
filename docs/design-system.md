@@ -27,7 +27,9 @@ choice for speed and reliability.
   `.auth-*`, `.news`, `.interview`, `.kv`, `.breakdown` (+`.table-scroll`),
   `.resource-card`, `.toolbar` filters.
 - Organisms: sticky `.site-header`, `.hero` search panel, `.job-card`,
-  Company/Role/Prep/Interview/News sections on the evidence page.
+  Company/Role/Prep/Interview/News sections on the evidence page (with sticky
+  `.section-nav` anchor row), `.skeleton` async placeholders, `.recent-row`
+  device-local recent searches.
 - Templates/pages: landing, results, evidence (role intelligence), tools,
   profile, usage, error.
 

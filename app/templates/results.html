@@ -117,7 +117,7 @@
   </p>
   {% endif %}
   {% if job.id in enrich_ids.verify %}
-  <div data-enrich="verify" data-job="{{ job.id }}">
+  <div class="skeleton" data-enrich="verify" data-job="{{ job.id }}">
     <p class="muted">Checking supporting evidence…</p>
   </div>
   {% else %}
@@ -128,14 +128,14 @@
   {% include "_authenticity.html" %}
   {% endif %}
   {% if job.id in enrich_ids.news %}
-  <div data-enrich="news" data-job="{{ job.id }}">
+  <div class="skeleton" data-enrich="news" data-job="{{ job.id }}">
     <p class="muted">Loading relevant news…</p>
   </div>
   {% else %}
   <p class="muted">News context is checked for top matches only.</p>
   {% endif %}
   {% if job.id in enrich_ids.interview %}
-  <div data-enrich="interview" data-job="{{ job.id }}">
+  <div class="skeleton" data-enrich="interview" data-job="{{ job.id }}">
     <p class="muted">Finding public interview evidence…</p>
   </div>
   {% endif %}

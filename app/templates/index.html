@@ -36,12 +36,117 @@
     </div>
     <button id="search-btn" class="cta" type="submit">Find jobs</button>
   </form>
+  <div id="recent-searches" hidden>
+    <p class="muted">Recent on this device:</p>
+    <div class="recent-row" id="recent-row"></div>
+  </div>
   <details class="filters-toggle">
     <summary>More filters</summary>
     <p class="filters-note">Verification-status and company-type filters appear on the results page and work instantly on your results — no extra searches needed.</p>
   </details>
   <p class="note">Live results via SerpApi Google Jobs. Repeated searches reuse cached results for 24 hours.</p>
 </section>
+
+<section aria-labelledby="how-heading">
+  <h2 id="how-heading">How JobSetu works</h2>
+  <div class="steps">
+    <article class="card step"><p class="step-num">01</p><h3>Build your profile</h3><p class="muted">Add skills, experience, location and job-type preference. Stored only on this server.</p></article>
+    <article class="card step"><p class="step-num">02</p><h3>Search real jobs</h3><p class="muted">JobSetu discovers live listings through SerpApi Google Jobs.</p></article>
+    <article class="card step"><p class="step-num">03</p><h3>Understand your match</h3><p class="muted">A deterministic engine scores skills, title, experience, location and type — with reasons, never a black box.</p></article>
+    <article class="card step"><p class="step-num">04</p><h3>Verify before applying</h3><p class="muted">Cited search evidence, authenticity signals and company context help you decide.</p></article>
+  </div>
+</section>
+
+<section aria-labelledby="pillars-heading">
+  <h2 id="pillars-heading">Four pillars</h2>
+  <div class="pillars-grid">
+    <article class="card"><h3>🔎 Real jobs</h3><p class="muted">Live discovery through SerpApi-powered search, deduplicated and cached.</p></article>
+    <article class="card"><h3>📊 Explainable matching</h3><p class="muted">Every score breaks into skills, title, experience, location and type.</p></article>
+    <article class="card"><h3>🛡 Evidence verification</h3><p class="muted">Inspect real cited sources before trusting a listing.</p></article>
+    <article class="card"><h3>🎓 Career context</h3><p class="muted">Interview processes, company news, prep topics and curated tools.</p></article>
+  </div>
+</section>
+
+<section aria-labelledby="serpapi-heading">
+  <h2 id="serpapi-heading">Powered by real web data</h2>
+  <p class="muted">SerpApi provides the data. JobSetu provides the matching, scoring, evidence organization and experience.</p>
+  <ul>
+    <li><strong>Google Jobs</strong> — live job discovery.</li>
+    <li><strong>Google Search</strong> — independent verification evidence and interview reports.</li>
+    <li><strong>Google News</strong> — recent company context.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="faq-heading" id="faq">
+  <h2 id="faq-heading">Frequently asked questions</h2>
+  <div class="faq">
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">What is JobSetu?</button>
+      <div class="faq-a" hidden><p>JobSetu is evidence-powered job intelligence for Indian freshers: live listings, explainable match scores, cited verification evidence, and interview preparation context — one card per job.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">Where do the jobs come from?</button>
+      <div class="faq-a" hidden><p>Live listings retrieved through SerpApi Google Jobs at search time, cached for 24 hours. Repeat searches reuse the cache without spending credits.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">How is the match score calculated?</button>
+      <div class="faq-a" hidden><p>Deterministically: skills 50 + title 20 + experience 15 + location 10 + job type 5 = 100. Every card shows its breakdown under WHY THIS MATCHES.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">What does VERIFY mean?</button>
+      <div class="faq-a" hidden><p>Each top listing is re-searched on Google and classified from observable evidence: Supporting evidence, Needs verification, or Warning signals. There are no numeric trust scores, and every claim links to its source.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">Is the match score AI-generated?</button>
+      <div class="faq-a" hidden><p>No. It is computed by fixed rules from your profile and the listing — the same inputs always give the same score. Nothing is generated or guessed.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">How does SerpApi power JobSetu?</button>
+      <div class="faq-a" hidden><p>Three engines: Google Jobs for discovery, Google Search for verification evidence and interview reports, Google News for company context. Without SerpApi there are no listings — and the app says so instead of showing fake data.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">Are jobs cached?</button>
+      <div class="faq-a" hidden><p>Yes. Job listings cache for 24 hours; evidence and news for 7 days. Pages show LIVE or CACHED badges, and stale cache is labeled when live search fails.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">Why might a job disappear?</button>
+      <div class="faq-a" hidden><p>Employers and boards expire listings; a refresh can also merge duplicates into one card. Cached results may show jobs that are already filled — always confirm on the application page.</p></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false">How should I interpret the authenticity score?</button>
+      <div class="faq-a" hidden><p>As an evidence-based risk indicator from 0–100, not a guarantee. Scores without independent evidence are capped at 49 and say so. Always verify the employer before sharing information or paying anything.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="card cta-panel" aria-labelledby="cta-heading">
+  <h2 id="cta-heading">Ready to search smarter?</h2>
+  <p class="muted">Build your profile and discover real opportunities with explainable matches and evidence-backed verification.</p>
+  <p class="apply-row">
+    <a class="btn" href="/profile">Build your profile</a>
+    <a class="btn btn-ghost" href="#search-form">Start searching</a>
+  </p>
+</section>
+<script>
+(function () {
+  // FAQ accordion: one open at a time, real buttons, aria-expanded.
+  var buttons = Array.prototype.slice.call(document.querySelectorAll(".faq-q"));
+  buttons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var panel = btn.nextElementSibling;
+      var willOpen = panel.hasAttribute("hidden");
+      buttons.forEach(function (other) {
+        other.setAttribute("aria-expanded", "false");
+        other.nextElementSibling.setAttribute("hidden", "");
+      });
+      if (willOpen) {
+        btn.setAttribute("aria-expanded", "true");
+        panel.removeAttribute("hidden");
+      }
+    });
+  });
+})();
+</script>
 <script>
 (function () {
   // Landing messaging rotation. Decorative only: the h1 keeps the full
@@ -58,6 +163,54 @@
     i = (i + 1) % phrases.length;
     el.textContent = phrases[i];
   }, 3000);
+})();
+</script>
+<script>
+(function () {
+  // Recent searches live only in this browser (localStorage). No backend,
+  // no tracking — refilling the form is all they do.
+  var KEY = "jobsetu-recent";
+  var MAX = 5;
+  var form = document.getElementById("search-form");
+  var role = document.getElementById("role");
+  var location = document.getElementById("location");
+  var wrap = document.getElementById("recent-searches");
+  var row = document.getElementById("recent-row");
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY) || "[]"); }
+    catch (e) { return []; }
+  }
+  function render() {
+    var items = load();
+    if (!items.length || !wrap) return;
+    wrap.hidden = false;
+    row.textContent = "";
+    items.forEach(function (item) {
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "recent-chip";
+      chip.textContent = item.role + " · " + item.location;
+      chip.setAttribute("aria-label", "Search again for " + item.role + " in " + item.location);
+      chip.addEventListener("click", function () {
+        role.value = item.role;
+        for (var i = 0; i < location.options.length; i += 1) {
+          if (location.options[i].text === item.location) location.selectedIndex = i;
+        }
+        form.submit();
+      });
+      row.appendChild(chip);
+    });
+  }
+  form.addEventListener("submit", function () {
+    try {
+      var items = load().filter(function (item) {
+        return item.role !== role.value || item.location !== location.value;
+      });
+      items.unshift({role: role.value, location: location.value});
+      localStorage.setItem(KEY, JSON.stringify(items.slice(0, MAX)));
+    } catch (e) { /* private mode */ }
+  });
+  render();
 })();
 </script>
 <script>

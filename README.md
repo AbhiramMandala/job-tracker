@@ -30,6 +30,7 @@ black-box scores.
 - Credit-efficient SQLite caching with LIVE/CACHED transparency + stale fallback
 - Credit visibility: `/debug/usage` logs every SerpApi attempt per engine
 - Warm-cache demo seeding: `python -m app.demo_seed`
+- Landing guide (How it works, pillars, SerpApi story, FAQ), friendly 404 page
 
 ## How SerpApi is used
 

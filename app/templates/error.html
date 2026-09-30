@@ -1,9 +1,13 @@
 {% extends "base.html" %}
-{% block title %}JobSetu — Error{% endblock %}
+{% block title %}JobSetu — {{ heading or "Error" }}{% endblock %}
 {% block content %}
-<section class="hero">
-  <h1>Something went wrong.</h1>
+<section class="hero error-hero">
+  {% if code %}<p class="error-code" aria-hidden="true">{{ code }}</p>{% endif %}
+  <h1>{{ heading or "Something went wrong." }}</h1>
   <p class="sub">{{ message }}</p>
-  <p><a href="/">Back to home</a></p>
+  <p class="apply-row">
+    <a class="btn" href="/">Go home</a>
+    <a class="btn btn-ghost" href="/tools">Browse career tools</a>
+  </p>
 </section>
 {% endblock %}

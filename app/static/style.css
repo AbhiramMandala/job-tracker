@@ -226,6 +226,32 @@ textarea { padding: 10px 12px; border: 1px solid var(--input-border); border-rad
 .resource-cat { display: inline-block; font-size: 0.75rem; font-weight: 700; background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 999px; padding: 1px 10px; }
 
 /* Misc pages. */
+.steps, .pillars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 14px 0; }
+.steps .card, .pillars-grid .card { margin: 0; }
+.step-num { font-size: 0.8rem; font-weight: 800; color: var(--accent); margin: 0 0 4px; }
+.faq { display: grid; gap: 8px; margin: 14px 0; }
+.faq-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.faq-q { width: 100%; text-align: left; background: transparent; border: 0; color: var(--ink); font-size: 1rem; font-weight: 700; padding: 12px 14px; cursor: pointer; }
+.faq-a { padding: 0 14px 12px; }
+.cta-panel { text-align: left; }
+@media (max-width: 560px) {
+  .steps, .pillars-grid { grid-template-columns: 1fr; }
+}
+.error-code { font-size: 4rem; font-weight: 800; color: var(--accent); margin: 0; line-height: 1; }
+.error-hero .apply-row { margin-top: var(--space-4); }
+.section-nav { position: sticky; top: 57px; z-index: 40; display: flex; gap: 4px; flex-wrap: wrap; background: var(--bg); padding: var(--space-2) 0; }
+.section-nav a { font-size: 0.85rem; font-weight: 700; color: var(--accent); text-decoration: none; border: 1px solid var(--border); background: var(--card); border-radius: 999px; padding: 2px 12px; }
+.section-nav a:hover { border-color: var(--accent); }
+
+/* Skeleton shimmer for async enrichment placeholders. Text stays readable
+   (the loading message), the shimmer is decoration only. */
+.skeleton { border-radius: var(--radius-md); background: linear-gradient(90deg, var(--panel) 25%, var(--chip-bg) 50%, var(--panel) 75%); background-size: 200% 100%; animation: shimmer var(--duration-slow) linear infinite; padding: var(--space-2) var(--space-3); }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+/* Recent searches (localStorage only; this device). */
+.recent-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: var(--space-2); }
+.recent-chip { font-size: 0.85rem; background: var(--chip-bg); border: 1px solid var(--chip-border); color: var(--ink); border-radius: 999px; padding: 2px 12px; cursor: pointer; }
+.recent-chip:hover { border-color: var(--accent); }
 .hero-steps { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; }
 .hero-steps span { background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 999px; padding: 2px 12px; font-size: 0.85rem; font-weight: 600; }
 .usage-table { border-collapse: collapse; margin: 12px 0; }

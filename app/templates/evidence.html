@@ -8,9 +8,12 @@
   <p class="muted">Every claim below cites a real retrieved search result. Nothing here is AI-generated.</p>
 </section>
 
-<section class="card">
-  <h2>Company</h2>
-  <dl class="kv">
+<nav class="section-nav" aria-label="Role intelligence sections">
+  <a href="#company">Company</a><a href="#role">Role</a><a href="#prep">Prep</a><a href="#interviews">Interviews</a><a href="#news">News</a><a href="#sources">Sources</a>
+</nav>
+
+<section class="card" id="company">
+  <h2>Company</h2>  <dl class="kv">
     <dt>Name</dt><dd>{{ company_name }}</dd>
     <dt>Company type</dt><dd>{{ company_type }} · Confidence: {{ company_confidence }} <span class="muted">({{ company_basis }})</span></dd>
     <dt>Location</dt><dd>{{ job.location_raw or "—" }}</dd>
@@ -18,7 +21,7 @@
   </dl>
 </section>
 
-<section class="card">
+<section class="card" id="role">
   <h2>Role</h2>
   {% if job_skill_labels %}
   <p class="skills-line"><span class="muted">Detected skills:</span>
@@ -56,6 +59,7 @@
 
 {% for source in sources %}
 {% if loop.first %}
+<div id="sources">
 <p class="eyebrow">SEARCH-RESULT EVIDENCE</p>
 <p class="muted">Independent search results about this employer and role — evidence to weigh, not verdicts.</p>
 {% endif %}
@@ -68,6 +72,7 @@
   <p><a class="btn btn-small" href="{{ source.url }}" target="_blank" rel="noopener">Open source</a></p>
 </article>
 {% endfor %}
+</div>
 
 <section class="card" id="prep">
   <h2>PREPARE FOR THIS ROLE</h2>

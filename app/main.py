@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import get_settings
 from app.database import init_db
@@ -62,6 +63,22 @@ def create_app() -> FastAPI:
             return JSONResponse(status_code=500, content={"detail": "Internal error"})
         return templates.TemplateResponse(
             request, "error.html", {"message": "Something went wrong."}, status_code=500
+        )
+
+    @app.exception_handler(StarletteHTTPException)
+    async def _http_error(request: Request, exc: StarletteHTTPException):
+        # Friendly pages for unknown routes. API and explicit JSON 404s
+        # elsewhere are untouched: this only handles unmatched paths.
+        if exc.status_code != 404 or request.url.path.startswith("/api/"):
+            return JSONResponse(status_code=exc.status_code,
+                                content={"detail": exc.detail})
+        return templates.TemplateResponse(
+            request, "error.html",
+            {"code": 404,
+             "heading": "Page not found.",
+             "message": "This address doesn't lead anywhere. The page may have "
+                        "moved, or the link has a typo."},
+            status_code=404,
         )
 
     return app
