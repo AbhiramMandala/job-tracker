@@ -147,12 +147,30 @@ See `.env.example`, `worker/.dev.vars.example`, `frontend/.env.example`. Never c
 
 ## JobSetu Integration
 
-Discovers jobs in [JobSetu](../temps) (`http://127.0.0.1:8000`) and saves them as `SAVED` applications — both directions:
+Discovers jobs in [JobSetu](../temps) and saves them as `SAVED` applications — both directions:
 
-- **Tracker → JobSetu:** the **Discover** page (`/discover`, `VITE_JOBSETU_URL`, defaults to local JobSetu) loads any JobSetu search by ID via `GET /api/jobs?search_id=N` and saves listings through `GET /api/jobs/{id}/tracker-export` → `POST /api/applications`.
-- **JobSetu → Tracker:** every results card has a **Save to Tracker** button that exports the job and POSTs it to the Tracker API (URL + token asked once, kept in `localStorage`; JobSetu never sees them server-side).
+- **Tracker → JobSetu:** the **Discover** page (`/discover`, `VITE_JOBSETU_URL`, defaults to local JobSetu) lists recent JobSetu searches via `GET /api/searches`, loads listings via `GET /api/jobs?search_id=N`, and saves through `GET /api/jobs/{id}/tracker-export` → `POST /api/applications`.
+- **JobSetu → Tracker:** every results card has a **Save to Tracker** button. First click asks for the Tracker API URL (prefilled from JobSetu's `TRACKER_API_URL`) and your Tracker email + password to fetch a token; only the token is kept in that browser.
 
 Run both locally: JobSetu on `:8000` (`python -m uvicorn app.main:app`), Worker on `:8787`, frontend on `:5173`.
+
+### Deploying on other machines / production
+
+No ports are hardcoded — every URL is env-configured. Set each side to point at the other's deployed URL:
+
+| Where | Variable | Local default | Production value |
+|---|---|---|---|
+| Pages (frontend build) | `VITE_API_URL` | empty (Vite proxy → `:8787`) | `https://<worker>.<subdomain>.workers.dev` |
+| Pages (frontend build) | `VITE_JOBSETU_URL` | `http://127.0.0.1:8000` | `https://<your-jobsetu-host>` |
+| Worker | `FRONTEND_ORIGIN` | `http://localhost:5173` | `https://<pages>.pages.dev` |
+| Worker | `JOBSETU_ORIGIN` | local `:8000` origins built in | `https://<your-jobsetu-host>` |
+| JobSetu server | `TRACKER_API_URL` | `http://127.0.0.1:8787` | `https://<worker>.<subdomain>.workers.dev` |
+| JobSetu server | `TRACKER_WEB_ORIGINS` | local `:5173` origins built in | `https://<pages>.pages.dev` |
+
+Gotchas:
+- `VITE_*` vars are baked in at **build** time — set them in the Pages dashboard *before* building, and rebuild after changing them.
+- On another dev machine on the same network, replace `localhost`/`127.0.0.1` with the host's LAN IP in all six places (and in `worker/.dev.vars`).
+- After changing the Tracker's API URL, clear the old `sjt_api_url` in the JobSetu site's localStorage (or just answer the prompt again).
 
 ## CI/CD
 

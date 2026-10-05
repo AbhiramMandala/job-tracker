@@ -1,2 +1,5 @@
 SESSION_SECRET="dev-only-change-me-to-32-random-chars"
 FRONTEND_ORIGIN="http://localhost:5173"
+# Extra API callers (comma-separated). Local JobSetu is allowed by default in code;
+# set this in production, e.g. JOBSETU_ORIGIN="https://jobsetu.example.com"
+# JOBSETU_ORIGIN=
