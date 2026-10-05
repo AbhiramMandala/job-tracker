@@ -323,6 +323,12 @@ describe("auth flow", () => {
       expect(r.status).toBe(401);
     }
   });
+
+  it("serves a public service index at /", async () => {
+    const r = await api(env, "GET", "/");
+    expect(r.status).toBe(200);
+    expect(r.json.data.service).toBe("student-job-tracker-api");
+  });
 });
 
 describe("applications CRUD + ownership + filtering", () => {
