@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import { EmptyState, Spinner, inputCls } from "../components/ui";
 
@@ -16,7 +16,24 @@ interface JobSetuJob {
   match_total: number | null;
 }
 
+interface JobSetuSearch {
+  id: number;
+  role: string;
+  location: string;
+  experience: string;
+  job_count: number;
+  retrieved_at: string | null;
+}
+
+function extractSearchId(raw: string): string {
+  // Accept a bare ID ("3") or anything containing one (pasted URL, "Search #3").
+  const m = raw.match(/\d+/);
+  return m ? m[0]! : "";
+}
+
 export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
+  const [searches, setSearches] = useState<JobSetuSearch[] | null>(null);
+  const [searchesError, setSearchesError] = useState(false);
   const [searchId, setSearchId] = useState("");
   const [jobs, setJobs] = useState<JobSetuJob[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,19 +41,24 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
   const [saving, setSaving] = useState<number | null>(null);
   const [saved, setSaved] = useState<Set<number>>(new Set());
 
-  const load = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    fetch(`${JOBSETU_URL}/api/searches`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        return res.json();
+      })
+      .then((body) => setSearches(body.searches ?? []))
+      .catch(() => setSearchesError(true));
+  }, []);
+
+  const loadById = async (id: string) => {
     setError(null);
     setJobs(null);
-    if (!searchId.trim() || !/^\d+$/.test(searchId.trim())) {
-      setError("Enter the numeric search ID from your JobSetu results page.");
-      return;
-    }
     setLoading(true);
     try {
-      const res = await fetch(`${JOBSETU_URL}/api/jobs?search_id=${encodeURIComponent(searchId.trim())}`);
+      const res = await fetch(`${JOBSETU_URL}/api/jobs?search_id=${encodeURIComponent(id)}`);
       if (res.status === 404) {
-        setError("Search not found in JobSetu. Check the search ID.");
+        setError("Search not found in JobSetu.");
         return;
       }
       if (!res.ok) throw new Error(`JobSetu returned ${res.status}`);
@@ -54,6 +76,17 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const load = (e: React.FormEvent) => {
+    e.preventDefault();
+    const id = extractSearchId(searchId);
+    if (!id) {
+      setError("Enter a JobSetu search — pick one above or type its ID.");
+      return;
+    }
+    setSearchId(id);
+    void loadById(id);
   };
 
   const save = async (job: JobSetuJob) => {
@@ -76,14 +109,39 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Discover via JobSetu</h1>
       <p className="text-sm text-slate-600">
-        Pull a JobSetu search into your tracker. Run a search in JobSetu first, then paste its numeric
-        search ID below. Source: <code className="rounded bg-slate-100 px-1">{JOBSETU_URL}</code>
+        Import a JobSetu search as tracked applications. Source:{" "}
+        <code className="rounded bg-slate-100 px-1">{JOBSETU_URL}</code>
       </p>
+
+      {searches === null && !searchesError && <Spinner />}
+      {searches !== null && searches.length > 0 && (
+        <div>
+          <label htmlFor="search-pick" className="text-sm font-medium">Recent JobSetu searches</label>
+          <div className="mt-1 flex max-w-xl gap-2">
+            <select
+              id="search-pick"
+              className={inputCls}
+              value={searchId}
+              onChange={(e) => {
+                setSearchId(e.target.value);
+                if (e.target.value) void loadById(e.target.value);
+              }}
+            >
+              <option value="">Choose a search…</option>
+              {searches.map((s) => (
+                <option key={s.id} value={String(s.id)}>
+                  #{s.id} {s.role} in {s.location} ({s.job_count} jobs)
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={load} className="flex max-w-md gap-2">
         <input
-          aria-label="JobSetu search ID"
-          placeholder="e.g. 3"
+          aria-label="JobSetu search ID or URL"
+          placeholder="…or paste search ID"
           inputMode="numeric"
           className={inputCls}
           value={searchId}
@@ -93,6 +151,11 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
           Load jobs
         </button>
       </form>
+      {searchesError && (
+        <p className="text-sm text-slate-500">
+          Couldn't list recent searches — is JobSetu running at {JOBSETU_URL}? You can still paste an ID above.
+        </p>
+      )}
 
       {loading && <Spinner />}
       {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
