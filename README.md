@@ -145,6 +145,15 @@ See `.env.example`, `worker/.dev.vars.example`, `frontend/.env.example`. Never c
 
 - Binding `RESUMES` → bucket `job-tracker-resumes`. Frontend never sees credentials; it POSTs `multipart/form-data` to the Worker, which validates (MIME allow-list pdf/doc/docx/txt, ≤5 MB, sanitized filename) and `PUT`s to `r2_key = {userId}/{resumeId}-{filename}`. Metadata row goes to D1. Download streams via `GET /api/resumes/:id/download` after ownership check. Delete removes R2 object + D1 row and nulls `applications.resume_id`.
 
+## JobSetu Integration
+
+Discovers jobs in [JobSetu](../temps) (`http://127.0.0.1:8000`) and saves them as `SAVED` applications — both directions:
+
+- **Tracker → JobSetu:** the **Discover** page (`/discover`, `VITE_JOBSETU_URL`, defaults to local JobSetu) loads any JobSetu search by ID via `GET /api/jobs?search_id=N` and saves listings through `GET /api/jobs/{id}/tracker-export` → `POST /api/applications`.
+- **JobSetu → Tracker:** every results card has a **Save to Tracker** button that exports the job and POSTs it to the Tracker API (URL + token asked once, kept in `localStorage`; JobSetu never sees them server-side).
+
+Run both locally: JobSetu on `:8000` (`python -m uvicorn app.main:app`), Worker on `:8787`, frontend on `:5173`.
+
 ## CI/CD
 
 - `.github/workflows/ci.yml` — on PR/push: install, worker typecheck + tests, frontend typecheck + build.
