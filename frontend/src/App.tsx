@@ -10,6 +10,7 @@ import { ApplicationDetailPage } from "./pages/ApplicationDetail";
 import { ApplicationNewPage } from "./pages/ApplicationNew";
 import { InterviewsPage } from "./pages/Interviews";
 import { ResumesPage } from "./pages/Resumes";
+import { DiscoverPage } from "./pages/Discover";
 import { SettingsPage } from "./pages/Settings";
 
 function RequireAuth({ children }: { children: JSX.Element }) {
@@ -43,6 +44,7 @@ function Shell() {
                 <Route path="/applications/:id" element={<ApplicationDetailPage notify={notify} />} />
                 <Route path="/interviews" element={<InterviewsPage notify={notify} />} />
                 <Route path="/resumes" element={<ResumesPage notify={notify} />} />
+                <Route path="/discover" element={<DiscoverPage notify={notify} />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
