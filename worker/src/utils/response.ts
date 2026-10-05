@@ -21,9 +21,31 @@ export function fail(
   });
 }
 
-export function corsHeaders(req: Request, env: { FRONTEND_ORIGIN?: string }): HeadersInit {
-  const origin = req.headers.get("Origin") ?? env.FRONTEND_ORIGIN ?? "*";
-  const allowed = env.FRONTEND_ORIGIN ? env.FRONTEND_ORIGIN : origin;
+export interface CorsEnv {
+  FRONTEND_ORIGIN?: string;
+  JOBSETU_ORIGIN?: string;
+}
+
+// Local-dev defaults so `wrangler dev` works without extra config.
+const DEV_ORIGINS = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:8000",
+  "http://127.0.0.1:8000",
+];
+
+export function corsHeaders(req: Request, env: CorsEnv): HeadersInit {
+  const requestOrigin = req.headers.get("Origin") ?? "";
+  const allowList = [
+    ...(env.FRONTEND_ORIGIN ? [env.FRONTEND_ORIGIN] : []),
+    ...(env.JOBSETU_ORIGIN ? env.JOBSETU_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean) : []),
+    ...DEV_ORIGINS,
+  ];
+  // Echo the request origin only when allow-listed; otherwise fall back to
+  // the primary frontend origin (or "*" when nothing is configured).
+  const allowed = allowList.includes(requestOrigin)
+    ? requestOrigin
+    : (env.FRONTEND_ORIGIN ?? allowList[0] ?? "*");
   return {
     "Access-Control-Allow-Origin": allowed,
     "Access-Control-Allow-Credentials": "true",
@@ -33,7 +55,7 @@ export function corsHeaders(req: Request, env: { FRONTEND_ORIGIN?: string }): He
   };
 }
 
-export function withCors(res: Response, req: Request, env: { FRONTEND_ORIGIN?: string }): Response {
+export function withCors(res: Response, req: Request, env: CorsEnv): Response {
   const h = new Headers(res.headers);
   const cors = corsHeaders(req, env);
   for (const [k, v] of Object.entries(cors)) h.set(k, v as string);

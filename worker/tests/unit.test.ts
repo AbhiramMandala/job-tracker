@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { hashPassword, verifyPassword, newId, newToken, sha256Hex } from "../src/utils/crypto";
+import { corsHeaders } from "../src/utils/response";
 import {
   validateApplication,
   validateInterview,
@@ -106,6 +107,22 @@ describe("resume validation", () => {
   });
   it("rejects path traversal filenames", () => {
     expect(validateResumeFile("../secret", "application/pdf", 100).length).toBeGreaterThan(0);
+  });
+});
+
+describe("CORS", () => {
+  const req = (origin: string) => new Request("https://example.com/api/applications", { headers: { Origin: origin } });
+  it("echoes allow-listed JobSetu origins", () => {
+    const h = corsHeaders(req("http://127.0.0.1:8000"), { FRONTEND_ORIGIN: "http://localhost:5173" }) as Record<string, string>;
+    expect(h["Access-Control-Allow-Origin"]).toBe("http://127.0.0.1:8000");
+  });
+  it("echoes the configured frontend origin", () => {
+    const h = corsHeaders(req("http://localhost:5173"), { FRONTEND_ORIGIN: "http://localhost:5173" }) as Record<string, string>;
+    expect(h["Access-Control-Allow-Origin"]).toBe("http://localhost:5173");
+  });
+  it("does not reflect arbitrary origins", () => {
+    const h = corsHeaders(req("https://evil.example"), { FRONTEND_ORIGIN: "http://localhost:5173" }) as Record<string, string>;
+    expect(h["Access-Control-Allow-Origin"]).toBe("http://localhost:5173");
   });
 });
 

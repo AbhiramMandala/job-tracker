@@ -6,6 +6,8 @@ compatibility_date = "2024-10-01"
 APP_NAME = "Student Job Tracker"
 # Set in .dev.vars / GitHub Secrets:
 # SESSION_SECRET, FRONTEND_ORIGIN
+# Comma-separated origins allowed to POST to the API (JobSetu "Save to Tracker").
+# JOBSETU_ORIGIN = "http://127.0.0.1:8000"
 
 # Local dev database. Create with:
 #   wrangler d1 create student_job_tracker

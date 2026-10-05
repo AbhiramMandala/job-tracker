@@ -4,6 +4,7 @@ export interface Env {
   CACHE?: KVNamespace;
   SESSION_SECRET: string;
   FRONTEND_ORIGIN?: string;
+  JOBSETU_ORIGIN?: string;
 }
 
 export interface AuthUser {
