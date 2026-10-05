@@ -35,6 +35,19 @@ export default {
     const respond = (res: Response) => withCors(res, req, env);
 
     try {
+      // Service index (no auth) — the API has no UI; the app lives on Pages.
+      if ((path === "/" || path === "/api") && req.method === "GET") {
+        return respond(
+          json({
+            service: "student-job-tracker-api",
+            message: "API only — open the frontend instead.",
+            frontend: env.FRONTEND_ORIGIN ?? "http://localhost:5173",
+            health: "/api/health",
+            docs: "GET /api/auth/me, /api/applications, /api/dashboard, ... (Bearer token required)",
+          }),
+        );
+      }
+
       // Health check (no auth)
       if (path === "/api/health" && req.method === "GET") return respond(json({ ok: true, time: new Date().toISOString() }));
 
