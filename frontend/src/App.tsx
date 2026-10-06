@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { ThemeProvider } from "./hooks/useTheme";
 import { Layout } from "./components/Layout";
 import { Spinner } from "./components/ui";
 import { LoginPage, RegisterPage } from "./pages/Auth";
@@ -69,10 +70,12 @@ export function App() {
     document.title = "Student Job Tracker";
   }, []);
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <Shell />
-      </AuthProvider>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <Shell />
+        </AuthProvider>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }

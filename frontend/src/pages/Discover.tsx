@@ -212,7 +212,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
             href={JOBSETU_URL}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-1.5 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800"
           >
             <Compass size={15} aria-hidden="true" />
             Open full JobSetu search →
@@ -220,7 +220,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
         }
       />
 
-      <form onSubmit={runSearch} className="reveal grid gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-4" aria-label="Search jobs">
+      <form onSubmit={runSearch} className="reveal grid gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 shadow-sm sm:grid-cols-4" aria-label="Search jobs">
         <input
           aria-label="Role"
           placeholder="Role — e.g. Python Backend Developer"
@@ -243,7 +243,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
       {(searches === null && !searchesError) && <RowSkeleton rows={1} />}
       {searches !== null && searches.length > 0 && (
         <details className="text-sm">
-          <summary className="cursor-pointer text-blue-700 underline">Or pick up a previous JobSetu search</summary>
+          <summary className="cursor-pointer text-blue-700 dark:text-blue-400 underline">Or pick up a previous JobSetu search</summary>
           <div className="mt-2 flex max-w-xl gap-2">
             <select
               aria-label="Previous JobSetu searches"
@@ -267,23 +267,23 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
 
       {loading && <RowSkeleton rows={4} />}
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-400" role="alert">
           {error} Your saved data is unaffected.
         </div>
       )}
 
       {jobs !== null && !loading && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-slate-600">
+          <span className="text-slate-600 dark:text-slate-400">
             {visible.length} of {jobs.length} jobs
             {searchMeta !== null && (searchMeta.live ? " · Live" : " · Cached")}
           </span>
-          <select aria-label="Filter by experience" className="w-auto rounded-md border border-slate-300 bg-white px-2 py-1 text-sm" value={expFilter} onChange={(e) => setExpFilter(e.target.value)}>
+          <select aria-label="Filter by experience" className="w-auto rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-1 text-sm" value={expFilter} onChange={(e) => setExpFilter(e.target.value)}>
             <option value="">All levels</option>
             <option value="entry">Fresher / entry-level</option>
             <option value="experienced">Experienced</option>
           </select>
-          <select aria-label="Filter by job type" className="w-auto rounded-md border border-slate-300 bg-white px-2 py-1 text-sm" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+          <select aria-label="Filter by job type" className="w-auto rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-2 py-1 text-sm" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
             {TYPE_OPTIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
         </div>
@@ -298,15 +298,15 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
               .filter(Boolean)
               .join(" · ");
             return (
-              <article key={job.id} className="reveal rounded-lg border border-slate-200 bg-white p-4 text-sm shadow-sm">
+              <article key={job.id} className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 text-sm shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="font-semibold">{job.company || "Unknown company"}</p>
-                    <p className="text-slate-800">{job.title || "Untitled role"}</p>
-                    {meta && <p className="mt-0.5 text-slate-600">{meta}</p>}
-                    <p className="mt-1 text-slate-500">
+                    <p className="text-slate-800 dark:text-slate-200">{job.title || "Untitled role"}</p>
+                    {meta && <p className="mt-0.5 text-slate-600 dark:text-slate-400">{meta}</p>}
+                    <p className="mt-1 text-slate-500 dark:text-slate-400">
                       {job.match_total !== null && job.match_total !== undefined && (
-                        <span className="font-semibold text-blue-700">{job.match_total}% match · </span>
+                        <span className="font-semibold text-blue-700 dark:text-blue-400">{job.match_total}% match · </span>
                       )}
                       {job.salary && `${job.salary} · `}
                       {job.posted}
@@ -316,7 +316,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
                     <button
                       onClick={() => setDetailId(open ? null : job.id)}
                       aria-expanded={open}
-                      className="rounded-md border border-slate-300 px-3 py-1.5 font-medium hover:bg-slate-50"
+                      className="rounded-md border border-slate-300 dark:border-slate-600 px-3 py-1.5 font-medium hover:bg-slate-50 dark:hover:bg-slate-800"
                     >
                       {open ? "Hide details" : "View details"}
                     </button>
@@ -328,7 +328,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
                       <button
                         disabled={saving === job.id}
                         onClick={() => void save(job)}
-                        className="btn-shine rounded-md bg-slate-800 px-3 py-1.5 font-semibold text-white hover:bg-slate-900 disabled:opacity-40"
+                        className="btn-shine rounded-md bg-slate-800 dark:bg-slate-200 px-3 py-1.5 font-semibold text-white dark:text-slate-900 hover:bg-slate-900 dark:hover:bg-slate-100 disabled:opacity-40"
                       >
                         {saving === job.id ? "Saving…" : "Save"}
                       </button>
@@ -336,21 +336,21 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
                   </div>
                 </div>
                 {open && (
-                  <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
-                    {job.description_snippet && <p className="whitespace-pre-wrap text-slate-600">{job.description_snippet}</p>}
+                  <div className="mt-3 space-y-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+                    {job.description_snippet && <p className="whitespace-pre-wrap text-slate-600 dark:text-slate-400">{job.description_snippet}</p>}
                     {job.match && (
-                      <div className="rounded-md bg-slate-50 p-2 text-[13px]">
+                      <div className="rounded-md bg-slate-50 dark:bg-slate-800 p-2 text-[13px]">
                         <p className="font-semibold">Why this matches ({job.match.total}%)</p>
-                        {job.match.reasons.map((r, i) => <p key={i} className="text-slate-600">• {r}</p>)}
+                        {job.match.reasons.map((r, i) => <p key={i} className="text-slate-600 dark:text-slate-400">• {r}</p>)}
                         {job.match.missing_skills.length > 0 && (
-                          <p className="mt-1 text-slate-600">Missing: {job.match.missing_skills.join(" · ")}</p>
+                          <p className="mt-1 text-slate-600 dark:text-slate-400">Missing: {job.match.missing_skills.join(" · ")}</p>
                         )}
                       </div>
                     )}
                     <div className="flex flex-wrap gap-3">
-                      {job.apply_link && <a className="font-medium text-blue-700 underline" href={job.apply_link} target="_blank" rel="noreferrer">Apply →</a>}
+                      {job.apply_link && <a className="font-medium text-blue-700 dark:text-blue-400 underline" href={job.apply_link} target="_blank" rel="noreferrer">Apply →</a>}
                       {job.evidence_url && (
-                        <a className="font-medium text-blue-700 underline" href={`${JOBSETU_URL}${job.evidence_url}`} target="_blank" rel="noreferrer">
+                        <a className="font-medium text-blue-700 dark:text-blue-400 underline" href={`${JOBSETU_URL}${job.evidence_url}`} target="_blank" rel="noreferrer">
                           Why verified? Evidence →
                         </a>
                       )}
@@ -372,3 +372,6 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
     </div>
   );
 }
+
+
+

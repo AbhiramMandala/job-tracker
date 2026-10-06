@@ -84,7 +84,7 @@ export function InterviewsPage({ notify }: { notify: (m: string) => void }) {
   return (
     <div className="space-y-4">
       <PageHeader title="Interviews" description="Prepare, track, and follow through on every conversation." />
-      <form onSubmit={create} className="reveal grid gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-3">
+      <form onSubmit={create} className="reveal grid gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 shadow-sm sm:grid-cols-3">
         <select aria-label="Application" className={inputCls} value={form.application_id} onChange={(e) => setForm({ ...form, application_id: e.target.value })}>
           {apps.map((a) => <option key={a.id} value={a.id}>{a.company} — {a.job_title}</option>)}
         </select>
@@ -109,24 +109,24 @@ export function InterviewsPage({ notify }: { notify: (m: string) => void }) {
           {grouped.map((g) =>
             g.items.length > 0 && (
               <section key={g.key} aria-label={g.title}>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">{g.title}</h2>
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{g.title}</h2>
                 <div className="mt-2 space-y-2">
                   {g.items.map((i) => (
-                    <div key={i.id} className="rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
+                    <div key={i.id} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm shadow-sm">
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="font-semibold">{i.company ?? i.application_id}</p>
-                          <p className="text-slate-600">
+                          <p className="text-slate-600 dark:text-slate-400">
                             {i.interview_type} · {new Date(i.scheduled_at).toLocaleString()}
                             {i.interviewer && ` · with ${i.interviewer}`}
                           </p>
-                          {i.notes && <p className="mt-1 whitespace-pre-wrap text-slate-600">{i.notes}</p>}
+                          {i.notes && <p className="mt-1 whitespace-pre-wrap text-slate-600 dark:text-slate-400">{i.notes}</p>}
                           <div className="mt-1 flex flex-wrap gap-3">
-                            {i.meeting_url && <a className="font-medium text-blue-700 underline" href={i.meeting_url} target="_blank" rel="noreferrer">Join meeting →</a>}
-                            <Link className="font-medium text-blue-700 underline" to={`/applications/${i.application_id}`}>Open application →</Link>
+                            {i.meeting_url && <a className="font-medium text-blue-700 dark:text-blue-400 underline" href={i.meeting_url} target="_blank" rel="noreferrer">Join meeting →</a>}
+                            <Link className="font-medium text-blue-700 dark:text-blue-400 underline" to={`/applications/${i.application_id}`}>Open application →</Link>
                           </div>
                         </div>
-                        <button onClick={() => setToDelete(i.id)} className="shrink-0 text-sm text-red-700 underline">Delete</button>
+                        <button onClick={() => setToDelete(i.id)} className="shrink-0 text-sm text-red-700 dark:text-red-400 underline">Delete</button>
                       </div>
                     </div>
                   ))}
@@ -140,3 +140,4 @@ export function InterviewsPage({ notify }: { notify: (m: string) => void }) {
     </div>
   );
 }
+

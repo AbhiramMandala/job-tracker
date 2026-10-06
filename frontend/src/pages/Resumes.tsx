@@ -76,7 +76,7 @@ export function ResumesPage({ notify }: { notify: (m: string) => void }) {
         actions={uploadLabel}
       />
       {error && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <div className="rounded-md border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 p-3 text-sm text-red-700 dark:text-red-400" role="alert">
           {error} Your files are safe. <button className="underline" onClick={load}>Try again</button>
         </div>
       )}
@@ -90,21 +90,21 @@ export function ResumesPage({ notify }: { notify: (m: string) => void }) {
       ) : (
         <div className="space-y-2">
           {items.map((r) => (
-            <div key={r.id} className="reveal flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
+            <div key={r.id} className="reveal flex items-center justify-between gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm shadow-sm">
               <div className="flex min-w-0 items-center gap-3">
-                <span aria-hidden="true" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-50 text-red-700">
+                <span aria-hidden="true" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400">
                   <FileText size={18} />
                 </span>
                 <div className="min-w-0">
                   <p className="truncate font-semibold">{r.filename}</p>
-                  <p className="text-slate-500">{(r.size / 1024).toFixed(1)} KB · Uploaded {r.created_at.slice(0, 10)}</p>
+                  <p className="text-slate-500 dark:text-slate-400">{(r.size / 1024).toFixed(1)} KB · Uploaded {r.created_at.slice(0, 10)}</p>
                 </div>
               </div>
               <div className="flex shrink-0 gap-3">
-                <button onClick={() => void downloadResume(r.id, r.filename)} className="inline-flex items-center gap-1 font-medium text-blue-700 underline">
+                <button onClick={() => void downloadResume(r.id, r.filename)} className="inline-flex items-center gap-1 font-medium text-blue-700 dark:text-blue-400 underline">
                   <Download size={14} aria-hidden="true" />Download
                 </button>
-                <button onClick={() => setToDelete(r)} className="font-medium text-red-700 underline">Delete</button>
+                <button onClick={() => setToDelete(r)} className="font-medium text-red-700 dark:text-red-400 underline">Delete</button>
               </div>
             </div>
           ))}
@@ -114,3 +114,4 @@ export function ResumesPage({ notify }: { notify: (m: string) => void }) {
     </div>
   );
 }
+

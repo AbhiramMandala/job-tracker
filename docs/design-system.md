@@ -4,7 +4,9 @@ Single source of truth for visual consistency. Implemented in
 `frontend/src/index.css` (tokens, keyframes) + `tailwind.config.js` (mapped
 utilities) + `frontend/src/components/ui.tsx` (primitives).
 
-## Colors (light-first; tokens are CSS vars so dark mode can layer on later)
+## Colors (light + dark via `dark:` variants; CSS vars remain for future theming)
+
+Dark mode is class-based (`darkMode: "class"`, toggled by `useTheme`, persisted as `jt-theme`, OS preference as default). Every surface/text/border class carries a `dark:` counterpart — no page-specific exceptions. Brand-solid buttons (blue-700, red-600, green-700) are shared across themes; soft alert/badge backgrounds get deep variants (e.g. `amber-950`, `blue-950`).
 
 | Token | Value | Use |
 |---|---|---|

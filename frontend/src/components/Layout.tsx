@@ -8,10 +8,13 @@ import {
   Home,
   LogOut,
   Menu,
+  Moon,
   Settings,
+  Sun,
   X,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 
 const NAV = [
   { to: "/home", label: "Home", icon: Home },
@@ -24,6 +27,7 @@ const NAV = [
 
 export function Layout({ children, toast }: { children: ReactNode; toast: string | null }) {
   const { user, logout } = useAuth();
+  const { theme, toggle } = useTheme();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const initial = (user?.name || user?.email || "?").trim().charAt(0).toUpperCase();
@@ -35,34 +39,42 @@ export function Layout({ children, toast }: { children: ReactNode; toast: string
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
             <button
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 md:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 md:hidden"
               onClick={() => setOpen((v) => !v)}
               aria-label={open ? "Close navigation" : "Open navigation"}
               aria-expanded={open}
             >
               {open ? <X size={18} /> : <Menu size={18} />}
             </button>
-            <Link to="/home" className="flex items-center gap-2 text-lg font-bold tracking-tight text-blue-800">
+            <Link to="/home" className="flex items-center gap-2 text-lg font-bold tracking-tight text-blue-800 dark:text-blue-300">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-blue-700 text-sm font-extrabold text-white">
                 JT
               </span>
               JobTracker
             </Link>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="hidden items-center gap-2 text-slate-600 sm:inline-flex" title={user?.email}>
-              <span aria-hidden="true" className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 text-xs font-bold text-slate-700">
+          <div className="flex items-center gap-2 text-sm">
+            <button
+              onClick={toggle}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 px-0 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+              aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+              title={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
+            >
+              {theme === "dark" ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
+            </button>
+            <span className="hidden items-center gap-2 text-slate-600 dark:text-slate-400 sm:inline-flex" title={user?.email}>
+              <span aria-hidden="true" className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
                 {initial}
               </span>
               <span className="max-w-44 truncate">{user?.name || user?.email}</span>
             </span>
             <button
               onClick={onLogout}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 dark:border-slate-600 px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               <LogOut size={15} aria-hidden="true" />
               Logout
@@ -76,7 +88,7 @@ export function Layout({ children, toast }: { children: ReactNode; toast: string
           className={`${open ? "block" : "hidden"} w-52 shrink-0 md:block`}
           aria-label="Sidebar navigation"
         >
-          <nav className="space-y-1 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
+          <nav className="space-y-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-2 shadow-sm">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
@@ -84,7 +96,7 @@ export function Layout({ children, toast }: { children: ReactNode; toast: string
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive ? "bg-blue-50 text-blue-800" : "text-slate-700 hover:bg-slate-50"
+                    isActive ? "bg-blue-50 dark:bg-blue-950 text-blue-800 dark:text-blue-300" : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                   }`
                 }
               >
@@ -93,14 +105,14 @@ export function Layout({ children, toast }: { children: ReactNode; toast: string
               </NavLink>
             ))}
           </nav>
-          <p className="mt-3 hidden px-1 text-xs leading-relaxed text-slate-400 md:block">
+          <p className="mt-3 hidden px-1 text-xs leading-relaxed text-slate-400 dark:text-slate-500 md:block">
             Discover → Save → Apply → Track. Powered by JobSetu intelligence.
           </p>
         </aside>
 
         <main className="min-w-0 flex-1">
           {toast && (
-            <div className="reveal mb-4 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800" role="status">
+            <div className="reveal mb-4 flex items-center gap-2 rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 px-4 py-2 text-sm text-green-800 dark:text-green-300" role="status">
               <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-xs font-bold text-white">✓</span>
               {toast}
             </div>
@@ -111,3 +123,4 @@ export function Layout({ children, toast }: { children: ReactNode; toast: string
     </div>
   );
 }
+
