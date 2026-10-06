@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { Layout } from "./components/Layout";
 import { Spinner } from "./components/ui";
 import { LoginPage, RegisterPage } from "./pages/Auth";
-import { DashboardPage } from "./pages/Dashboard";
+import { HomePage } from "./pages/Home";
 import { ApplicationsPage } from "./pages/Applications";
 import { ApplicationDetailPage } from "./pages/ApplicationDetail";
 import { ApplicationNewPage } from "./pages/ApplicationNew";
@@ -20,6 +20,8 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   return children;
 }
+
+export { RequireAuth };
 
 function Shell() {
   const [toast, setToast] = useState<string | null>(null);
@@ -38,15 +40,17 @@ function Shell() {
           <RequireAuth>
             <Layout toast={toast}>
               <Routes>
-                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/home" element={<HomePage />} />
+                <Route path="/dashboard" element={<Navigate to="/home" replace />} />
                 <Route path="/applications" element={<ApplicationsPage notify={notify} />} />
                 <Route path="/applications/new" element={<ApplicationNewPage notify={notify} />} />
                 <Route path="/applications/:id" element={<ApplicationDetailPage notify={notify} />} />
                 <Route path="/interviews" element={<InterviewsPage notify={notify} />} />
                 <Route path="/resumes" element={<ResumesPage notify={notify} />} />
-                <Route path="/discover" element={<DiscoverPage notify={notify} />} />
+                <Route path="/discover-jobs" element={<DiscoverPage notify={notify} />} />
+                <Route path="/discover" element={<Navigate to="/discover-jobs" replace />} />
                 <Route path="/settings" element={<SettingsPage />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                <Route path="*" element={<Navigate to="/home" replace />} />
               </Routes>
             </Layout>
           </RequireAuth>

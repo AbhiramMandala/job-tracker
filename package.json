@@ -7,7 +7,7 @@
     "install:all": "npm install --workspaces",
     "dev:worker": "npm run dev --workspace=student-job-tracker-worker",
     "dev:frontend": "npm run dev --workspace=student-job-tracker-frontend",
-    "test": "npm run test --workspace=student-job-tracker-worker",
+    "test": "npm run test --workspace=student-job-tracker-worker && npm run test --workspace=student-job-tracker-frontend",
     "typecheck": "npm run typecheck --workspace=student-job-tracker-worker && npm run typecheck --workspace=student-job-tracker-frontend",
     "build": "npm run build --workspace=student-job-tracker-frontend"
   }

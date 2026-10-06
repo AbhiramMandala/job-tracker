@@ -106,7 +106,16 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
                     <Link to={`/applications/${a.id}`} className="text-blue-700 hover:underline">{a.company}</Link>
                   </td>
                   <td className="px-4 py-2">{a.job_title}</td>
-                  <td className="px-4 py-2"><StatusBadge status={a.status} /></td>
+                  <td className="px-4 py-2">
+                    <span className="flex flex-wrap items-center gap-1">
+                      <StatusBadge status={a.status} />
+                      {a.notes?.startsWith("Imported from JobSetu") && (
+                        <span title="Discovered in JobSetu" className="inline-flex items-center rounded-full bg-teal-100 px-2 py-0.5 text-xs font-semibold text-teal-800">
+                          JobSetu
+                        </span>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-4 py-2 text-slate-600">{a.application_date?.slice(0, 10)}</td>
                 </tr>
               ))}

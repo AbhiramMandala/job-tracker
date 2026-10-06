@@ -21,7 +21,7 @@ export function LoginPage() {
     setBusy(true);
     try {
       await login(email.trim(), password);
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -77,7 +77,7 @@ export function RegisterPage() {
     setBusy(true);
     try {
       await register(email.trim(), password, name.trim());
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {
@@ -112,3 +112,4 @@ export function RegisterPage() {
     </div>
   );
 }
+
