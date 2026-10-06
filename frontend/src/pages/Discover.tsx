@@ -154,7 +154,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
           aria-label="JobSetu search ID or URL"
           placeholder="…or paste search ID"
           inputMode="numeric"
-          className={inputCls}
+          className={`${inputCls} min-w-0 flex-1`}
           value={searchId}
           onChange={(e) => setSearchId(e.target.value)}
         />
