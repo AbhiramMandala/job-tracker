@@ -147,7 +147,7 @@ See `.env.example`, `worker/.dev.vars.example`, `frontend/.env.example`. Never c
 
 ## Information architecture (post sign-in)
 
-Sign-in is the gateway; the first screen is a **career command center**, not an analytics dashboard:
+Public landing (`/`) explains the product with Sign In / Sign Up actions (`/sign-in`, `/sign-up`; legacy `/login`, `/register` redirect). Sign-in is the gateway; logout returns to `/`. The first authenticated screen is a **career command center**, not an analytics dashboard:
 
 - **Home** (`/home`; `/dashboard` redirects here): greeting, four action cards (Discover Jobs, My Applications, Interviews, Resumes), a Saved → Applied → Interview → Offer pipeline strip, a Next-action card (overdue follow-up first, else most recent Saved), Continue-where-you-left-off, and Upcoming interviews. Metrics are secondary.
 - **Applications** (`/applications`): the tracking workspace. JobSetu imports carry a `JobSetu` source badge (detected from the import note).
