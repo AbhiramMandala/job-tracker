@@ -52,7 +52,7 @@ export function ApplicationNewPage({ notify }: { notify: (m: string) => void }) 
   };
 
   return (
-    <div className="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow-sm">
+    <div className="reveal mx-auto max-w-2xl rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
       <h1 className="text-xl font-bold">New application</h1>
       <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-2">
         <div><label className="text-sm font-medium" htmlFor="company">Company *</label><input id="company" className={inputCls} value={form.company} onChange={(e) => set("company", e.target.value)} /></div>
@@ -84,7 +84,7 @@ export function ApplicationNewPage({ notify }: { notify: (m: string) => void }) 
         <div className="sm:col-span-2"><label className="text-sm font-medium">Follow-up notes</label><textarea rows={2} className={inputCls} value={form.follow_up_notes} onChange={(e) => set("follow_up_notes", e.target.value)} /></div>
         <FieldError message={error ?? undefined} />
         <div className="sm:col-span-2">
-          <button disabled={busy} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
+          <button disabled={busy} className="btn-shine rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
             {busy ? "Saving…" : "Create application"}
           </button>
         </div>
@@ -92,3 +92,4 @@ export function ApplicationNewPage({ notify }: { notify: (m: string) => void }) 
     </div>
   );
 }
+

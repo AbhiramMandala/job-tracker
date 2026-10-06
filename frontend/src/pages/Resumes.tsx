@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { Download, FileText, Upload } from "lucide-react";
 import { api, downloadResume } from "../services/api";
 import type { ResumeMeta } from "../types";
-import { ConfirmModal, EmptyState, Spinner } from "../components/ui";
+import { ConfirmModal, EmptyState, PageHeader, RowSkeleton } from "../components/ui";
 
 export function ResumesPage({ notify }: { notify: (m: string) => void }) {
   const [items, setItems] = useState<ResumeMeta[]>([]);
@@ -50,32 +51,60 @@ export function ResumesPage({ notify }: { notify: (m: string) => void }) {
     notify("Resume deleted.");
   };
 
-  if (loading) return <Spinner />;
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <PageHeader title="Resumes" description="Your application materials, ready for the next opportunity." />
+        <RowSkeleton rows={4} />
+      </div>
+    );
+  }
+
+  const uploadLabel = (
+    <label className="btn-shine inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">
+      <Upload size={16} aria-hidden="true" />
+      {busy ? "Uploading…" : "Upload resume"}
+      <input type="file" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={upload} disabled={busy} />
+    </label>
+  );
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Resumes</h1>
-        <label className="cursor-pointer rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
-          {busy ? "Uploading…" : "Upload resume"}
-          <input type="file" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={upload} disabled={busy} />
-        </label>
-      </div>
-      <p className="text-sm text-slate-500">PDF, DOC, DOCX, or TXT up to 5 MB. Files are stored in R2; only metadata lives in D1.</p>
-      {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      <PageHeader
+        title="Resumes"
+        description="PDF, DOC, DOCX, or TXT up to 5 MB. Stored securely; link them to applications when you apply."
+        actions={uploadLabel}
+      />
+      {error && (
+        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+          {error} Your files are safe. <button className="underline" onClick={load}>Try again</button>
+        </div>
+      )}
       {items.length === 0 ? (
-        <EmptyState title="No resumes yet" hint="Upload your first resume to attach it to applications." />
+        <EmptyState
+          icon={FileText}
+          title="No resumes yet"
+          body="Add your first resume so it's ready to attach the moment you apply."
+          action={{ to: "/applications", label: "Browse applications" }}
+        />
       ) : (
         <div className="space-y-2">
           {items.map((r) => (
-            <div key={r.id} className="flex items-center justify-between rounded-lg bg-white p-3 text-sm shadow-sm">
-              <div>
-                <p className="font-medium">{r.filename}</p>
-                <p className="text-slate-500">{(r.size / 1024).toFixed(1)} KB · {r.created_at.slice(0, 10)}</p>
+            <div key={r.id} className="reveal flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
+              <div className="flex min-w-0 items-center gap-3">
+                <span aria-hidden="true" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-50 text-red-700">
+                  <FileText size={18} />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{r.filename}</p>
+                  <p className="text-slate-500">{(r.size / 1024).toFixed(1)} KB · Uploaded {r.created_at.slice(0, 10)}</p>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <button onClick={() => void downloadResume(r.id, r.filename)} className="text-blue-700 underline">Download</button>
-                <button onClick={() => setToDelete(r)} className="text-red-700 underline">Delete</button>
+              <div className="flex shrink-0 gap-3">
+                <button onClick={() => void downloadResume(r.id, r.filename)} className="inline-flex items-center gap-1 font-medium text-blue-700 underline">
+                  <Download size={14} aria-hidden="true" />Download
+                </button>
+                <button onClick={() => setToDelete(r)} className="font-medium text-red-700 underline">Delete</button>
               </div>
             </div>
           ))}

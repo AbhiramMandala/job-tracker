@@ -73,7 +73,7 @@ export function ApplicationDetailPage({ notify }: { notify: (m: string) => void 
   return (
     <div className="space-y-4">
       <button onClick={() => navigate("/applications")} className="text-sm text-blue-700 underline">← Back to applications</button>
-      <div className="rounded-lg bg-white p-6 shadow-sm">
+      <div className="reveal rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-xl font-bold">{app.company} — {app.job_title}</h1>
           <StatusBadge status={app.status} />
@@ -95,7 +95,7 @@ export function ApplicationDetailPage({ notify }: { notify: (m: string) => void 
         </div>
       </div>
 
-      <section className="rounded-lg bg-white p-4 shadow-sm">
+      <section className="reveal rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="font-semibold">Interviews ({app.interviews.length})</h2>
         <div className="mt-2 space-y-2 text-sm">
           {app.interviews.map((i) => (
@@ -108,7 +108,7 @@ export function ApplicationDetailPage({ notify }: { notify: (m: string) => void 
         </div>
       </section>
 
-      <section className="rounded-lg bg-white p-4 shadow-sm">
+      <section className="reveal rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="font-semibold">Notes</h2>
         <form onSubmit={addNote} className="mt-2 flex gap-2">
           <input aria-label="New note" className={inputCls} value={noteDraft} onChange={(e) => setNoteDraft(e.target.value)} placeholder="Add a note…" />
@@ -143,4 +143,5 @@ export function ApplicationDetailPage({ notify }: { notify: (m: string) => void 
     </div>
   );
 }
+
 
