@@ -25,7 +25,7 @@ const NAV = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
-export function Layout({ children, toast }: { children: ReactNode; toast: string | null }) {
+export function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const { theme, toggle } = useTheme();
   const navigate = useNavigate();
@@ -111,12 +111,6 @@ export function Layout({ children, toast }: { children: ReactNode; toast: string
         </aside>
 
         <main className="min-w-0 flex-1">
-          {toast && (
-            <div className="reveal mb-4 flex items-center gap-2 rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 px-4 py-2 text-sm text-green-800 dark:text-green-300" role="status">
-              <span aria-hidden="true" className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-xs font-bold text-white">✓</span>
-              {toast}
-            </div>
-          )}
           {children}
         </main>
       </div>

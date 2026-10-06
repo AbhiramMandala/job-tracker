@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ThemeProvider } from "./hooks/useTheme";
+import { ToastStack, useToasts } from "./components/Toast";
 import { Layout } from "./components/Layout";
 import { Spinner } from "./components/ui";
 import { LoginPage, RegisterPage } from "./pages/Auth";
@@ -26,14 +27,12 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 export { RequireAuth };
 
 function Shell() {
-  const [toast, setToast] = useState<string | null>(null);
-  const notify = (m: string) => {
-    setToast(m);
-    window.setTimeout(() => setToast(null), 3000);
-  };
+  const { toasts, notify, dismiss } = useToasts();
 
   return (
-    <Routes>
+    <>
+      <ToastStack items={toasts} onDone={dismiss} />
+      <Routes>
       <Route path="/" element={<PublicHomePage />} />
       <Route path="/sign-in" element={<LoginPage />} />
       <Route path="/sign-up" element={<RegisterPage />} />
@@ -43,7 +42,7 @@ function Shell() {
         path="/*"
         element={
           <RequireAuth>
-            <Layout toast={toast}>
+            <Layout>
               <Routes>
                 <Route path="/home" element={<HomePage />} />
                 <Route path="/dashboard" element={<Navigate to="/home" replace />} />
@@ -61,7 +60,8 @@ function Shell() {
           </RequireAuth>
         }
       />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

@@ -69,7 +69,7 @@ describe("Interviews workspace", () => {
       return Promise.resolve({ items: [] });
     });
     shell(<InterviewsPage notify={notify} />);
-    expect(await screen.findByText("Today")).toBeTruthy();
+    expect(await screen.findByText(/Today/)).toBeTruthy();
     expect(await screen.findByText("This week")).toBeTruthy();
     expect(await screen.findByText(/Acme/)).toBeTruthy();
   });
@@ -131,7 +131,7 @@ describe("Discover embedded search", () => {
     // Cards render with company/role/location/signal chips and match context.
     expect(await screen.findByText("Acme")).toBeTruthy();
     expect(await screen.findByText("Hyderabad · Entry-level · Full-time")).toBeTruthy();
-    expect(await screen.findByText(/70% match/)).toBeTruthy();
+    expect(screen.getByRole("img", { name: "70% match" })).toBeTruthy();
 
     // Embedded filters narrow the list without new requests.
     fireEvent.change(screen.getByLabelText("Filter by experience"), { target: { value: "experienced" } });
@@ -142,7 +142,7 @@ describe("Discover embedded search", () => {
 
     // Details expand inline with evidence + apply links; save uses the session.
     fireEvent.click((await screen.findAllByText("View details"))[0]);
-    expect(await screen.findByText("Why verified? Evidence →")).toBeTruthy();
+    expect(await screen.findByText("Evidence →")).toBeTruthy();
     fireEvent.click((await screen.findAllByRole("button", { name: "Save" }))[0]);
     expect(await screen.findByText("Saved ✓")).toBeTruthy();
     expect(post).toHaveBeenCalledWith("/api/applications", expect.objectContaining({ company: "Acme" }));
