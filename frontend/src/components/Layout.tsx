@@ -3,11 +3,11 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 
 const NAV = [
-  { to: "/dashboard", label: "Dashboard" },
+  { to: "/home", label: "Home" },
   { to: "/applications", label: "Applications" },
   { to: "/interviews", label: "Interviews" },
   { to: "/resumes", label: "Resumes" },
-  { to: "/discover", label: "Discover" },
+  { to: "/discover-jobs", label: "Discover Jobs" },
   { to: "/settings", label: "Settings" },
 ];
 
@@ -33,7 +33,7 @@ export function Layout({ children, toast }: { children: ReactNode; toast: string
             >
               ☰
             </button>
-            <Link to="/dashboard" className="text-lg font-bold text-blue-700">
+            <Link to="/home" className="text-lg font-bold text-blue-700">
               JobTracker
             </Link>
           </div>

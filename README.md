@@ -145,11 +145,25 @@ See `.env.example`, `worker/.dev.vars.example`, `frontend/.env.example`. Never c
 
 - Binding `RESUMES` → bucket `job-tracker-resumes`. Frontend never sees credentials; it POSTs `multipart/form-data` to the Worker, which validates (MIME allow-list pdf/doc/docx/txt, ≤5 MB, sanitized filename) and `PUT`s to `r2_key = {userId}/{resumeId}-{filename}`. Metadata row goes to D1. Download streams via `GET /api/resumes/:id/download` after ownership check. Delete removes R2 object + D1 row and nulls `applications.resume_id`.
 
+## Information architecture (post sign-in)
+
+Sign-in is the gateway; the first screen is a **career command center**, not an analytics dashboard:
+
+- **Home** (`/home`; `/dashboard` redirects here): greeting, four action cards (Discover Jobs, My Applications, Interviews, Resumes), a Saved → Applied → Interview → Offer pipeline strip, a Next-action card (overdue follow-up first, else most recent Saved), Continue-where-you-left-off, and Upcoming interviews. Metrics are secondary.
+- **Applications** (`/applications`): the tracking workspace. JobSetu imports carry a `JobSetu` source badge (detected from the import note).
+- **Interviews**, **Resumes** (`/resumes`): dedicated workspaces; R2 stays Worker-only, metadata in D1.
+- **Discover Jobs** (`/discover-jobs`; `/discover` redirects here): staged as Discovered → Saved → …, with a link out to the full JobSetu UI.
+- **Settings**: account, session info, integration configuration.
+
+Journey: Sign in → Home → Discover Jobs → (JobSetu) Save → Applications → Apply → Track → Interview → Offer. Discovery and tracking stay separate surfaces; a discovered job becomes an application only via an explicit Save.
+
+Auth/integration decision: the JobSetu Save-to-Tracker email+password fallback is kept (Option D). Cross-origin localStorage isolation is a browser security boundary — removing the fallback would require a shared auth server (over-engineering). Raw passwords are never stored; only the opaque token is kept, per origin.
+
 ## JobSetu Integration
 
 Discovers jobs in [JobSetu](../temps) and saves them as `SAVED` applications — both directions:
 
-- **Tracker → JobSetu:** the **Discover** page (`/discover`, `VITE_JOBSETU_URL`, defaults to local JobSetu) lists recent JobSetu searches via `GET /api/searches`, loads listings via `GET /api/jobs?search_id=N`, and saves through `GET /api/jobs/{id}/tracker-export` → `POST /api/applications`.
+- **Tracker → JobSetu:** the **Discover Jobs** page (`/discover-jobs`, `VITE_JOBSETU_URL`, defaults to local JobSetu) lists recent JobSetu searches via `GET /api/searches`, loads listings via `GET /api/jobs?search_id=N`, and saves through `GET /api/jobs/{id}/tracker-export` → `POST /api/applications`.
 - **JobSetu → Tracker:** every results card has a **Save to Tracker** button. First click asks for the Tracker API URL (prefilled from JobSetu's `TRACKER_API_URL`) and your Tracker email + password to fetch a token; only the token is kept in that browser.
 
 Run both locally: JobSetu on `:8000` (`python -m uvicorn app.main:app`), Worker on `:8787`, frontend on `:5173`.
@@ -174,7 +188,7 @@ Gotchas:
 
 ## CI/CD
 
-- `.github/workflows/ci.yml` — on PR/push: install, worker typecheck + tests, frontend typecheck + build.
+- `.github/workflows/ci.yml` — on PR/push: install, worker typecheck + tests, frontend typecheck + tests + build.
 - `.github/workflows/deploy.yml` — on `main`: same checks, then `wrangler deploy` + `wrangler pages deploy`. Required secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 
 ## Security Considerations
@@ -201,6 +215,8 @@ Gotchas:
 project/
 ├── frontend/src/{components,pages,hooks,services,types,utils}
 ├── worker/src/{routes,middleware,validation,utils,db} + index.ts
-├── worker/tests/  migrations/  .github/workflows/
+├── worker/tests/  migrations/  docs/competitive-analysis.md  .github/workflows/
 ├── README.md  .gitignore  package.json
 ```
+
+Frontend tests (`frontend/src/**/*.test.tsx`, vitest + jsdom + Testing Library) cover the Home command center, auth-gated routing (`/home` blocked when logged out, `/dashboard` → `/home`), and the new navigation.
