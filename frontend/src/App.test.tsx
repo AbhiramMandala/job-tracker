@@ -43,7 +43,7 @@ describe("auth-gated routing", () => {
     go("/dashboard");
     render(<App />);
     // Old bookmark still works via redirect, landing on the command center.
-    expect(await screen.findByText("Welcome back, Admin")).toBeTruthy();
+    expect(await screen.findByText(/Good (morning|afternoon|evening), Admin/)).toBeTruthy();
     expect(window.location.pathname).toBe("/home");
   });
 
