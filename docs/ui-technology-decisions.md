@@ -31,12 +31,20 @@ Evaluated for a Home ambient visual and a career-progression visual. Rejected be
 
 Ambient depth is achieved with layered CSS gradients + grid + spotlight (0 KB JS, GPU-cheap, `prefers-reduced-motion`-safe).
 
-## Animation library — NONE (CSS only)
+## Animation library — anime.js 4, granular imports ONLY
 
-CSS keyframes + transitions cover: page/section entrance, hover lifts, button
-shine, skeleton shimmer, modal fade/scale, status-pill transitions. Reasons:
-- framer-motion (~50 KB+) buys spring physics we don't need; our motion spec is fast/subtle/purposeful.
-- CSS animations are interruptible by default, composable with `prefers-reduced-motion`, and add zero bundle.
+CSS keyframes + transitions remain the base (entrance, hover, shine, skeleton,
+modal). Anime.js is used strictly for what CSS cannot do well:
+
+- `tweenNumber` — animated pipeline/metric counts (`AnimatedNumber`).
+- `staggerIn` — result-list stagger via per-index delay callback (no stagger module).
+- `toastEnter`/`toastExit` — toast lifecycle with unmount callback.
+- `ringSweep` — match-ring stroke animation.
+
+Imports are granular (`animejs/animation` only) — never the root bundle.
+Measured cost: ~15 KB gzip. The `stagger` module was evaluated and dropped in
+favor of a delay callback to save weight. All helpers no-op to final state
+under `prefers-reduced-motion` or without rAF, so content never depends on motion.
 
 ## Icons — lucide-react (NEW dependency)
 
@@ -66,4 +74,5 @@ kits; custom components stay small and match the design tokens exactly.
 
 - Baseline (pre-upgrade): JS 207.6 kB / CSS 15.8 kB (vite build output).
 - Budget: total JS gzip delta ≤ +25 KB vs baseline, CSS ≤ +8 KB.
+- Measured (post-Anime): JS +24.1 KB gzip, CSS +1.6 KB gzip — inside budget.
 - Rules: no runtime animation libs; decorative layers are pure CSS; icons tree-shaken; no new per-page heavy deps; skeletons preserve layout (no CLS); decorative visuals never block interaction or fetch.
