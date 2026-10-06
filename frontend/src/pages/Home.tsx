@@ -5,6 +5,7 @@ import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { Dashboard } from "../types";
 import { ActionCard, CardSkeleton, EmptyState, StatusBadge } from "../components/ui";
+import { AnimatedNumber } from "../components/AnimatedNumber";
 
 function Hero({ name, hasActivity }: { name: string; hasActivity: boolean }) {
   const hour = new Date().getHours();
@@ -74,7 +75,7 @@ function Pipeline({ totals }: { totals: Dashboard["totals"] }) {
         {steps.map((s, i) => (
           <li key={s.label} className="flex min-w-0 flex-1 items-stretch gap-1.5 sm:gap-2">
             <div className="min-w-0 flex-1 rounded-md bg-slate-50 dark:bg-slate-800 px-1 py-3 sm:px-2">
-              <p className="text-2xl font-extrabold tabular-nums">{s.value}</p>
+              <p className="text-2xl font-extrabold tabular-nums"><AnimatedNumber value={s.value} label={`${s.label}: ${s.value}`} /></p>
               <p className="truncate text-xs text-slate-500 dark:text-slate-400">{s.label}</p>
               <div className="mx-auto mt-2 h-1 w-full max-w-20 overflow-hidden rounded bg-slate-200 dark:bg-slate-700">
                 <div className="h-1 rounded bg-blue-600" style={{ width: `${(s.value / max) * 100}%` }} />
@@ -195,6 +196,7 @@ export function HomePage() {
         <div className="mt-3 space-y-2">
           {data.recentApplications.length === 0 && (
             <EmptyState
+              art="pipeline"
               title="Your pipeline is empty"
               body="Find your next opportunity with JobSetu, then save the ones you like."
               action={{ to: "/discover-jobs", label: "Discover jobs" }}

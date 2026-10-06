@@ -45,6 +45,15 @@ body {
   background-size: 200% 100%;
 }
 
+/* Gentle float for decorative hero visuals (disabled under reduced motion). */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.float-soft {
+  animation: float-soft 5s ease-in-out infinite;
+}
+
 /* Section entrance: fast, subtle, staggered. */
 @keyframes rise {
   from { opacity: 0; transform: translateY(10px); }
@@ -141,7 +150,8 @@ textarea:focus-visible {
   .reveal,
   .modal-panel,
   .modal-backdrop,
-  .animate-spin {
+  .animate-spin,
+  .float-soft {
     animation: none;
   }
   .skeleton {

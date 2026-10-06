@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Briefcase, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { api } from "../services/api";
 import type { Application } from "../types";
 import { EmptyState, PageHeader, PrimaryLink, RowSkeleton, StatusBadge, inputCls } from "../components/ui";
@@ -96,7 +96,7 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          icon={Briefcase}
+          art="pipeline"
           title="No applications match"
           body="Try clearing the filters — or find your next opportunity with JobSetu."
           action={{ to: "/discover-jobs", label: "Discover jobs" }}

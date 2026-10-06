@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarClock } from "lucide-react";
 import { api } from "../services/api";
 import type { Application, Interview } from "../types";
 import { ConfirmModal, EmptyState, PageHeader, RowSkeleton, inputCls } from "../components/ui";
@@ -99,20 +98,23 @@ export function InterviewsPage({ notify }: { notify: (m: string) => void }) {
 
       {items.length === 0 ? (
         <EmptyState
-          icon={CalendarClock}
+          art="calendar"
           title="No interviews scheduled"
           body="Once an application reaches the interview stage, your upcoming conversations will appear here — with stage, time, and prep notes."
           action={{ to: "/applications", label: "Review applications" }}
         />
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6">
           {grouped.map((g) =>
             g.items.length > 0 && (
               <section key={g.key} aria-label={g.title}>
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{g.title}</h2>
-                <div className="mt-2 space-y-2">
+                <h2 className={`text-sm font-semibold uppercase tracking-wide ${g.key === "today" ? "text-blue-700 dark:text-blue-400" : "text-slate-500 dark:text-slate-400"}`}>
+                  {g.key === "today" ? "● Today" : g.title}
+                </h2>
+                <div className="mt-2 space-y-2 border-l-2 border-slate-200 pl-4 dark:border-slate-700" style={g.key === "today" ? { borderColor: "#1d4ed8" } : undefined}>
                   {g.items.map((i) => (
-                    <div key={i.id} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm shadow-sm">
+                    <div key={i.id} className={`rounded-lg border bg-white p-3 text-sm shadow-sm dark:bg-slate-900 ${g.key === "today" ? "border-blue-300 dark:border-blue-700" : "border-slate-200 dark:border-slate-700"} ${g.key === "past" ? "opacity-70" : ""}`}>
+
                       <div className="flex flex-wrap items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="font-semibold">{i.company ?? i.application_id}</p>

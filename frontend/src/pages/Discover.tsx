@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { BookmarkCheck, Compass, Search } from "lucide-react";
 import { api } from "../services/api";
+import { staggerIn } from "../animations/anime";
+import { MatchRing } from "../components/MatchRing";
 import { EmptyState, PageHeader, RowSkeleton, inputCls } from "../components/ui";
 
 const JOBSETU_URL = (import.meta.env.VITE_JOBSETU_URL as string | undefined) || "http://127.0.0.1:8000";
@@ -91,6 +93,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
   const [saving, setSaving] = useState<number | null>(null);
   const [savedApps, setSavedApps] = useState<Record<number, string>>({});
   const [detailId, setDetailId] = useState<number | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch(`${JOBSETU_URL}/api/searches`)
@@ -101,6 +104,10 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
       .then((body) => setSearches(body.searches ?? []))
       .catch(() => setSearchesError(true));
   }, []);
+
+  useEffect(() => {
+    staggerIn(resultsRef.current);
+  }, [jobs]);
 
   const runSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -290,7 +297,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
       )}
 
       {jobs !== null && !loading && visible.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2" ref={resultsRef}>
           {visible.map((job) => {
             const appId = savedApps[job.id];
             const open = detailId === job.id;
@@ -298,20 +305,20 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
               .filter(Boolean)
               .join(" · ");
             return (
-              <article key={job.id} className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 text-sm shadow-sm">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
+              <article key={job.id} data-anime-item className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 text-sm shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
                     <p className="font-semibold">{job.company || "Unknown company"}</p>
                     <p className="text-slate-800 dark:text-slate-200">{job.title || "Untitled role"}</p>
                     {meta && <p className="mt-0.5 text-slate-600 dark:text-slate-400">{meta}</p>}
                     <p className="mt-1 text-slate-500 dark:text-slate-400">
-                      {job.match_total !== null && job.match_total !== undefined && (
-                        <span className="font-semibold text-blue-700 dark:text-blue-400">{job.match_total}% match · </span>
-                      )}
                       {job.salary && `${job.salary} · `}
                       {job.posted}
                     </p>
                   </div>
+                  {job.match_total !== null && job.match_total !== undefined && (
+                    <MatchRing value={job.match_total} />
+                  )}
                   <div className="flex shrink-0 gap-2">
                     <button
                       onClick={() => setDetailId(open ? null : job.id)}
@@ -351,7 +358,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
                       {job.apply_link && <a className="font-medium text-blue-700 dark:text-blue-400 underline" href={job.apply_link} target="_blank" rel="noreferrer">Apply →</a>}
                       {job.evidence_url && (
                         <a className="font-medium text-blue-700 dark:text-blue-400 underline" href={`${JOBSETU_URL}${job.evidence_url}`} target="_blank" rel="noreferrer">
-                          Why verified? Evidence →
+                          Evidence →
                         </a>
                       )}
                     </div>
@@ -364,7 +371,7 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
       )}
       {jobs !== null && jobs.length === 0 && !loading && !error && (
         <EmptyState
-          icon={Compass}
+          art="compass"
           title="No jobs in this search"
           body="Try different wording or another city — or run a fresh search above."
         />

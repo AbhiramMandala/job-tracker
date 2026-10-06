@@ -82,7 +82,7 @@ export function ResumesPage({ notify }: { notify: (m: string) => void }) {
       )}
       {items.length === 0 ? (
         <EmptyState
-          icon={FileText}
+          art="document"
           title="No resumes yet"
           body="Add your first resume so it's ready to attach the moment you apply."
           action={{ to: "/applications", label: "Browse applications" }}
@@ -90,7 +90,8 @@ export function ResumesPage({ notify }: { notify: (m: string) => void }) {
       ) : (
         <div className="space-y-2">
           {items.map((r) => (
-            <div key={r.id} className="reveal flex items-center justify-between gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm shadow-sm">
+            <div key={r.id} className="reveal relative flex items-center justify-between gap-2 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 pl-5 text-sm shadow-sm">
+              <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-red-400 via-red-500 to-red-700" />
               <div className="flex min-w-0 items-center gap-3">
                 <span aria-hidden="true" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-400">
                   <FileText size={18} />

@@ -2,6 +2,7 @@ import { useCallback, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import type { ApplicationStatus } from "../types";
+import { SpotIllustration, type SpotKind } from "./SpotIllustration";
 
 const COLORS: Record<ApplicationStatus, string> = {
   SAVED: "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200",
@@ -97,21 +98,27 @@ export function ActionCard({
 
 export function EmptyState({
   icon: Icon,
+  art,
   title,
   body,
   action,
 }: {
   icon?: LucideIcon;
+  art?: SpotKind;
   title: string;
   body?: string;
   action?: { to: string; label: string };
 }) {
   return (
     <div className="rounded-lg border border-dashed border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-6 py-10 text-center">
-      {Icon && (
-        <span className="mx-auto mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-          <Icon size={22} aria-hidden="true" />
-        </span>
+      {art ? (
+        <SpotIllustration kind={art} />
+      ) : (
+        Icon && (
+          <span className="mx-auto mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+            <Icon size={22} aria-hidden="true" />
+          </span>
+        )
       )}
       <p className="font-semibold text-slate-800 dark:text-slate-200">{title}</p>
       {body && <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">{body}</p>}

@@ -71,6 +71,38 @@ export function PublicHomePage() {
           </div>
         </section>
 
+        <div aria-hidden="true" className="float-soft mx-auto -mt-2 max-w-2xl px-2">
+          <svg viewBox="0 0 520 150" className="w-full drop-shadow-xl" role="presentation">
+            <defs>
+              <linearGradient id="hero-card" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#ffffff" />
+                <stop offset="1" stopColor="#eff6ff" />
+              </linearGradient>
+              <linearGradient id="hero-ring" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#1d4ed8" />
+                <stop offset="1" stopColor="#3b82f6" />
+              </linearGradient>
+            </defs>
+            <rect x="40" y="18" width="440" height="44" rx="10" fill="url(#hero-card)" opacity="0.97" />
+            <circle cx="70" cy="40" r="10" fill="url(#hero-ring)" opacity="0.9" />
+            <rect x="88" y="33" width="150" height="8" rx="4" fill="#cbd5e1" />
+            <rect x="88" y="45" width="100" height="6" rx="3" fill="#e2e8f0" />
+            <rect x="380" y="29" width="74" height="22" rx="6" fill="#1d4ed8" />
+            <rect x="60" y="76" width="400" height="56" rx="10" fill="url(#hero-card)" />
+            <circle cx="92" cy="104" r="14" fill="none" stroke="#e2e8f0" strokeWidth="5" />
+            <circle cx="92" cy="104" r="14" fill="none" stroke="url(#hero-ring)" strokeWidth="5" strokeLinecap="round" strokeDasharray="62 100" pathLength="100" transform="rotate(-90 92 104)" />
+            <rect x="116" y="90" width="130" height="9" rx="4.5" fill="#334155" />
+            <rect x="116" y="104" width="180" height="7" rx="3.5" fill="#cbd5e1" />
+            <rect x="116" y="116" width="120" height="7" rx="3.5" fill="#e2e8f0" />
+            <rect x="360" y="94" width="84" height="20" rx="10" fill="#dcfce7" />
+            <circle cx="372" cy="104" r="5" fill="#16a34a" />
+            <rect x="380" y="101" width="52" height="6" rx="3" fill="#16a34a" opacity="0.7" />
+            <circle cx="150" cy="140" r="3" fill="#3b82f6" />
+            <circle cx="260" cy="142" r="3" fill="#3b82f6" opacity="0.6" />
+            <circle cx="370" cy="140" r="3" fill="#3b82f6" opacity="0.8" />
+          </svg>
+        </div>
+
         <section aria-label="How it works" className="mt-10 grid gap-3 sm:grid-cols-3">
           {STEPS.map((s, i) => (
             <div key={s.title} className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm" style={{ "--reveal-delay": `${i * 60}ms` } as React.CSSProperties}>
