@@ -130,7 +130,8 @@ textarea:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .modal-panel,
-  .modal-backdrop {
+  .modal-backdrop,
+  .animate-spin {
     animation: none;
   }
   .skeleton {
