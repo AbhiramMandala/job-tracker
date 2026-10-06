@@ -53,7 +53,7 @@ export function LoginPage() {
           </button>
         </form>
         <p className="mt-4 text-sm text-slate-600">
-          No account? <Link to="/register" className="font-medium text-blue-700 underline">Register</Link>
+          No account? <Link to="/sign-up" className="font-medium text-blue-700 underline">Register</Link>
         </p>
       </div>
     </div>
@@ -119,10 +119,11 @@ export function RegisterPage() {
           </button>
         </form>
         <p className="mt-4 text-sm text-slate-600">
-          Have an account? <Link to="/login" className="font-medium text-blue-700 underline">Sign in</Link>
+          Have an account? <Link to="/sign-in" className="font-medium text-blue-700 underline">Sign in</Link>
         </p>
       </div>
     </div>
   );
 }
+
 
