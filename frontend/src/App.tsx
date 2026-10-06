@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { Layout } from "./components/Layout";
 import { Spinner } from "./components/ui";
 import { LoginPage, RegisterPage } from "./pages/Auth";
+import { PublicHomePage } from "./pages/PublicHome";
 import { HomePage } from "./pages/Home";
 import { ApplicationsPage } from "./pages/Applications";
 import { ApplicationDetailPage } from "./pages/ApplicationDetail";
@@ -17,7 +18,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   if (loading) return <Spinner />;
-  if (!user) return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  if (!user) return <Navigate to="/sign-in" state={{ from: location.pathname }} replace />;
   return children;
 }
 
@@ -32,8 +33,11 @@ function Shell() {
 
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/" element={<PublicHomePage />} />
+      <Route path="/sign-in" element={<LoginPage />} />
+      <Route path="/sign-up" element={<RegisterPage />} />
+      <Route path="/login" element={<Navigate to="/sign-in" replace />} />
+      <Route path="/register" element={<Navigate to="/sign-up" replace />} />
       <Route
         path="/*"
         element={

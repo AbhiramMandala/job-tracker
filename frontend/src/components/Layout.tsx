@@ -30,7 +30,7 @@ export function Layout({ children, toast }: { children: ReactNode; toast: string
 
   const onLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate("/");
   };
 
   return (
