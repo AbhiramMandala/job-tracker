@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { BookmarkCheck, Compass } from "lucide-react";
 import { api } from "../services/api";
-import { EmptyState, Spinner, inputCls } from "../components/ui";
+import { EmptyState, PageHeader, RowSkeleton, inputCls } from "../components/ui";
 
 const JOBSETU_URL = (import.meta.env.VITE_JOBSETU_URL as string | undefined) || "http://127.0.0.1:8000";
 
@@ -107,25 +108,23 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-bold">Discover Jobs</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Discovered → Saved → Applied → Interview → Offer. Saving a job here
-            adds it to <span className="font-medium">My Applications</span> as Saved.
-          </p>
-        </div>
-        <a
-          href={JOBSETU_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50"
-        >
-          Open full JobSetu search →
-        </a>
-      </div>
+      <PageHeader
+        title="Discover Jobs"
+        description="Discovered → Saved → Applied → Interview → Offer. Saving here adds the job to My Applications as Saved."
+        actions={
+          <a
+            href={JOBSETU_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50"
+          >
+            <Compass size={15} aria-hidden="true" />
+            Open full JobSetu search →
+          </a>
+        }
+      />
 
-      {searches === null && !searchesError && <Spinner />}
+      {searches === null && !searchesError && <RowSkeleton rows={2} />}
       {searches !== null && searches.length > 0 && (
         <div>
           <label htmlFor="search-pick" className="text-sm font-medium">Recent JobSetu searches</label>
@@ -169,16 +168,20 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
         </p>
       )}
 
-      {loading && <Spinner />}
-      {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {loading && <RowSkeleton rows={4} />}
+      {error && (
+        <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+          {error} Your saved data is unaffected.
+        </div>
+      )}
 
       {jobs !== null && !loading && jobs.length > 0 && (
         <div className="space-y-2">
           {jobs.map((job) => (
-            <div key={job.id} className="rounded-lg bg-white p-3 text-sm shadow-sm">
+            <div key={job.id} className="reveal rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-medium">{job.title || "Untitled role"}</p>
+                <div className="min-w-0">
+                  <p className="font-semibold">{job.title || "Untitled role"}</p>
                   <p className="text-slate-600">{job.company} · {job.location}</p>
                   <p className="mt-1 text-slate-500">
                     {job.match_total !== null && <span className="font-semibold text-blue-700">{job.match_total}% match · </span>}
@@ -189,9 +192,9 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
                 <button
                   disabled={saving === job.id || saved.has(job.id)}
                   onClick={() => void save(job)}
-                  className="rounded-md bg-slate-800 px-3 py-1.5 text-white hover:bg-slate-900 disabled:opacity-40"
+                  className="btn-shine inline-flex shrink-0 items-center gap-1 rounded-md bg-slate-800 px-3 py-1.5 text-white hover:bg-slate-900 disabled:opacity-40"
                 >
-                  {saved.has(job.id) ? "Saved ✓" : saving === job.id ? "Saving…" : "Save as application"}
+                  {saved.has(job.id) ? (<><BookmarkCheck size={14} aria-hidden="true" /> Saved ✓</>) : saving === job.id ? "Saving…" : "Save as application"}
                 </button>
               </div>
             </div>
@@ -199,7 +202,11 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
         </div>
       )}
       {jobs !== null && jobs.length === 0 && !loading && !error && (
-        <EmptyState title="No jobs" hint="That search has no active jobs to import." />
+        <EmptyState
+          icon={Compass}
+          title="No jobs in this search"
+          body="That search has no active jobs to import. Try another search in JobSetu."
+        />
       )}
     </div>
   );

@@ -30,26 +30,32 @@ export function LoginPage() {
   };
 
   return (
-    <div className="mx-auto mt-16 max-w-md rounded-lg bg-white p-6 shadow">
-      <h1 className="text-2xl font-bold">Sign in</h1>
-      <p className="mt-1 text-sm text-slate-600">Track your student job applications.</p>
-      <form onSubmit={submit} className="mt-4 space-y-3" noValidate>
-        <div>
-          <label htmlFor="email" className="text-sm font-medium">Email</label>
-          <input id="email" type="email" autoComplete="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} />
+    <div className="mx-auto mt-10 max-w-md px-4 sm:mt-16">
+      <div className="reveal rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" style={{ "--reveal-delay": "60ms" } as React.CSSProperties}>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-blue-700 text-sm font-extrabold text-white">JT</span>
+          <span className="text-sm font-semibold text-slate-500">Your career, in one place</span>
         </div>
-        <div>
-          <label htmlFor="password" className="text-sm font-medium">Password</label>
-          <input id="password" type="password" autoComplete="current-password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-        <FieldError message={error ?? undefined} />
-        <button disabled={busy} className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-slate-600">
-        No account? <Link to="/register" className="text-blue-700 underline">Register</Link>
-      </p>
+        <h1 className="mt-4 text-2xl font-bold tracking-tight">Sign in</h1>
+        <p className="mt-1 text-sm text-slate-600">Pick up your job search where you left off.</p>
+        <form onSubmit={submit} className="mt-5 space-y-3" noValidate>
+          <div>
+            <label htmlFor="email" className="text-sm font-medium">Email</label>
+            <input id="email" type="email" autoComplete="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <label htmlFor="password" className="text-sm font-medium">Password</label>
+            <input id="password" type="password" autoComplete="current-password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} />
+          </div>
+          <FieldError message={error ?? undefined} />
+          <button disabled={busy} className="btn-shine w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+            {busy ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+        <p className="mt-4 text-sm text-slate-600">
+          No account? <Link to="/register" className="font-medium text-blue-700 underline">Register</Link>
+        </p>
+      </div>
     </div>
   );
 }
@@ -86,29 +92,36 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="mx-auto mt-16 max-w-md rounded-lg bg-white p-6 shadow">
-      <h1 className="text-2xl font-bold">Create account</h1>
-      <form onSubmit={submit} className="mt-4 space-y-3" noValidate>
-        <div>
-          <label htmlFor="name" className="text-sm font-medium">Name</label>
-          <input id="name" className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
+    <div className="mx-auto mt-10 max-w-md px-4 sm:mt-16">
+      <div className="reveal rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" style={{ "--reveal-delay": "60ms" } as React.CSSProperties}>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-blue-700 text-sm font-extrabold text-white">JT</span>
+          <span className="text-sm font-semibold text-slate-500">Your career, in one place</span>
         </div>
-        <div>
-          <label htmlFor="email" className="text-sm font-medium">Email</label>
-          <input id="email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} />
-        </div>
-        <div>
-          <label htmlFor="password" className="text-sm font-medium">Password (8+ chars)</label>
-          <input id="password" type="password" autoComplete="new-password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-        <FieldError message={error ?? undefined} />
-        <button disabled={busy} className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
-          {busy ? "Creating…" : "Register"}
-        </button>
-      </form>
-      <p className="mt-4 text-sm text-slate-600">
-        Have an account? <Link to="/login" className="text-blue-700 underline">Sign in</Link>
-      </p>
+        <h1 className="mt-4 text-2xl font-bold tracking-tight">Create account</h1>
+        <p className="mt-1 text-sm text-slate-600">Discover jobs, track applications, prepare for interviews.</p>
+        <form onSubmit={submit} className="mt-5 space-y-3" noValidate>
+          <div>
+            <label htmlFor="name" className="text-sm font-medium">Name</label>
+            <input id="name" className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div>
+            <label htmlFor="email" className="text-sm font-medium">Email</label>
+            <input id="email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} />
+          </div>
+          <div>
+            <label htmlFor="password" className="text-sm font-medium">Password (8+ chars)</label>
+            <input id="password" type="password" autoComplete="new-password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} />
+          </div>
+          <FieldError message={error ?? undefined} />
+          <button disabled={busy} className="btn-shine w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+            {busy ? "Creating…" : "Register"}
+          </button>
+        </form>
+        <p className="mt-4 text-sm text-slate-600">
+          Have an account? <Link to="/login" className="font-medium text-blue-700 underline">Sign in</Link>
+        </p>
+      </div>
     </div>
   );
 }

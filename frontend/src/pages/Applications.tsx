@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { Briefcase, Plus } from "lucide-react";
 import { api } from "../services/api";
 import type { Application } from "../types";
-import { EmptyState, Spinner, StatusBadge, inputCls } from "../components/ui";
+import { EmptyState, PageHeader, PrimaryLink, RowSkeleton, StatusBadge, inputCls } from "../components/ui";
 
 const STATUSES = ["", "SAVED", "APPLIED", "OA", "INTERVIEW", "OFFER", "REJECTED", "WITHDRAWN"];
 const JOB_TYPES = ["", "FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT", "REMOTE"];
@@ -13,6 +14,7 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
 
   const search = params.get("search") ?? "";
   const status = params.get("status") ?? "";
@@ -44,7 +46,7 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
       })
       .catch((e) => setError(e instanceof Error ? e.message : "Failed"))
       .finally(() => setLoading(false));
-  }, [search, status, jobType, sort, page]);
+  }, [search, status, jobType, sort, page, retry]);
 
   const applyFilters = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,14 +58,17 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Applications ({total})</h1>
-        <Link to="/applications/new" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
-          + New
-        </Link>
-      </div>
+      <PageHeader
+        title={`Applications${total > 0 ? ` (${total})` : ""}`}
+        description="Your career pipeline — every saved, applied, and interviewed role."
+        actions={
+          <PrimaryLink to="/applications/new">
+            <Plus size={16} aria-hidden="true" /> New application
+          </PrimaryLink>
+        }
+      />
 
-      <form onSubmit={applyFilters} className="grid gap-2 rounded-lg bg-white p-3 shadow-sm sm:grid-cols-5">
+      <form onSubmit={applyFilters} className="reveal grid gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-5">
         <input aria-label="Search" placeholder="Company or title…" className={inputCls} value={draft.search} onChange={(e) => setDraft({ ...draft, search: e.target.value })} />
         <select aria-label="Status" className={inputCls} value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value })}>
           {STATUSES.map((s) => (
@@ -83,13 +88,21 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
       </form>
 
       {loading ? (
-        <Spinner />
+        <RowSkeleton rows={6} />
       ) : error ? (
-        <div className="rounded-md bg-red-50 p-4 text-sm text-red-700">{error}</div>
+        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+          We couldn't load your applications. Your data is safe.{" "}
+          <button className="underline" onClick={() => { setError(null); setLoading(true); setRetry((r) => r + 1); }}>Try again</button>
+        </div>
       ) : items.length === 0 ? (
-        <EmptyState title="No applications match" hint="Try clearing filters or add a new application." />
+        <EmptyState
+          icon={Briefcase}
+          title="No applications match"
+          body="Try clearing the filters — or find your next opportunity with JobSetu."
+          action={{ to: "/discover-jobs", label: "Discover jobs" }}
+        />
       ) : (
-        <div className="overflow-x-auto rounded-lg bg-white shadow-sm">
+        <div className="reveal overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 text-slate-500">
               <tr>

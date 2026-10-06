@@ -56,7 +56,7 @@ function renderHome() {
 describe("Home command center", () => {
   it("greets the user and exposes the four actions", async () => {
     renderHome();
-    expect(await screen.findByText("Welcome back, Admin")).toBeTruthy();
+    expect(await screen.findByText(/Good (morning|afternoon|evening), Admin/)).toBeTruthy();
     for (const label of ["Discover Jobs", "My Applications", "Interviews", "Resumes"]) {
       expect(await screen.findByText(new RegExp(label))).toBeTruthy();
     }
