@@ -88,44 +88,65 @@ describe("Resumes workspace", () => {
   });
 });
 
-describe("Discover save interaction", () => {
-  const SEARCHES = {
-    ok: true,
-    status: 200,
-    json: () => Promise.resolve({ searches: [{ id: 3, role: "Java Developer", location: "Hyderabad", experience: "Fresher", job_count: 2, retrieved_at: null }] }),
-  };
-  const JOBS = {
+describe("Discover embedded search", () => {
+  const SEARCH_OK = {
     ok: true,
     status: 200,
     json: () => Promise.resolve({
-      jobs: [{ id: 9, company: "Acme", title: "Java Dev", location: "Hyderabad", apply_link: "", salary: "", posted: "", description_snippet: "", match_total: 70 }],
+      search_id: 7,
+      role: "Python Developer",
+      is_live: true,
+      jobs: [
+        { id: 9, company: "Acme", title: "Python Dev", location: "Hyderabad", apply_link: "https://example.com/a", salary: "", posted: "", description_snippet: "Build APIs.", match_total: 70, signals: { experience: "entry", min_years: 0, job_type: "full-time" }, evidence_url: "/jobs/9/evidence", match: { total: 70, matched_skills: ["Python"], missing_skills: ["Django"], reasons: ["2/2 detected skills match"] } },
+        { id: 10, company: "Beta", title: "Senior Python Dev", location: "Hyderabad", apply_link: "", salary: "", posted: "", description_snippet: "Lead the team.", match_total: 20, signals: { experience: "experienced", min_years: 5, job_type: "" }, evidence_url: "/jobs/10/evidence" },
+      ],
     }),
   };
   const EXPORT = {
     ok: true,
     status: 200,
-    json: () => Promise.resolve({ company: "Acme", job_title: "Java Dev", status: "SAVED" }),
+    json: () => Promise.resolve({ company: "Acme", job_title: "Python Dev", status: "SAVED" }),
   };
 
-  it("picks a search, lists jobs, and saves one as an application", async () => {
-    authed();
-    const fetchMock = vi.fn((url: string) => {
-      if (String(url).includes("/api/searches")) return Promise.resolve(SEARCHES);
+  function mockJobSetu() {
+    const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+      if (String(url).includes("/api/searches")) return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ searches: [] }) });
       if (String(url).includes("/tracker-export")) return Promise.resolve(EXPORT);
-      return Promise.resolve(JOBS);
+      if (String(url).endsWith("/api/search") && init?.method === "POST") return Promise.resolve(SEARCH_OK);
+      return Promise.reject(new Error(`unexpected fetch ${url}`));
     });
     vi.stubGlobal("fetch", fetchMock);
+    return fetchMock;
+  }
+
+  it("searches natively, shows signals, and saves without extra login", async () => {
+    authed();
+    mockJobSetu();
     post.mockResolvedValue({ id: "app1" });
     shell(<DiscoverPage notify={notify} />);
 
-    const picker = (await screen.findByLabelText("Recent JobSetu searches")) as HTMLSelectElement;
-    expect(picker.options.length).toBe(2); // placeholder + one search
-    fireEvent.change(picker, { target: { value: "3" } });
+    fireEvent.change(await screen.findByLabelText("Role"), { target: { value: "Python Developer" } });
+    fireEvent.click(screen.getByRole("button", { name: "Search jobs" }));
 
-    expect(await screen.findByText("Java Dev")).toBeTruthy();
-    fireEvent.click(await screen.findByText("Save as application"));
+    // Cards render with company/role/location/signal chips and match context.
+    expect(await screen.findByText("Acme")).toBeTruthy();
+    expect(await screen.findByText("Hyderabad · Entry-level · Full-time")).toBeTruthy();
+    expect(await screen.findByText(/70% match/)).toBeTruthy();
+
+    // Embedded filters narrow the list without new requests.
+    fireEvent.change(screen.getByLabelText("Filter by experience"), { target: { value: "experienced" } });
+    expect(screen.queryByText("Acme")).toBeNull();
+    expect(await screen.findByText("Beta")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("Filter by experience"), { target: { value: "" } });
+    expect(await screen.findByText("Acme")).toBeTruthy();
+
+    // Details expand inline with evidence + apply links; save uses the session.
+    fireEvent.click((await screen.findAllByText("View details"))[0]);
+    expect(await screen.findByText("Why verified? Evidence →")).toBeTruthy();
+    fireEvent.click((await screen.findAllByRole("button", { name: "Save" }))[0]);
     expect(await screen.findByText("Saved ✓")).toBeTruthy();
     expect(post).toHaveBeenCalledWith("/api/applications", expect.objectContaining({ company: "Acme" }));
     expect(notify).toHaveBeenCalled();
+    expect(await screen.findByRole("link", { name: "Saved. View application" })).toBeTruthy();
   });
 });
