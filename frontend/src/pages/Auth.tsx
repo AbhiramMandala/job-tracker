@@ -31,13 +31,13 @@ export function LoginPage() {
 
   return (
     <div className="mx-auto mt-10 max-w-md px-4 sm:mt-16">
-      <div className="reveal rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" style={{ "--reveal-delay": "60ms" } as React.CSSProperties}>
+      <div className="reveal rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm sm:p-8" style={{ "--reveal-delay": "60ms" } as React.CSSProperties}>
         <div className="flex items-center gap-2">
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-blue-700 text-sm font-extrabold text-white">JT</span>
-          <span className="text-sm font-semibold text-slate-500">Your career, in one place</span>
+          <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Your career, in one place</span>
         </div>
         <h1 className="mt-4 text-2xl font-bold tracking-tight">Sign in</h1>
-        <p className="mt-1 text-sm text-slate-600">Pick up your job search where you left off.</p>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Pick up your job search where you left off.</p>
         <form onSubmit={submit} className="mt-5 space-y-3" noValidate>
           <div>
             <label htmlFor="email" className="text-sm font-medium">Email</label>
@@ -52,8 +52,8 @@ export function LoginPage() {
             {busy ? "Signing in…" : "Sign in"}
           </button>
         </form>
-        <p className="mt-4 text-sm text-slate-600">
-          No account? <Link to="/sign-up" className="font-medium text-blue-700 underline">Register</Link>
+        <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+          No account? <Link to="/sign-up" className="font-medium text-blue-700 dark:text-blue-400 underline">Register</Link>
         </p>
       </div>
     </div>
@@ -93,13 +93,13 @@ export function RegisterPage() {
 
   return (
     <div className="mx-auto mt-10 max-w-md px-4 sm:mt-16">
-      <div className="reveal rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" style={{ "--reveal-delay": "60ms" } as React.CSSProperties}>
+      <div className="reveal rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm sm:p-8" style={{ "--reveal-delay": "60ms" } as React.CSSProperties}>
         <div className="flex items-center gap-2">
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-blue-700 text-sm font-extrabold text-white">JT</span>
-          <span className="text-sm font-semibold text-slate-500">Your career, in one place</span>
+          <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Your career, in one place</span>
         </div>
         <h1 className="mt-4 text-2xl font-bold tracking-tight">Create account</h1>
-        <p className="mt-1 text-sm text-slate-600">Discover jobs, track applications, prepare for interviews.</p>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Discover jobs, track applications, prepare for interviews.</p>
         <form onSubmit={submit} className="mt-5 space-y-3" noValidate>
           <div>
             <label htmlFor="name" className="text-sm font-medium">Name</label>
@@ -118,12 +118,13 @@ export function RegisterPage() {
             {busy ? "Creating…" : "Register"}
           </button>
         </form>
-        <p className="mt-4 text-sm text-slate-600">
-          Have an account? <Link to="/sign-in" className="font-medium text-blue-700 underline">Sign in</Link>
+        <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+          Have an account? <Link to="/sign-in" className="font-medium text-blue-700 dark:text-blue-400 underline">Sign in</Link>
         </p>
       </div>
     </div>
   );
 }
+
 
 

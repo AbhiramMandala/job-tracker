@@ -100,6 +100,22 @@ describe("auth-gated routing", () => {
     expect(window.location.pathname).toBe("/");
   });
 
+  it("offers a theme toggle in the header that persists", async () => {
+    localStorage.setItem("sjt_token", "test-token");
+    get.mockImplementation((path: string) => {
+      if (path === "/api/auth/me") return Promise.resolve({ user: USER });
+      if (path === "/api/dashboard") return Promise.resolve(EMPTY_DASH);
+      return Promise.reject(new Error(`unexpected GET ${path}`));
+    });
+    go("/home");
+    render(<App />);
+    expect(await screen.findByText(/Good (morning|afternoon|evening), Admin/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Switch to dark theme" }));
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(localStorage.getItem("jt-theme")).toBe("dark");
+    expect(screen.getByRole("button", { name: "Switch to light theme" })).toBeTruthy();
+  });
+
   it("lands fresh logins on home with the new navigation", async () => {
     localStorage.setItem("sjt_token", "test-token");
     get.mockImplementation((path: string) => {

@@ -4,19 +4,19 @@ import type { LucideIcon } from "lucide-react";
 import type { ApplicationStatus } from "../types";
 
 const COLORS: Record<ApplicationStatus, string> = {
-  SAVED: "bg-slate-200 text-slate-800",
-  APPLIED: "bg-blue-100 text-blue-800",
-  OA: "bg-purple-100 text-purple-800",
-  INTERVIEW: "bg-amber-100 text-amber-800",
-  OFFER: "bg-green-100 text-green-800",
-  REJECTED: "bg-red-100 text-red-800",
-  WITHDRAWN: "bg-zinc-200 text-zinc-600",
+  SAVED: "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200",
+  APPLIED: "bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300",
+  OA: "bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300",
+  INTERVIEW: "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300",
+  OFFER: "bg-green-100 dark:bg-green-950 text-green-800 dark:text-green-300",
+  REJECTED: "bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-300",
+  WITHDRAWN: "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300",
 };
 
 export function StatusBadge({ status }: { status: ApplicationStatus }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${COLORS[status] ?? "bg-slate-200"}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${COLORS[status] ?? "bg-slate-200 dark:bg-slate-700"}`}
     >
       {status}
     </span>
@@ -36,7 +36,7 @@ export function PageHeader({
     <div className="reveal flex flex-wrap items-start justify-between gap-3">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-        {description && <p className="mt-1 text-sm text-slate-600">{description}</p>}
+        {description && <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </div>
@@ -81,14 +81,14 @@ export function ActionCard({
       to={to}
       onMouseMove={onMove}
       style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties}
-      className="reveal spotlight lift group rounded-lg border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md"
+      className="reveal spotlight lift group rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md"
     >
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-blue-700">
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400">
         <Icon size={20} aria-hidden="true" />
       </span>
       <span className="mt-3 block font-semibold">{title}</span>
-      <span className="mt-1 block text-sm text-slate-600">{body}</span>
-      <span className="mt-3 block text-sm font-medium text-blue-700">
+      <span className="mt-1 block text-sm text-slate-600 dark:text-slate-400">{body}</span>
+      <span className="mt-3 block text-sm font-medium text-blue-700 dark:text-blue-400">
         {cta} <span aria-hidden="true" className="inline-block transition-transform group-hover:translate-x-0.5">→</span>
       </span>
     </Link>
@@ -107,14 +107,14 @@ export function EmptyState({
   action?: { to: string; label: string };
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-10 text-center">
+    <div className="rounded-lg border border-dashed border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-6 py-10 text-center">
       {Icon && (
-        <span className="mx-auto mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+        <span className="mx-auto mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
           <Icon size={22} aria-hidden="true" />
         </span>
       )}
-      <p className="font-semibold text-slate-800">{title}</p>
-      {body && <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">{body}</p>}
+      <p className="font-semibold text-slate-800 dark:text-slate-200">{title}</p>
+      {body && <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">{body}</p>}
       {action && (
         <Link
           to={action.to}
@@ -130,14 +130,14 @@ export function EmptyState({
 export function Spinner() {
   return (
     <div className="flex items-center justify-center p-8" role="status" aria-label="Loading">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 dark:border-slate-600 border-t-blue-600" />
     </div>
   );
 }
 
 export function CardSkeleton({ lines = 3 }: { lines?: number }) {
   return (
-    <div className="rounded-lg bg-white p-4 shadow-sm" aria-hidden="true">
+    <div className="rounded-lg bg-white dark:bg-slate-900 p-4 shadow-sm" aria-hidden="true">
       <div className="skeleton h-4 w-2/3" />
       {Array.from({ length: lines }).map((_, i) => (
         <div key={i} className="skeleton mt-2 h-3 w-full" style={{ opacity: 1 - i * 0.15 }} />
@@ -158,11 +158,11 @@ export function RowSkeleton({ rows = 4 }: { rows?: number }) {
 
 export function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-1 text-sm text-red-600">{message}</p>;
+  return <p className="mt-1 text-sm text-red-600 dark:text-red-400">{message}</p>;
 }
 
 export const inputCls =
-  "w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
+  "w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
 
 export function ConfirmModal({
   title,
@@ -182,13 +182,13 @@ export function ConfirmModal({
       aria-modal="true"
       aria-label={title}
     >
-      <div className="modal-panel w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+      <div className="modal-panel w-full max-w-md rounded-lg bg-white dark:bg-slate-900 p-6 shadow-xl">
         <h2 className="text-lg font-semibold">{title}</h2>
-        <p className="mt-2 text-sm text-slate-600">{body}</p>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{body}</p>
         <div className="mt-6 flex justify-end gap-2">
           <button
             onClick={onCancel}
-            className="rounded-md border border-slate-300 px-4 py-2 text-sm hover:bg-slate-50"
+            className="rounded-md border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
           >
             Cancel
           </button>
@@ -204,3 +204,4 @@ export function ConfirmModal({
     </div>
   );
 }
+

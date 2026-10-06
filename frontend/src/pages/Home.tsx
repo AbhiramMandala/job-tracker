@@ -10,7 +10,7 @@ function Hero({ name, hasActivity }: { name: string; hasActivity: boolean }) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   return (
-    <section className="reveal relative overflow-hidden rounded-xl border border-blue-100 bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800 px-6 py-8 text-white shadow-sm sm:px-8">
+    <section className="reveal relative overflow-hidden rounded-xl border border-blue-100 dark:border-blue-900 bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800 px-6 py-8 text-white shadow-sm sm:px-8">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
@@ -41,7 +41,7 @@ function Hero({ name, hasActivity }: { name: string; hasActivity: boolean }) {
         <div className="mt-5 flex flex-wrap gap-2">
           <Link
             to="/discover-jobs"
-            className="btn-shine inline-flex items-center gap-1.5 rounded-md bg-white px-4 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-50"
+            className="btn-shine inline-flex items-center gap-1.5 rounded-md bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-blue-800 dark:text-blue-300 hover:bg-blue-50"
           >
             <Compass size={16} aria-hidden="true" />
             Discover jobs
@@ -68,25 +68,25 @@ function Pipeline({ totals }: { totals: Dashboard["totals"] }) {
   ];
   const max = Math.max(1, ...steps.map((s) => s.value));
   return (
-    <section aria-label="Your pipeline" className="reveal rounded-lg border border-slate-200 bg-white p-4 shadow-sm" style={{ "--reveal-delay": "60ms" } as React.CSSProperties}>
+    <section aria-label="Your pipeline" className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm" style={{ "--reveal-delay": "60ms" } as React.CSSProperties}>
       <h2 className="font-semibold">Your pipeline</h2>
       <ol className="mt-3 flex items-stretch gap-1.5 text-center sm:gap-2">
         {steps.map((s, i) => (
           <li key={s.label} className="flex min-w-0 flex-1 items-stretch gap-1.5 sm:gap-2">
-            <div className="min-w-0 flex-1 rounded-md bg-slate-50 px-1 py-3 sm:px-2">
+            <div className="min-w-0 flex-1 rounded-md bg-slate-50 dark:bg-slate-800 px-1 py-3 sm:px-2">
               <p className="text-2xl font-extrabold tabular-nums">{s.value}</p>
-              <p className="truncate text-xs text-slate-500">{s.label}</p>
-              <div className="mx-auto mt-2 h-1 w-full max-w-20 overflow-hidden rounded bg-slate-200">
+              <p className="truncate text-xs text-slate-500 dark:text-slate-400">{s.label}</p>
+              <div className="mx-auto mt-2 h-1 w-full max-w-20 overflow-hidden rounded bg-slate-200 dark:bg-slate-700">
                 <div className="h-1 rounded bg-blue-600" style={{ width: `${(s.value / max) * 100}%` }} />
               </div>
             </div>
             {i < steps.length - 1 && (
-              <span aria-hidden="true" className="self-center text-slate-300">→</span>
+              <span aria-hidden="true" className="self-center text-slate-300 dark:text-slate-400">→</span>
             )}
           </li>
         ))}
       </ol>
-      <p className="mt-2 text-xs text-slate-500">
+      <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         Discovered → Saved → Applied → Interview → Offer
         {totals.rejected > 0 && ` · Rejected: ${totals.rejected}`}
       </p>
@@ -109,9 +109,9 @@ export function HomePage() {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-        <p className="font-semibold text-red-800">We couldn't load your workspace.</p>
-        <p className="mt-1 text-sm text-red-600">Your data is safe.</p>
+      <div className="rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 p-6 text-center">
+        <p className="font-semibold text-red-800 dark:text-red-300">We couldn't load your workspace.</p>
+        <p className="mt-1 text-sm text-red-600 dark:text-red-400">Your data is safe.</p>
         <button
           onClick={() => { setError(null); setRetry((r) => r + 1); }}
           className="mt-4 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
@@ -152,45 +152,45 @@ export function HomePage() {
       <Pipeline totals={data.totals} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <section aria-label="Next action" className="reveal rounded-lg border border-slate-200 bg-white p-4 shadow-sm" style={{ "--reveal-delay": "100ms" } as React.CSSProperties}>
+        <section aria-label="Next action" className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm" style={{ "--reveal-delay": "100ms" } as React.CSSProperties}>
           <h2 className="font-semibold">Next action</h2>
           {!overdueNext && !nextApp ? (
-            <p className="mt-2 text-sm text-slate-500">
-              Nothing yet. <Link to="/discover-jobs" className="text-blue-700 underline">Find jobs</Link> to get started.
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Nothing yet. <Link to="/discover-jobs" className="text-blue-700 dark:text-blue-400 underline">Find jobs</Link> to get started.
             </p>
           ) : overdueNext ? (
-            <div className="mt-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm">
-              <p className="font-semibold text-amber-900">⚠ Follow up with {overdueNext.company}</p>
-              <p className="text-amber-700">Due: {overdueNext.follow_up_date}</p>
-              <Link to={`/applications/${overdueNext.id}`} className="mt-1 inline-block font-medium text-blue-700 underline">Open application →</Link>
+            <div className="mt-2 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950 p-3 text-sm">
+              <p className="font-semibold text-amber-900 dark:text-amber-200">⚠ Follow up with {overdueNext.company}</p>
+              <p className="text-amber-700 dark:text-amber-300">Due: {overdueNext.follow_up_date}</p>
+              <Link to={`/applications/${overdueNext.id}`} className="mt-1 inline-block font-medium text-blue-700 dark:text-blue-400 underline">Open application →</Link>
             </div>
           ) : nextApp ? (
-            <div className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-3 text-sm">
+            <div className="mt-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-3 text-sm">
               <p className="font-semibold">{nextApp.company} — {nextApp.job_title}</p>
               <div className="mt-1.5"><StatusBadge status={nextApp.status} /></div>
-              <Link to={`/applications/${nextApp.id}`} className="mt-1 inline-block font-medium text-blue-700 underline">Continue →</Link>
+              <Link to={`/applications/${nextApp.id}`} className="mt-1 inline-block font-medium text-blue-700 dark:text-blue-400 underline">Continue →</Link>
             </div>
           ) : null}
         </section>
 
-        <section aria-label="Upcoming interviews" className="reveal rounded-lg border border-slate-200 bg-white p-4 shadow-sm" style={{ "--reveal-delay": "140ms" } as React.CSSProperties}>
+        <section aria-label="Upcoming interviews" className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm" style={{ "--reveal-delay": "140ms" } as React.CSSProperties}>
           <h2 className="font-semibold">Upcoming</h2>
           <div className="mt-2 space-y-2 text-sm">
             {data.upcomingInterviews.length === 0 && (
-              <p className="text-slate-500">No interviews scheduled. They'll appear here once an application reaches the interview stage.</p>
+              <p className="text-slate-500 dark:text-slate-400">No interviews scheduled. They'll appear here once an application reaches the interview stage.</p>
             )}
             {data.upcomingInterviews.slice(0, 3).map((i) => (
-              <div key={i.id} className="rounded-md border border-slate-200 p-2">
+              <div key={i.id} className="rounded-md border border-slate-200 dark:border-slate-700 p-2">
                 <p className="font-medium">{i.company} — {i.job_title}</p>
-                <p className="text-slate-600">{i.interview_type} · {new Date(i.scheduled_at).toLocaleString()}</p>
+                <p className="text-slate-600 dark:text-slate-400">{i.interview_type} · {new Date(i.scheduled_at).toLocaleString()}</p>
               </div>
             ))}
-            <Link to="/interviews" className="inline-block font-medium text-blue-700 underline">Manage interviews →</Link>
+            <Link to="/interviews" className="inline-block font-medium text-blue-700 dark:text-blue-400 underline">Manage interviews →</Link>
           </div>
         </section>
       </div>
 
-      <section aria-label="Continue where you left off" className="reveal rounded-lg border border-slate-200 bg-white p-4 shadow-sm" style={{ "--reveal-delay": "180ms" } as React.CSSProperties}>
+      <section aria-label="Continue where you left off" className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm" style={{ "--reveal-delay": "180ms" } as React.CSSProperties}>
         <h2 className="font-semibold">Continue where you left off</h2>
         <div className="mt-3 space-y-2">
           {data.recentApplications.length === 0 && (
@@ -201,17 +201,17 @@ export function HomePage() {
             />
           )}
           {data.recentApplications.slice(0, 3).map((a) => (
-            <Link key={a.id} to={`/applications/${a.id}`} className="lift flex items-center justify-between gap-2 rounded-md border border-slate-200 bg-white p-3 text-sm shadow-sm hover:shadow-md">
+            <Link key={a.id} to={`/applications/${a.id}`} className="lift flex items-center justify-between gap-2 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-3 text-sm shadow-sm hover:shadow-md">
               <span className="min-w-0">
                 <span className="block truncate font-semibold">{a.company}</span>
-                <span className="block truncate text-slate-600">{a.job_title}</span>
+                <span className="block truncate text-slate-600 dark:text-slate-400">{a.job_title}</span>
               </span>
               <StatusBadge status={a.status} />
             </Link>
           ))}
         </div>
         {data.recentApplications.length > 0 && (
-          <Link to="/applications" className="mt-3 inline-block text-sm font-medium text-blue-700 underline">
+          <Link to="/applications" className="mt-3 inline-block text-sm font-medium text-blue-700 dark:text-blue-400 underline">
             View all applications →
           </Link>
         )}
@@ -219,3 +219,4 @@ export function HomePage() {
     </div>
   );
 }
+
