@@ -149,4 +149,25 @@ describe("Discover embedded search", () => {
     expect(notify).toHaveBeenCalled();
     expect(await screen.findByRole("link", { name: "Saved. View application" })).toBeTruthy();
   });
+
+  it("links the existing application when the job is already tracked", async () => {
+    authed();
+    mockJobSetu();
+    const conflict = new Error("This job is already tracked") as Error & {
+      code?: string;
+      details?: unknown;
+    };
+    conflict.code = "CONFLICT";
+    conflict.details = { application_id: "existing-app" };
+    post.mockRejectedValue(conflict);
+    shell(<DiscoverPage notify={notify} />);
+
+    fireEvent.change(await screen.findByLabelText("Role"), { target: { value: "Python Developer" } });
+    fireEvent.click(screen.getByRole("button", { name: "Search jobs" }));
+    expect(await screen.findByText("Acme")).toBeTruthy();
+    fireEvent.click((await screen.findAllByRole("button", { name: "Save" }))[0]);
+    const link = await screen.findByRole("link", { name: "Saved. View application" });
+    expect(link.getAttribute("href")).toBe("/applications/existing-app");
+    expect(notify).toHaveBeenCalledWith(expect.stringContaining("already tracked"));
+  });
 });
