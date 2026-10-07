@@ -56,7 +56,8 @@ sessions(id, user_id FK, token_hash UNIQUE, expires_at, created_at)
 resumes(id, user_id FK, filename, content_type, size, r2_key UNIQUE, created_at)
 applications(id, user_id FK, company, job_title, location, job_url, job_type, salary,
   application_date, status, notes, contact_person, contact_email,
-  follow_up_date, follow_up_reminder, follow_up_notes, resume_id FK NULL, timestamps)
+  follow_up_date, follow_up_reminder, follow_up_notes, resume_id FK NULL,
+  jobsetu_job_id INT NULL (JobSetu provenance; partial UNIQUE(user_id, jobsetu_job_id)), timestamps)
 interviews(id, user_id FK, application_id FK, interview_type, scheduled_at, interviewer, meeting_url, notes, result, timestamps)
 notes(id, user_id FK, application_id FK, content, timestamps)
 ```

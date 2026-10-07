@@ -192,7 +192,16 @@ export function DiscoverPage({ notify }: { notify: (m: string) => void }) {
       setSavedApps((prev) => ({ ...prev, [job.id]: created.id }));
       notify(`Saved "${job.title}" to applications.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
+      // Re-saving an already-tracked JobSetu job returns 409 with the
+      // existing application id — link to it instead of showing an error.
+      const code = (err as { code?: string }).code;
+      const existingId = (err as { details?: { application_id?: string } }).details?.application_id;
+      if (code === "CONFLICT" && existingId) {
+        setSavedApps((prev) => ({ ...prev, [job.id]: existingId }));
+        notify(`"${job.title}" is already tracked — opened the existing application.`);
+      } else {
+        setError(err instanceof Error ? err.message : "Save failed");
+      }
     } finally {
       setSaving(null);
     }

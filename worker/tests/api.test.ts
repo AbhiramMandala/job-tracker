@@ -63,8 +63,8 @@ class MockD1 {
       return [];
     }
     if (q.startsWith("INSERT INTO applications")) {
-      const [id, user_id, company, job_title, location, job_url, job_type, salary, application_date, status, notes, contact_person, contact_email, follow_up_date, follow_up_reminder, follow_up_notes, resume_id, created_at, updated_at] = params as any[];
-      T.applications.push({ id, user_id, company, job_title, location, job_url, job_type, salary, application_date, status, notes, contact_person, contact_email, follow_up_date, follow_up_reminder, follow_up_notes, resume_id, created_at, updated_at });
+      const [id, user_id, company, job_title, location, job_url, job_type, salary, application_date, status, notes, contact_person, contact_email, follow_up_date, follow_up_reminder, follow_up_notes, resume_id, jobsetu_job_id, created_at, updated_at] = params as any[];
+      T.applications.push({ id, user_id, company, job_title, location, job_url, job_type, salary, application_date, status, notes, contact_person, contact_email, follow_up_date, follow_up_reminder, follow_up_notes, resume_id, jobsetu_job_id, created_at, updated_at });
       return [];
     }
     if (q.startsWith("INSERT INTO interviews")) {
@@ -108,6 +108,9 @@ class MockD1 {
     }
     if (q.startsWith("SELECT id FROM applications WHERE id = ? AND user_id")) {
       return T.applications.filter((a) => a.id === params[0] && a.user_id === params[1]).map((a) => ({ id: a.id })) as unknown as T[];
+    }
+    if (q.startsWith("SELECT id FROM applications WHERE user_id = ? AND jobsetu_job_id = ?")) {
+      return T.applications.filter((a) => a.user_id === params[0] && a.jobsetu_job_id === params[1]).map((a) => ({ id: a.id })) as unknown as T[];
     }
     if (q.startsWith("SELECT COUNT(*) as total FROM applications")) {
       let rows = T.applications.filter((a) => a.user_id === params[0]);
@@ -396,6 +399,89 @@ describe("applications CRUD + ownership + filtering", () => {
   });
 });
 
+describe("JobSetu duplicate prevention", () => {
+  let env: ReturnType<typeof makeEnv>;
+  let token = "";
+  beforeEach(async () => {
+    env = makeEnv();
+    token = (await api(env, "POST", "/api/auth/register", { email: "dup@test.com", password: "password123" })).json.data.token;
+  });
+
+  it("rejects duplicate JobSetu job_id for same user", async () => {
+    const first = await api(env, "POST", "/api/applications", {
+      company: "Qloron",
+      job_title: "Python Backend Developer",
+      application_date: "2026-10-05",
+      status: "SAVED",
+      jobsetu: { job_id: 123 }
+    }, token);
+    expect(first.status).toBe(201);
+
+    const dup = await api(env, "POST", "/api/applications", {
+      company: "Qloron",
+      job_title: "Python Backend Developer",
+      application_date: "2026-10-05",
+      status: "OFFER",
+      jobsetu: { job_id: 123 }
+    }, token);
+    expect(dup.status).toBe(409);
+    expect(dup.json.error.code).toBe("CONFLICT");
+  });
+
+  it("allows same JobSetu job_id for different users", async () => {
+    const token2 = (await api(env, "POST", "/api/auth/register", { email: "other@test.com", password: "password123" })).json.data.token;
+
+    const first = await api(env, "POST", "/api/applications", {
+      company: "Qloron",
+      job_title: "Python Backend Developer",
+      application_date: "2026-10-05",
+      status: "SAVED",
+      jobsetu: { job_id: 123 }
+    }, token);
+    expect(first.status).toBe(201);
+
+    const second = await api(env, "POST", "/api/applications", {
+      company: "Qloron",
+      job_title: "Python Backend Developer",
+      application_date: "2026-10-05",
+      status: "SAVED",
+      jobsetu: { job_id: 123 }
+    }, token2);
+    expect(second.status).toBe(201);
+  });
+
+  it("allows different JobSetu job_ids for same user", async () => {
+    const first = await api(env, "POST", "/api/applications", {
+      company: "Qloron",
+      job_title: "Python Backend Developer",
+      application_date: "2026-10-05",
+      status: "SAVED",
+      jobsetu: { job_id: 123 }
+    }, token);
+    expect(first.status).toBe(201);
+
+    const second = await api(env, "POST", "/api/applications", {
+      company: "Qloron",
+      job_title: "Python Backend Developer",
+      application_date: "2026-10-05",
+      status: "OFFER",
+      jobsetu: { job_id: 456 }
+    }, token);
+    expect(second.status).toBe(201);
+  });
+
+  it("rejects invalid jobsetu reference", async () => {
+    const res = await api(env, "POST", "/api/applications", {
+      company: "Test",
+      job_title: "Dev",
+      application_date: "2026-10-05",
+      jobsetu: { job_id: "invalid" }
+    }, token);
+    expect(res.status).toBe(400);
+    expect(res.json.error.code).toBe("VALIDATION_ERROR");
+  });
+});
+
 describe("interviews, notes, resumes", () => {
   let env: ReturnType<typeof makeEnv>;
   let token = "";
@@ -441,4 +527,3 @@ describe("interviews, notes, resumes", () => {
     expect(del.status).toBe(200);
   });
 });
-

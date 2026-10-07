@@ -133,6 +133,16 @@ export const ALLOWED_RESUME_MIMES = [
 
 export const MAX_RESUME_BYTES = 5 * 1024 * 1024; // 5 MB
 
+/** Parse an optional JobSetu provenance reference `{ job_id }` as sent by
+ *  GET /api/jobs/{id}/tracker-export. Returns the positive integer id, or
+ *  null when the value is absent or malformed (callers 400 on malformed). */
+export function parseJobsetuJobId(value: unknown): number | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  const id = (value as Record<string, unknown>).job_id;
+  if (typeof id !== "number" || !Number.isInteger(id) || id <= 0) return null;
+  return id;
+}
+
 export function validateResumeFile(filename: string, mime: string, size: number): ValidationError[] {
   const errs: ValidationError[] = [];
   // Reject traversal / path separators on the raw input before sanitization.
