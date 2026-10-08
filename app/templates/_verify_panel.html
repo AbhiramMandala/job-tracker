@@ -1,0 +1,16 @@
+{# VERIFY panel. Expects `ver` display dict and `job_id`. #}
+{% if ver and ver.status != 'unavailable' %}
+<div class="verify verify-{{ ver.status }}">
+  <p class="verify-head">
+    {% if ver.is_supporting %}🟢{% elif ver.is_warning %}🔴{% else %}🟡{% endif %}
+    <strong>VERIFY · {{ ver.label }}</strong>
+    <span class="muted">· {{ ver.source_count }} source{{ "s" if ver.source_count != 1 }} · {{ "LIVE" if ver.live else "CACHED · " + ver.age }}</span>
+  </p>
+  <ul class="verify-reasons">
+    {% for reason in ver.reasons %}<li>{{ reason }}</li>{% endfor %}
+  </ul>
+  <p><a class="link" href="/jobs/{{ job_id }}/evidence">VIEW EVIDENCE</a></p>
+</div>
+{% elif ver %}
+<p class="muted">Verification unavailable — the live check failed and no cached evidence exists. No status shown rather than a guess.</p>
+{% endif %}

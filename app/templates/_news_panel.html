@@ -1,0 +1,27 @@
+{# NEWS CONTEXT panel. Expects `nw` display dict and `job_id`. #}
+{% if nw and (nw['items'] or nw['state'] in ('empty', 'ambiguous', 'stale', 'unavailable')) %}
+<div class="news">
+  <p class="news-head"><strong>NEWS CONTEXT</strong>
+    <span class="muted">· {{ "LIVE · checked just now" if nw['live'] else ("CACHED · checked earlier" if nw['state'] in ('ok', 'stale') else "") }}</span>
+  </p>
+  {% if nw['state'] == 'ok' or (nw['state'] == 'stale' and nw['items']) %}
+  {% if nw['stale'] %}<p class="stale-banner" role="alert">News context temporarily unavailable. Showing cached items.</p>{% endif %}
+  <ul class="news-list">
+    {% for item in nw['items'] %}
+    <li>{% if item['attention'] %}⚠{% else %}📰{% endif %} {{ item['title'] }}<br />
+      <span class="muted">{{ item['source'] }} · {{ item['date_display'] }} · {{ item['label'] }}</span></li>
+    {% endfor %}
+  </ul>
+  {% if nw['items'] and nw['items'] | selectattr('attention') | list %}
+  <p class="muted">Recent news includes sensitive company activity. Read the source before drawing conclusions.</p>
+  {% endif %}
+  <p><a class="link" href="/jobs/{{ job_id }}/evidence#news">VIEW SOURCES</a></p>
+  {% elif nw['state'] == 'empty' %}
+  <p class="muted">No matching news results found for this company.</p>
+  {% elif nw['state'] == 'ambiguous' %}
+  <p class="muted">News context unavailable — ambiguous company identity.</p>
+  {% else %}
+  <p class="muted">News context temporarily unavailable.</p>
+  {% endif %}
+</div>
+{% endif %}
