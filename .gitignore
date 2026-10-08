@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .temps
 
 node_modules/
@@ -11,3 +12,15 @@ dist/
 frontend/dist/
 worker/dist/
 frontend/.env
+=======
+.env
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+>>>>>>> e9c6929019e324b5af53fa75f10210ec7f411830
