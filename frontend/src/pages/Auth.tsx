@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { FieldError, inputCls } from "../components/ui";
+import { emailError } from "../utils/email";
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -53,6 +54,9 @@ export function LoginPage() {
           </button>
         </form>
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">
+          <Link to="/forgot-password" className="font-medium text-blue-700 dark:text-blue-400 underline">Forgot password?</Link>
+        </p>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           No account? <Link to="/sign-up" className="font-medium text-blue-700 dark:text-blue-400 underline">Register</Link>
         </p>
       </div>
@@ -66,14 +70,22 @@ export function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [touched, setTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Live validation: the submit stays blocked while the email is invalid.
+  const emailInlineError = touched ? emailError(email) : null;
+  const emailValid = emailError(email) === null;
+  const formValid = emailValid && password.length >= 8;
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setTouched(true);
     setError(null);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) {
-      setError("Enter a valid email.");
+    const emailErr = emailError(email);
+    if (emailErr) {
+      setError(emailErr);
       return;
     }
     if (password.length < 8) {
@@ -99,7 +111,7 @@ export function RegisterPage() {
           <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Your career, in one place</span>
         </div>
         <h1 className="mt-4 text-2xl font-bold tracking-tight">Create account</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Discover jobs, track applications, prepare for interviews.</p>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Track applications, prepare for interviews.</p>
         <form onSubmit={submit} className="mt-5 space-y-3" noValidate>
           <div>
             <label htmlFor="name" className="text-sm font-medium">Name</label>
@@ -107,14 +119,25 @@ export function RegisterPage() {
           </div>
           <div>
             <label htmlFor="email" className="text-sm font-medium">Email</label>
-            <input id="email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input
+              id="email"
+              type="email"
+              className={inputCls}
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setTouched(true); }}
+              aria-invalid={emailInlineError ? true : undefined}
+              aria-describedby={emailInlineError ? "email-error" : undefined}
+            />
+            {emailInlineError && (
+              <p id="email-error" role="alert" className="mt-1 text-sm text-red-600 dark:text-red-400">{emailInlineError}</p>
+            )}
           </div>
           <div>
             <label htmlFor="password" className="text-sm font-medium">Password (8+ chars)</label>
             <input id="password" type="password" autoComplete="new-password" className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           <FieldError message={error ?? undefined} />
-          <button disabled={busy} className="btn-shine w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+          <button disabled={busy || !formValid} className="btn-shine w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
             {busy ? "Creating…" : "Register"}
           </button>
         </form>

@@ -101,7 +101,7 @@ export function ResumesPage({ notify }: { notify: (m: string) => void }) {
                   <p className="text-slate-500 dark:text-slate-400">{(r.size / 1024).toFixed(1)} KB · Uploaded {r.created_at.slice(0, 10)}</p>
                 </div>
               </div>
-              <div className="flex shrink-0 gap-3">
+              <div className="flex shrink-0 flex-wrap gap-3">
                 <button onClick={() => void downloadResume(r.id, r.filename)} className="inline-flex items-center gap-1 font-medium text-blue-700 dark:text-blue-400 underline">
                   <Download size={14} aria-hidden="true" />Download
                 </button>

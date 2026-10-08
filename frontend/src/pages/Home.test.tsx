@@ -14,7 +14,7 @@ import { api } from "../services/api";
 
 const get = api.get as unknown as ReturnType<typeof vi.fn>;
 
-const USER = { id: "u1", email: "admin@gmail.com", name: "Admin User", created_at: "2026-01-01" };
+const USER = { id: "u1", email: "admin@gmail.com", name: "Admin User", role: "student", created_at: "2026-01-01" };
 
 const DASH: Dashboard = {
   totals: { total: 4, applied: 0, interviewing: 0, offers: 1, rejected: 0, saved: 3 },
@@ -29,6 +29,7 @@ const DASH: Dashboard = {
   ],
   overdueFollowUps: [],
   upcomingFollowUps: [],
+  discoveryImports: 1,
 };
 
 afterEach(() => {
@@ -54,10 +55,10 @@ function renderHome() {
 }
 
 describe("Home command center", () => {
-  it("greets the user and exposes the four actions", async () => {
+  it("greets the user and exposes the three actions", async () => {
     renderHome();
     expect(await screen.findByText(/Good (morning|afternoon|evening), Admin/)).toBeTruthy();
-    for (const label of ["Discover Jobs", "My Applications", "Interviews", "Resumes"]) {
+    for (const label of ["My Applications", "Interviews", "Resumes"]) {
       expect(await screen.findByText(new RegExp(label))).toBeTruthy();
     }
   });
@@ -69,6 +70,7 @@ describe("Home command center", () => {
     expect(pipeline.textContent).toContain("Offer");
     expect(pipeline.textContent).toContain("3");
     expect(pipeline.textContent).toContain("1");
+    expect(pipeline.textContent).toContain("1 saved from discovery");
   });
 
   it("surfaces a next action and recent applications", async () => {
@@ -78,7 +80,7 @@ describe("Home command center", () => {
     expect(await screen.findByText("View all applications →")).toBeTruthy();
   });
 
-  it("shows an empty state with a discover CTA when there is nothing", async () => {
+  it("shows an empty state with a creation CTA when there is nothing", async () => {
     localStorage.setItem("sjt_token", "test-token");
     get.mockImplementation((path: string) => {
       if (path === "/api/auth/me") return Promise.resolve({ user: USER });
@@ -89,6 +91,7 @@ describe("Home command center", () => {
         recentApplications: [],
         overdueFollowUps: [],
         upcomingFollowUps: [],
+        discoveryImports: 0,
       });
     });
     render(
@@ -98,6 +101,6 @@ describe("Home command center", () => {
         </AuthProvider>
       </MemoryRouter>,
     );
-    expect(await screen.findByText("Find jobs")).toBeTruthy();
+    expect(await screen.findByText("Add your first application")).toBeTruthy();
   });
 });

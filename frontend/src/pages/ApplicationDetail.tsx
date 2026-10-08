@@ -73,7 +73,7 @@ export function ApplicationDetailPage({ notify }: { notify: (m: string) => void 
   return (
     <div className="space-y-4">
       <button onClick={() => navigate("/applications")} className="text-sm text-blue-700 dark:text-blue-400 underline">← Back to applications</button>
-      <div className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+      <div className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-xl font-bold">{app.company} — {app.job_title}</h1>
           <StatusBadge status={app.status} />

@@ -1,5 +1,5 @@
 SESSION_SECRET="dev-only-change-me-to-32-random-chars"
 FRONTEND_ORIGIN="http://localhost:5173"
-# Extra API callers (comma-separated). Local JobSetu is allowed by default in code;
-# set this in production, e.g. JOBSETU_ORIGIN="https://jobsetu.example.com"
-# JOBSETU_ORIGIN=
+# SerpApi key for native Discover Jobs (server-side only, never commit a real key).
+# Unset = live discovery returns 503; cached searches still work.
+# SERPAPI_API_KEY=

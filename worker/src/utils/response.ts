@@ -23,22 +23,18 @@ export function fail(
 
 export interface CorsEnv {
   FRONTEND_ORIGIN?: string;
-  JOBSETU_ORIGIN?: string;
 }
 
 // Local-dev defaults so `wrangler dev` works without extra config.
 const DEV_ORIGINS = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "http://localhost:8000",
-  "http://127.0.0.1:8000",
 ];
 
 export function corsHeaders(req: Request, env: CorsEnv): HeadersInit {
   const requestOrigin = req.headers.get("Origin") ?? "";
   const allowList = [
     ...(env.FRONTEND_ORIGIN ? [env.FRONTEND_ORIGIN] : []),
-    ...(env.JOBSETU_ORIGIN ? env.JOBSETU_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean) : []),
     ...DEV_ORIGINS,
   ];
   // Echo the request origin only when allow-listed; otherwise fall back to

@@ -82,7 +82,7 @@ export function ActionCard({
       to={to}
       onMouseMove={onMove}
       style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties}
-      className="reveal spotlight lift group rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md"
+      className="reveal spotlight lift group rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm hover:shadow-md"
     >
       <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400">
         <Icon size={20} aria-hidden="true" />

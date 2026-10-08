@@ -1,7 +1,31 @@
+export type Role = "student" | "admin";
+
+export type Permission =
+  | "applications.read"
+  | "applications.create"
+  | "applications.update"
+  | "applications.delete"
+  | "interviews.read"
+  | "interviews.create"
+  | "interviews.update"
+  | "interviews.delete"
+  | "notes.read"
+  | "notes.create"
+  | "notes.update"
+  | "notes.delete"
+  | "resumes.read"
+  | "resumes.create"
+  | "resumes.delete"
+  | "jobs.discover"
+  | "users.read"
+  | "users.manage"
+  | "admin.access";
+
 export interface User {
   id: string;
   email: string;
   name: string;
+  role: Role;
   created_at: string;
 }
 
@@ -81,5 +105,36 @@ export interface Dashboard {
   recentApplications: Application[];
   overdueFollowUps: { id: string; company: string; job_title: string; follow_up_date: string; follow_up_notes: string }[];
   upcomingFollowUps: { id: string; company: string; job_title: string; follow_up_date: string; follow_up_notes: string }[];
+  discoveryImports: number;
   cached?: boolean;
+}
+
+export interface DiscoveredJob {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  description: string;
+  apply_url: string;
+  source: string;
+  posted_at: string;
+  salary: string;
+  employment_type: string;
+  remote: boolean | null;
+}
+
+export interface DiscoverSearch {
+  id: string;
+  role: string;
+  location: string;
+  experience: string;
+  job_count: number;
+  created_at: string;
+}
+
+export interface DiscoverPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }

@@ -57,7 +57,7 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
   void notify;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <PageHeader
         title={`Applications${total > 0 ? ` (${total})` : ""}`}
         description="Your career pipeline — every saved, applied, and interviewed role."
@@ -98,12 +98,12 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
         <EmptyState
           art="pipeline"
           title="No applications match"
-          body="Try clearing the filters — or find your next opportunity with JobSetu."
-          action={{ to: "/discover-jobs", label: "Discover jobs" }}
+          body="Try clearing the filters — or find your next opportunity."
+          action={{ to: "/applications/new", label: "New application" }}
         />
       ) : (
         <div className="reveal overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[560px] text-left text-sm">
             <thead className="border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400">
               <tr>
                 <th className="px-4 py-2">Company</th>
@@ -123,8 +123,8 @@ export function ApplicationsPage({ notify }: { notify: (m: string) => void }) {
                     <span className="flex flex-wrap items-center gap-1">
                       <StatusBadge status={a.status} />
                       {a.notes?.startsWith("Imported from JobSetu") && (
-                        <span title="Discovered in JobSetu" className="inline-flex items-center rounded-full bg-teal-100 dark:bg-teal-950 px-2 py-0.5 text-xs font-semibold text-teal-800 dark:text-teal-300">
-                          JobSetu
+                        <span title="Imported from job discovery" className="inline-flex items-center rounded-full bg-teal-100 dark:bg-teal-950 px-2 py-0.5 text-xs font-semibold text-teal-800 dark:text-teal-300">
+                          Imported
                         </span>
                       )}
                     </span>

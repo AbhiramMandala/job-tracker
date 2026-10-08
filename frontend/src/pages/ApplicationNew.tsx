@@ -52,7 +52,7 @@ export function ApplicationNewPage({ notify }: { notify: (m: string) => void }) 
   };
 
   return (
-    <div className="reveal mx-auto max-w-2xl rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+    <div className="reveal mx-auto max-w-2xl rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 sm:p-5 shadow-sm">
       <h1 className="text-xl font-bold">New application</h1>
       <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-2">
         <div><label className="text-sm font-medium" htmlFor="company">Company *</label><input id="company" className={inputCls} value={form.company} onChange={(e) => set("company", e.target.value)} /></div>

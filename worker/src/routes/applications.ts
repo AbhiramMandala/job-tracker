@@ -1,7 +1,7 @@
 import type { AuthUser, Env } from "../types";
 import { fail, json, readJson } from "../utils/response";
 import { newId } from "../utils/crypto";
-import { parseJobsetuJobId, validateApplication } from "../validation/schemas";
+import { parseJobsetuJobId, parseProviderRef, validateApplication } from "../validation/schemas";
 import { APPLICATION_STATUSES, JOB_TYPES } from "../types";
 
 function toBoolInt(v: unknown): number {
@@ -80,11 +80,20 @@ export async function listApplications(req: Request, env: Env, user: AuthUser): 
 
 export async function createApplication(req: Request, env: Env, user: AuthUser): Promise<Response> {
   const body = await readJson<any>(req);
+  return insertApplicationRow(env, user, body ?? {});
+}
+
+/**
+ * Shared application insert: validation, provider-import duplicate detection,
+ * resume ownership, insert. Single choke point so no path can create
+ * duplicate provider-backed rows.
+ */
+export async function insertApplicationRow(env: Env, user: AuthUser, body: any): Promise<Response> {
   const errs = validateApplication(body ?? {});
   if (errs.length) return fail("VALIDATION_ERROR", "Invalid application data", 400, errs);
 
-  // Optional JobSetu provenance: { jobsetu: { job_id: <int> } }. When present
-  // it must be well-formed; when valid it must not already be tracked.
+  // Optional provenance for provider-imported jobs: { jobsetu: { job_id: <int> } }.
+  // When present it must be well-formed; when valid it must not already be tracked.
   let jobsetuJobId: number | null = null;
   if (body.jobsetu !== undefined && body.jobsetu !== null) {
     const parsed = parseJobsetuJobId(body.jobsetu);
@@ -95,8 +104,26 @@ export async function createApplication(req: Request, env: Env, user: AuthUser):
       .bind(user.id, parsed)
       .first<{ id: string }>();
     if (existing)
-      return fail("CONFLICT", "This job is already tracked", 409, { application_id: existing.id });
+      return fail("CONFLICT", "Already tracked", 409, { application_id: existing.id });
     jobsetuJobId = parsed;
+  }
+
+  // Optional provenance for natively discovered jobs: { provider: { name, job_id } }.
+  // Same contract: well-formed when present, never a second row per (user, job).
+  let provider: string | null = null;
+  let providerJobId: string | null = null;
+  if (body.provider !== undefined && body.provider !== null) {
+    const parsed = parseProviderRef(body.provider);
+    if (parsed === null) return fail("VALIDATION_ERROR", "Invalid provider reference", 400);
+    const existing = await env.DB.prepare(
+      `SELECT id FROM applications WHERE user_id = ? AND provider = ? AND provider_job_id = ? LIMIT 1`,
+    )
+      .bind(user.id, parsed.name, parsed.job_id)
+      .first<{ id: string }>();
+    if (existing)
+      return fail("CONFLICT", "Already tracked", 409, { application_id: existing.id });
+    provider = parsed.name;
+    providerJobId = parsed.job_id;
   }
 
   if (body.resume_id) {
@@ -127,17 +154,20 @@ export async function createApplication(req: Request, env: Env, user: AuthUser):
     follow_up_notes: String(body.follow_up_notes ?? ""),
     resume_id: body.resume_id ? String(body.resume_id) : null,
     jobsetu_job_id: jobsetuJobId,
+    provider,
+    provider_job_id: providerJobId,
     created_at: now,
     updated_at: now,
   };
   await env.DB.prepare(
-    `INSERT INTO applications (id, user_id, company, job_title, location, job_url, job_type, salary, application_date, status, notes, contact_person, contact_email, follow_up_date, follow_up_reminder, follow_up_notes, resume_id, jobsetu_job_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO applications (id, user_id, company, job_title, location, job_url, job_type, salary, application_date, status, notes, contact_person, contact_email, follow_up_date, follow_up_reminder, follow_up_notes, resume_id, jobsetu_job_id, provider, provider_job_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
     .bind(
       row.id, row.user_id, row.company, row.job_title, row.location, row.job_url, row.job_type,
       row.salary, row.application_date, row.status, row.notes, row.contact_person, row.contact_email,
-      row.follow_up_date, row.follow_up_reminder, row.follow_up_notes, row.resume_id, row.jobsetu_job_id, row.created_at, row.updated_at,
+      row.follow_up_date, row.follow_up_reminder, row.follow_up_notes, row.resume_id, row.jobsetu_job_id,
+      row.provider, row.provider_job_id, row.created_at, row.updated_at,
     )
     .run();
   // Invalidate dashboard cache.

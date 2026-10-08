@@ -8,6 +8,8 @@ interface DashboardData {
   recentApplications: unknown[];
   overdueFollowUps: unknown[];
   upcomingFollowUps: unknown[];
+  /** Applications imported from job discovery (real provenance count, not a metric). */
+  discoveryImports: number;
 }
 
 export async function handleDashboard(req: Request, env: Env, user: AuthUser): Promise<Response> {
@@ -31,6 +33,13 @@ export async function handleDashboard(req: Request, env: Env, user: AuthUser): P
   const byStatus = counts.results ?? [];
   const get = (s: string) => Number(byStatus.find((r) => r.status === s)?.count ?? 0);
   const total = byStatus.reduce((a, r) => a + Number(r.count), 0);
+
+  const discoveredRow = await env.DB.prepare(
+    `SELECT COUNT(*) AS discovered FROM applications WHERE user_id = ? AND jobsetu_job_id IS NOT NULL`,
+  )
+    .bind(user.id)
+    .first<{ discovered: number }>();
+  const discoveryImports = Number(discoveredRow?.discovered ?? 0);
 
   const upcomingInterviews = await env.DB.prepare(
     `SELECT i.*, a.company, a.job_title FROM interviews i
@@ -80,6 +89,7 @@ export async function handleDashboard(req: Request, env: Env, user: AuthUser): P
     })),
     overdueFollowUps: overdueFollowUps.results ?? [],
     upcomingFollowUps: upcomingFollowUps.results ?? [],
+    discoveryImports,
     cached: false,
   };
 

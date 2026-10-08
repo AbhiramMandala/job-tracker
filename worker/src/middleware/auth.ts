@@ -8,19 +8,33 @@ export async function getSessionUser(req: Request, env: Env): Promise<AuthUser |
   const token = bearerToken(req);
   if (!token) return null;
   const tokenHash = await sha256Hex(token);
-  const row = await env.DB.prepare(
-    `SELECT u.id, u.email, u.name, u.created_at, s.expires_at
-     FROM sessions s JOIN users u ON u.id = s.user_id
-     WHERE s.token_hash = ? LIMIT 1`,
-  )
-    .bind(tokenHash)
-    .first<{ id: string; email: string; name: string; created_at: string; expires_at: string }>();
+  // The role column exists after migration 0004; fall back to the pre-RBAC
+  // select on older databases (role defaults to student).
+  let row: { id: string; email: string; name: string; role?: string; created_at: string; expires_at: string } | null;
+  try {
+    row = await env.DB.prepare(
+      `SELECT u.id, u.email, u.name, u.role, u.created_at, s.expires_at
+       FROM sessions s JOIN users u ON u.id = s.user_id
+       WHERE s.token_hash = ? LIMIT 1`,
+    )
+      .bind(tokenHash)
+      .first<{ id: string; email: string; name: string; role: string; created_at: string; expires_at: string }>();
+  } catch {
+    row = await env.DB.prepare(
+      `SELECT u.id, u.email, u.name, u.created_at, s.expires_at
+       FROM sessions s JOIN users u ON u.id = s.user_id
+       WHERE s.token_hash = ? LIMIT 1`,
+    )
+      .bind(tokenHash)
+      .first<{ id: string; email: string; name: string; created_at: string; expires_at: string }>();
+  }
   if (!row) return null;
   if (Date.parse(row.expires_at) < Date.now()) {
     await env.DB.prepare(`DELETE FROM sessions WHERE token_hash = ?`).bind(tokenHash).run().catch(() => {});
     return null;
   }
-  return { id: row.id, email: row.email, name: row.name, created_at: row.created_at };
+  const role = row.role === "admin" ? "admin" : "student";
+  return { id: row.id, email: row.email, name: row.name, role, created_at: row.created_at };
 }
 
 export async function requireAuth(

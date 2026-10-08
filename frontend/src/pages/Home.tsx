@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Briefcase, CalendarClock, Compass, FileText } from "lucide-react";
+import { Briefcase, CalendarClock, FileText, Plus } from "lucide-react";
 import { api } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import type { Dashboard } from "../types";
@@ -41,11 +41,11 @@ function Hero({ name, hasActivity }: { name: string; hasActivity: boolean }) {
         </p>
         <div className="mt-5 flex flex-wrap gap-2">
           <Link
-            to="/discover-jobs"
+            to="/applications/new"
             className="btn-shine inline-flex items-center gap-1.5 rounded-md bg-white dark:bg-slate-900 px-4 py-2 text-sm font-semibold text-blue-800 dark:text-blue-300 hover:bg-blue-50"
           >
-            <Compass size={16} aria-hidden="true" />
-            Discover jobs
+            <Plus size={16} aria-hidden="true" />
+            New application
           </Link>
           <Link
             to="/applications"
@@ -60,7 +60,7 @@ function Hero({ name, hasActivity }: { name: string; hasActivity: boolean }) {
   );
 }
 
-function Pipeline({ totals }: { totals: Dashboard["totals"] }) {
+function Pipeline({ totals, discoveryImports }: { totals: Dashboard["totals"]; discoveryImports: number }) {
   const steps = [
     { label: "Saved", value: totals.saved },
     { label: "Applied", value: totals.applied },
@@ -90,6 +90,7 @@ function Pipeline({ totals }: { totals: Dashboard["totals"] }) {
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         Discovered → Saved → Applied → Interview → Offer
         {totals.rejected > 0 && ` · Rejected: ${totals.rejected}`}
+        {discoveryImports > 0 && ` · ${discoveryImports} saved from discovery`}
       </p>
     </section>
   );
@@ -140,24 +141,23 @@ export function HomePage() {
     data.recentApplications.find((a) => a.status === "SAVED") ?? data.recentApplications[0];
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <Hero name={firstName} hasActivity={data.totals.total > 0} />
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <ActionCard to="/discover-jobs" icon={Compass} title="Discover Jobs" body="Find verified opportunities through JobSetu." cta="Explore jobs" delay={40} />
-        <ActionCard to="/applications" icon={Briefcase} title="My Applications" body="Track jobs you've saved and applied to." cta="Open pipeline" delay={80} />
-        <ActionCard to="/interviews" icon={CalendarClock} title="Interviews" body="Manage upcoming interviews and preparation." cta="View schedule" delay={120} />
-        <ActionCard to="/resumes" icon={FileText} title="Resumes" body="Manage resumes and link them to applications." cta="Manage files" delay={160} />
+        <ActionCard to="/applications" icon={Briefcase} title="My Applications" body="Track jobs you've saved and applied to." cta="Open pipeline" delay={40} />
+        <ActionCard to="/interviews" icon={CalendarClock} title="Interviews" body="Manage upcoming interviews and preparation." cta="View schedule" delay={80} />
+        <ActionCard to="/resumes" icon={FileText} title="Resumes" body="Manage resumes and link them to applications." cta="Manage files" delay={120} />
       </div>
 
-      <Pipeline totals={data.totals} />
+      <Pipeline totals={data.totals} discoveryImports={data.discoveryImports ?? 0} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <section aria-label="Next action" className="reveal rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 shadow-sm" style={{ "--reveal-delay": "100ms" } as React.CSSProperties}>
           <h2 className="font-semibold">Next action</h2>
           {!overdueNext && !nextApp ? (
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Nothing yet. <Link to="/discover-jobs" className="text-blue-700 dark:text-blue-400 underline">Find jobs</Link> to get started.
+              Nothing yet. <Link to="/applications/new" className="text-blue-700 dark:text-blue-400 underline">Add your first application</Link> to get started.
             </p>
           ) : overdueNext ? (
             <div className="mt-2 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-950 p-3 text-sm">
@@ -198,8 +198,8 @@ export function HomePage() {
             <EmptyState
               art="pipeline"
               title="Your pipeline is empty"
-              body="Find your next opportunity with JobSetu, then save the ones you like."
-              action={{ to: "/discover-jobs", label: "Discover jobs" }}
+              body="Add the roles you're pursuing, then track each one to offer."
+              action={{ to: "/applications/new", label: "New application" }}
             />
           )}
           {data.recentApplications.slice(0, 3).map((a) => (
