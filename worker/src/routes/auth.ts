@@ -22,11 +22,21 @@ export async function handleRegister(req: Request, env: Env): Promise<Response> 
   const password_hash = await hashPassword(body!.password!);
   const id = newId();
   const now = new Date().toISOString();
-  await env.DB.prepare(
-    `INSERT INTO users (id, email, password_hash, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`,
-  )
-    .bind(id, email, password_hash, name, now, now)
-    .run();
+  // The role column may not exist on databases that have not applied
+  // migration 0004 yet; default to student either way.
+  try {
+    await env.DB.prepare(
+      `INSERT INTO users (id, email, password_hash, name, role, created_at, updated_at) VALUES (?, ?, ?, ?, 'student', ?, ?)`,
+    )
+      .bind(id, email, password_hash, name, now, now)
+      .run();
+  } catch {
+    await env.DB.prepare(
+      `INSERT INTO users (id, email, password_hash, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(id, email, password_hash, name, now, now)
+      .run();
+  }
 
   const token = newToken();
   const tokenHash = await sha256Hex(token);
@@ -39,7 +49,7 @@ export async function handleRegister(req: Request, env: Env): Promise<Response> 
 
   log(req, env, "register", email);
   const headers = { "Set-Cookie": sessionCookie(token, SESSION_TTL_SEC, isSecure(req)) };
-  return json({ user: { id, email, name, created_at: now }, token }, 201, headers);
+  return json({ user: { id, email, name, role: "student", created_at: now }, token }, 201, headers);
 }
 
 export async function handleLogin(req: Request, env: Env): Promise<Response> {
@@ -48,13 +58,25 @@ export async function handleLogin(req: Request, env: Env): Promise<Response> {
   if (errs.length) return fail("VALIDATION_ERROR", "Invalid login data", 400, errs);
   const email = String(body!.email).trim().toLowerCase();
 
-  const row = await env.DB.prepare(`SELECT id, email, name, password_hash, created_at FROM users WHERE email = ? LIMIT 1`)
-    .bind(email)
-    .first<{ id: string; email: string; name: string; password_hash: string; created_at: string }>();
+  // The role column exists after migration 0004; fall back to the
+  // pre-RBAC select on older databases (role defaults to student).
+  let row: { id: string; email: string; name: string; password_hash: string; created_at: string; role?: string } | null;
+  try {
+    row = await env.DB.prepare(
+      `SELECT id, email, name, password_hash, role, created_at FROM users WHERE email = ? LIMIT 1`,
+    )
+      .bind(email)
+      .first<{ id: string; email: string; name: string; password_hash: string; role: string; created_at: string }>();
+  } catch {
+    row = await env.DB.prepare(`SELECT id, email, name, password_hash, created_at FROM users WHERE email = ? LIMIT 1`)
+      .bind(email)
+      .first<{ id: string; email: string; name: string; password_hash: string; created_at: string }>();
+  }
   // Generic message to avoid user enumeration.
   if (!row) return fail("UNAUTHORIZED", "Invalid email or password", 401);
   const ok = await verifyPassword(body!.password!, row.password_hash);
   if (!ok) return fail("UNAUTHORIZED", "Invalid email or password", 401);
+  const role: "student" | "admin" = row.role === "admin" ? "admin" : "student";
 
   const token = newToken();
   const tokenHash = await sha256Hex(token);
@@ -69,7 +91,7 @@ export async function handleLogin(req: Request, env: Env): Promise<Response> {
   log(req, env, "login", email);
   const headers = { "Set-Cookie": sessionCookie(token, SESSION_TTL_SEC, isSecure(req)) };
   return json(
-    { user: { id: row.id, email: row.email, name: row.name, created_at: row.created_at }, token },
+    { user: { id: row.id, email: row.email, name: row.name, role, created_at: row.created_at }, token },
     200,
     headers,
   );

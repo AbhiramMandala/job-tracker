@@ -7,10 +7,10 @@ APP_NAME = "Student Job Tracker"
 # Local dev values come from worker/.dev.vars (SESSION_SECRET, FRONTEND_ORIGIN).
 # Production: set these to the deployed URLs, e.g.
 #   FRONTEND_ORIGIN = "https://student-job-tracker.pages.dev"
-#   JOBSETU_ORIGIN = "https://jobsetu.example.com"
 # (or `npx wrangler secret put SESSION_SECRET` for secrets).
-# Comma-separated origins allowed to call the API (JobSetu "Save to Tracker").
-# JOBSETU_ORIGIN = "http://127.0.0.1:8000"
+# Native Discover Jobs needs a SerpApi key (server-side only, never committed):
+#   local:      SERPAPI_API_KEY="..." in worker/.dev.vars
+#   production: npx wrangler secret put SERPAPI_API_KEY
 
 # Local dev database. Create with:
 #   wrangler d1 create student_job_tracker

@@ -1,13 +1,13 @@
 import { Link, Navigate } from "react-router-dom";
-import { Briefcase, Compass, Moon, Sun } from "lucide-react";
+import { Briefcase, Moon, Sun } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useTheme } from "../hooks/useTheme";
 import { Spinner } from "../components/ui";
 
 const STEPS = [
-  { title: "Discover jobs", body: "Search verified opportunities powered by JobSetu intelligence." },
-  { title: "Save what fits", body: "Keep the right roles in one pipeline — never a spreadsheet." },
+  { title: "Save every application", body: "Keep every role you're pursuing in one pipeline — never a spreadsheet." },
   { title: "Track to offer", body: "Follow applications, interviews, and resumes to the finish line." },
+  { title: "Never miss a follow-up", body: "Reminders and next actions keep every opportunity moving." },
 ];
 
 export function PublicHomePage() {
@@ -42,7 +42,7 @@ export function PublicHomePage() {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 pb-16">
+      <main className="mx-auto max-w-6xl px-4 pb-10">
         <section className="reveal relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-800 via-blue-700 to-indigo-800 px-6 py-14 text-center text-white sm:px-12 sm:py-20">
           <div
             aria-hidden="true"
@@ -58,7 +58,7 @@ export function PublicHomePage() {
               Your career, in one place.
             </h1>
             <p className="mx-auto mt-3 max-w-xl text-base text-blue-100">
-              Discover jobs. Track applications. Prepare for interviews. Manage resumes.
+              Track applications. Prepare for interviews. Manage resumes.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link to="/sign-up" className="btn-shine inline-flex items-center gap-1.5 rounded-md bg-white dark:bg-slate-900 px-6 py-2.5 text-sm font-semibold text-blue-800 dark:text-blue-300 hover:bg-blue-50">
@@ -115,13 +115,12 @@ export function PublicHomePage() {
 
         <section className="reveal mt-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 text-center shadow-sm">
           <p className="inline-flex items-center gap-2 font-semibold">
-            <Compass size={18} aria-hidden="true" className="text-blue-700 dark:text-blue-400" />
-            Discovery powered by JobSetu
             <Briefcase size={18} aria-hidden="true" className="text-blue-700 dark:text-blue-400" />
+            Your pipeline, under control
           </p>
           <p className="mx-auto mt-2 max-w-lg text-sm text-slate-600 dark:text-slate-400">
-            Every listing carries evidence-backed verification and match context — then flows
-            straight into your application pipeline.
+            Every application carries its status, interviews, notes, and follow-ups — all the way
+            to offer.
           </p>
         </section>
       </main>

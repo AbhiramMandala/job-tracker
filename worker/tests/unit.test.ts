@@ -2,13 +2,18 @@ import { describe, expect, it } from "vitest";
 import { hashPassword, verifyPassword, newId, newToken, sha256Hex } from "../src/utils/crypto";
 import { corsHeaders } from "../src/utils/response";
 import {
+  parseProviderRef,
   validateApplication,
+  validateDiscoverSearch,
   validateInterview,
   validateLogin,
   validateNote,
   validateRegister,
   validateResumeFile,
 } from "../src/validation/schemas";
+import { normalizeSerpApiJob } from "../src/routes/discover";
+import { removesLastAdmin } from "../src/routes/admin";
+import { rateLimit } from "../src/middleware/auth";
 
 describe("password hashing", () => {
   it("hashes and verifies a password", async () => {
@@ -55,9 +60,76 @@ describe("auth validation", () => {
     const errs = validateRegister({ email: "nope", password: "short" });
     expect(errs.length).toBeGreaterThanOrEqual(2);
   });
+  it("uses exact email messages and normalizes case/whitespace", () => {
+    expect(validateRegister({ email: "", password: "password123" })).toEqual([
+      { field: "email", message: "Email is required." },
+    ]);
+    expect(validateRegister({ email: "   ", password: "password123" })).toEqual([
+      { field: "email", message: "Email is required." },
+    ]);
+    for (const bad of ["abc", "abc@", "abc@domain", "@domain.com", "abc domain@gmail.com", "abc@@gmail.com"]) {
+      expect(validateRegister({ email: bad, password: "password123" })).toEqual([
+        { field: "email", message: "Please enter a valid email address." },
+      ]);
+    }
+    expect(validateRegister({ email: "  User@Example.com  ", password: "password123" })).toEqual([]);
+  });
   it("requires password on login", () => {
     expect(validateLogin({ email: "a@b.com", password: "" }).length).toBeGreaterThan(0);
     expect(validateLogin({ email: "a@b.com", password: "x" })).toEqual([]);
+  });
+});
+
+describe("discover + provider validation", () => {
+  it("requires search keywords within length limits", () => {
+    expect(validateDiscoverSearch({}).errs).not.toHaveLength(0);
+    expect(validateDiscoverSearch({ role: "  " }).errs.map((e) => e.field)).toContain("role");
+    const { errs, input } = validateDiscoverSearch({ role: " python ", location: "Hyd", experience: "Fresher" });
+    expect(errs).toEqual([]);
+    expect(input).toEqual({ role: "python", location: "Hyd", experience: "Fresher" });
+  });
+  it("parses provider provenance strictly", () => {
+    expect(parseProviderRef({ name: "serpapi", job_id: "abc" })).toEqual({ name: "serpapi", job_id: "abc" });
+    for (const bad of [null, "x", [], {}, { name: "", job_id: "a" }, { name: "s", job_id: "" }, { name: "s", job_id: 5 }]) {
+      expect(parseProviderRef(bad)).toBeNull();
+    }
+  });
+  it("normalizes SerpApi jobs defensively", () => {
+    expect(normalizeSerpApiJob(null)).toBeNull();
+    expect(normalizeSerpApiJob({})).toBeNull();
+    const full = normalizeSerpApiJob({
+      title: "Dev", company_name: "Acme", location: "Hyd", description: "x",
+      via: "LinkedIn", job_id: "j1",
+      detected_extensions: { posted_at: "today", schedule_type: "Full-time", salary: "$1", work_from_home: true },
+      apply_options: [{ link: "https://example.com/a" }, { link: "javascript:evil()" }],
+    });
+    expect(full).toMatchObject({ id: "j1", employment_type: "FULL_TIME", remote: true, apply_url: "https://example.com/a" });
+    const bare = normalizeSerpApiJob({ title: "T", apply_options: [{ link: "data:x" }] })!;
+    expect(typeof bare.id).toBe("string");
+    expect(bare.apply_url).toBe("");
+    expect(bare.remote).toBeNull();
+  });
+});
+
+describe("rate limiting", () => {
+  it("allows under the limit, blocks at it, and fails open without KV", async () => {
+    expect(await rateLimit(new Request("https://x/"), { DB: null } as any, "k", 2, 60)).toBe(true);
+    const store = new Map<string, string>();
+    const env = { CACHE: { get: async (k: string) => store.get(k) ?? null, put: async (k: string, v: string) => { store.set(k, v); } } } as any;
+    const req = new Request("https://x/", { headers: { "CF-Connecting-IP": "1.2.3.4" } });
+    expect(await rateLimit(req, env, "k", 2, 60)).toBe(true);
+    expect(await rateLimit(req, env, "k", 2, 60)).toBe(true);
+    expect(await rateLimit(req, env, "k", 2, 60)).toBe(false);
+  });
+});
+
+describe("last-admin safeguard", () => {
+  it("blocks only operations that would leave zero admins", () => {
+    expect(removesLastAdmin(1, "admin", false)).toBe(true);
+    expect(removesLastAdmin(2, "admin", false)).toBe(false);
+    expect(removesLastAdmin(1, "student", false)).toBe(false);
+    expect(removesLastAdmin(1, "admin", true)).toBe(false);
+    expect(removesLastAdmin(0, "admin", false)).toBe(true);
   });
 });
 
@@ -112,9 +184,9 @@ describe("resume validation", () => {
 
 describe("CORS", () => {
   const req = (origin: string) => new Request("https://example.com/api/applications", { headers: { Origin: origin } });
-  it("echoes allow-listed JobSetu origins", () => {
+  it("no longer allow-lists provider origins", () => {
     const h = corsHeaders(req("http://127.0.0.1:8000"), { FRONTEND_ORIGIN: "http://localhost:5173" }) as Record<string, string>;
-    expect(h["Access-Control-Allow-Origin"]).toBe("http://127.0.0.1:8000");
+    expect(h["Access-Control-Allow-Origin"]).toBe("http://localhost:5173");
   });
   it("echoes the configured frontend origin", () => {
     const h = corsHeaders(req("http://localhost:5173"), { FRONTEND_ORIGIN: "http://localhost:5173" }) as Record<string, string>;

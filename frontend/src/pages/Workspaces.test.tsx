@@ -1,10 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { AuthProvider } from "../hooks/useAuth";
 import { InterviewsPage } from "./Interviews";
 import { ResumesPage } from "./Resumes";
-import { DiscoverPage } from "./Discover";
 
 vi.mock("../services/api", () => ({
   api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), del: vi.fn(), upload: vi.fn() },
@@ -14,8 +13,7 @@ vi.mock("../services/api", () => ({
 import { api } from "../services/api";
 
 const get = api.get as unknown as ReturnType<typeof vi.fn>;
-const post = api.post as unknown as ReturnType<typeof vi.fn>;
-const USER = { id: "u1", email: "a@b.com", name: "Al", created_at: "2026-01-01" };
+const USER = { id: "u1", email: "a@b.com", name: "Al", role: "student", created_at: "2026-01-01" };
 const notify = vi.fn();
 
 function authed() {
@@ -85,89 +83,5 @@ describe("Resumes workspace", () => {
     shell(<ResumesPage notify={notify} />);
     expect(await screen.findByText("No resumes yet")).toBeTruthy();
     expect(await screen.findByText("Upload resume")).toBeTruthy();
-  });
-});
-
-describe("Discover embedded search", () => {
-  const SEARCH_OK = {
-    ok: true,
-    status: 200,
-    json: () => Promise.resolve({
-      search_id: 7,
-      role: "Python Developer",
-      is_live: true,
-      jobs: [
-        { id: 9, company: "Acme", title: "Python Dev", location: "Hyderabad", apply_link: "https://example.com/a", salary: "", posted: "", description_snippet: "Build APIs.", match_total: 70, signals: { experience: "entry", min_years: 0, job_type: "full-time" }, evidence_url: "/jobs/9/evidence", match: { total: 70, matched_skills: ["Python"], missing_skills: ["Django"], reasons: ["2/2 detected skills match"] } },
-        { id: 10, company: "Beta", title: "Senior Python Dev", location: "Hyderabad", apply_link: "", salary: "", posted: "", description_snippet: "Lead the team.", match_total: 20, signals: { experience: "experienced", min_years: 5, job_type: "" }, evidence_url: "/jobs/10/evidence" },
-      ],
-    }),
-  };
-  const EXPORT = {
-    ok: true,
-    status: 200,
-    json: () => Promise.resolve({ company: "Acme", job_title: "Python Dev", status: "SAVED" }),
-  };
-
-  function mockJobSetu() {
-    const fetchMock = vi.fn((url: string, init?: RequestInit) => {
-      if (String(url).includes("/api/searches")) return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ searches: [] }) });
-      if (String(url).includes("/tracker-export")) return Promise.resolve(EXPORT);
-      if (String(url).endsWith("/api/search") && init?.method === "POST") return Promise.resolve(SEARCH_OK);
-      return Promise.reject(new Error(`unexpected fetch ${url}`));
-    });
-    vi.stubGlobal("fetch", fetchMock);
-    return fetchMock;
-  }
-
-  it("searches natively, shows signals, and saves without extra login", async () => {
-    authed();
-    mockJobSetu();
-    post.mockResolvedValue({ id: "app1" });
-    shell(<DiscoverPage notify={notify} />);
-
-    fireEvent.change(await screen.findByLabelText("Role"), { target: { value: "Python Developer" } });
-    fireEvent.click(screen.getByRole("button", { name: "Search jobs" }));
-
-    // Cards render with company/role/location/signal chips and match context.
-    expect(await screen.findByText("Acme")).toBeTruthy();
-    expect(await screen.findByText("Hyderabad · Entry-level · Full-time")).toBeTruthy();
-    expect(screen.getByRole("img", { name: "70% match" })).toBeTruthy();
-
-    // Embedded filters narrow the list without new requests.
-    fireEvent.change(screen.getByLabelText("Filter by experience"), { target: { value: "experienced" } });
-    expect(screen.queryByText("Acme")).toBeNull();
-    expect(await screen.findByText("Beta")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Filter by experience"), { target: { value: "" } });
-    expect(await screen.findByText("Acme")).toBeTruthy();
-
-    // Details expand inline with evidence + apply links; save uses the session.
-    fireEvent.click((await screen.findAllByText("View details"))[0]);
-    expect(await screen.findByText("Evidence →")).toBeTruthy();
-    fireEvent.click((await screen.findAllByRole("button", { name: "Save" }))[0]);
-    expect(await screen.findByText("Saved ✓")).toBeTruthy();
-    expect(post).toHaveBeenCalledWith("/api/applications", expect.objectContaining({ company: "Acme" }));
-    expect(notify).toHaveBeenCalled();
-    expect(await screen.findByRole("link", { name: "Saved. View application" })).toBeTruthy();
-  });
-
-  it("links the existing application when the job is already tracked", async () => {
-    authed();
-    mockJobSetu();
-    const conflict = new Error("This job is already tracked") as Error & {
-      code?: string;
-      details?: unknown;
-    };
-    conflict.code = "CONFLICT";
-    conflict.details = { application_id: "existing-app" };
-    post.mockRejectedValue(conflict);
-    shell(<DiscoverPage notify={notify} />);
-
-    fireEvent.change(await screen.findByLabelText("Role"), { target: { value: "Python Developer" } });
-    fireEvent.click(screen.getByRole("button", { name: "Search jobs" }));
-    expect(await screen.findByText("Acme")).toBeTruthy();
-    fireEvent.click((await screen.findAllByRole("button", { name: "Save" }))[0]);
-    const link = await screen.findByRole("link", { name: "Saved. View application" });
-    expect(link.getAttribute("href")).toBe("/applications/existing-app");
-    expect(notify).toHaveBeenCalledWith(expect.stringContaining("already tracked"));
   });
 });

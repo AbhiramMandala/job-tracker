@@ -104,7 +104,7 @@ export function InterviewsPage({ notify }: { notify: (m: string) => void }) {
           action={{ to: "/applications", label: "Review applications" }}
         />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {grouped.map((g) =>
             g.items.length > 0 && (
               <section key={g.key} aria-label={g.title}>

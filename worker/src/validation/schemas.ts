@@ -33,11 +33,21 @@ function isValidUrl(v: string): boolean {
   }
 }
 
+/** Shared email-field check: empty → "Email is required.", malformed →
+ *  "Please enter a valid email address." Normalization (trim + lowercase)
+ *  must happen before calling this (register/login/forgot all do). */
+export function emailFieldError(rawEmail: unknown): ValidationError | null {
+  const email = String(rawEmail ?? "").trim();
+  if (!email) return { field: "email", message: "Email is required." };
+  if (!isValidEmail(email.toLowerCase())) return { field: "email", message: "Please enter a valid email address." };
+  return null;
+}
+
 export function validateRegister(body: any): ValidationError[] {
   const errs: ValidationError[] = [];
   if (!body || typeof body !== "object") return [{ field: "body", message: "Invalid JSON body" }];
-  const email = String(body.email ?? "").trim().toLowerCase();
-  if (!isValidEmail(email)) errs.push({ field: "email", message: "Valid email is required" });
+  const emailErr = emailFieldError(body.email);
+  if (emailErr) errs.push(emailErr);
   if (typeof body.password !== "string" || body.password.length < 8 || body.password.length > 128)
     errs.push({ field: "password", message: "Password must be 8-128 characters" });
   if (body.name !== undefined && (typeof body.name !== "string" || body.name.length > 120))
@@ -53,6 +63,58 @@ export function validateLogin(body: any): ValidationError[] {
   if (typeof body.password !== "string" || body.password.length === 0)
     errs.push({ field: "password", message: "Password is required" });
   return errs;
+}
+
+export function validateForgotPassword(body: any): ValidationError[] {
+  const errs: ValidationError[] = [];
+  if (!body || typeof body !== "object") return [{ field: "body", message: "Invalid JSON body" }];
+  const emailErr = emailFieldError(body.email);
+  if (emailErr) errs.push(emailErr);
+  return errs;
+}
+
+function isHexToken(v: unknown, len: number): boolean {
+  return typeof v === "string" && v.length === len && /^[0-9a-f]+$/.test(v);
+}
+
+export function validateResetPassword(body: any): ValidationError[] {
+  const errs: ValidationError[] = [];
+  if (!body || typeof body !== "object") return [{ field: "body", message: "Invalid JSON body" }];
+  if (!isHexToken(body.selector, 32))
+    errs.push({ field: "selector", message: "Invalid reset link" });
+  if (!isHexToken(body.token, 64))
+    errs.push({ field: "token", message: "Invalid reset link" });
+  if (typeof body.new_password !== "string" || body.new_password.length < 8 || body.new_password.length > 128)
+    errs.push({ field: "new_password", message: "Password must be 8-128 characters" });
+  return errs;
+}
+
+/** Discover search input. Only role/location/experience exist because those
+ *  are the only dimensions the SerpApi google_jobs query supports. */
+export interface DiscoverSearchInput {
+  role: string;
+  location: string;
+  experience: string;
+}
+
+export function validateDiscoverSearch(body: any): { errs: ValidationError[]; input: DiscoverSearchInput } {
+  const errs: ValidationError[] = [];
+  if (!body || typeof body !== "object") return { errs: [{ field: "body", message: "Invalid JSON body" }], input: { role: "", location: "", experience: "" } };
+  const role = typeof body.role === "string" ? body.role.trim().slice(0, 200) : "";
+  const location = typeof body.location === "string" ? body.location.trim().slice(0, 200) : "";
+  const experience = typeof body.experience === "string" ? body.experience.trim().slice(0, 100) : "";
+  if (!role) errs.push({ field: "role", message: "Search keywords are required" });
+  return { errs, input: { role, location, experience } };
+}
+
+/** Parse native provider provenance `{ name, job_id }` attached by the
+ *  Discover save endpoint. Returns null when malformed (callers 400). */
+export function parseProviderRef(value: unknown): { name: string; job_id: string } | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
+  const rec = value as Record<string, unknown>;
+  if (typeof rec.name !== "string" || !rec.name.trim() || rec.name.length > 50) return null;
+  if (typeof rec.job_id !== "string" || !rec.job_id.trim() || rec.job_id.length > 200) return null;
+  return { name: rec.name.trim(), job_id: rec.job_id.trim() };
 }
 
 export function validateApplication(body: any, partial = false): ValidationError[] {
@@ -133,8 +195,8 @@ export const ALLOWED_RESUME_MIMES = [
 
 export const MAX_RESUME_BYTES = 5 * 1024 * 1024; // 5 MB
 
-/** Parse an optional JobSetu provenance reference `{ job_id }` as sent by
- *  GET /api/jobs/{id}/tracker-export. Returns the positive integer id, or
+/** Parse legacy provider provenance `{ job_id }` kept for historical
+ *  application rows (migration 0003). Returns the positive integer id, or
  *  null when the value is absent or malformed (callers 400 on malformed). */
 export function parseJobsetuJobId(value: unknown): number | null {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return null;
