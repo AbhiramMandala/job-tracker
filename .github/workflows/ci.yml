@@ -1,3 +1,4 @@
+
 name: CI
 
 on:
@@ -8,6 +9,7 @@ on:
 jobs:
   build-test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -15,35 +17,22 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            worker/package-lock.json
-            frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install worker deps
-        working-directory: worker
-        run: npm ci
-
-      - name: Install frontend deps
-        working-directory: frontend
+      - name: Install dependencies
         run: npm ci
 
       - name: Worker typecheck
-        working-directory: worker
-        run: npm run typecheck
+        run: npm run typecheck --workspace=student-job-tracker-worker
 
       - name: Worker tests
-        working-directory: worker
-        run: npm test
+        run: npm test --workspace=student-job-tracker-worker
 
       - name: Frontend typecheck
-        working-directory: frontend
-        run: npm run typecheck
+        run: npm run typecheck --workspace=student-job-tracker-frontend
 
       - name: Frontend tests
-        working-directory: frontend
-        run: npm test
+        run: npm test --workspace=student-job-tracker-frontend
 
       - name: Frontend build
-        working-directory: frontend
-        run: npm run build
+        run: npm run build --workspace=student-job-tracker-frontend
