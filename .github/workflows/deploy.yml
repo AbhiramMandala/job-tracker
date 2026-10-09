@@ -1,3 +1,4 @@
+
 name: Deploy
 
 on:
@@ -7,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -14,19 +16,12 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: |
-            worker/package-lock.json
-            frontend/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Install worker deps
-        working-directory: worker
+      - name: Install dependencies
         run: npm ci
 
-      - name: Install frontend deps
-        working-directory: frontend
-        run: npm ci
-
-      - name: Typecheck + test + build
+      - name: Typecheck, test, and build
         run: |
           npm run typecheck --workspace=student-job-tracker-worker
           npm test --workspace=student-job-tracker-worker
@@ -41,7 +36,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Deploy Pages (frontend)
+      - name: Deploy Pages
         run: npx wrangler pages deploy frontend/dist --project-name=student-job-tracker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
