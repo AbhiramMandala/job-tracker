@@ -64,8 +64,8 @@
 - Done when: stranger can run from README + demo fits 3 min.
 - Status (final QA): README hackathon-ready (Why SerpApi, deploy, seeding);
   Mermaid architecture diagram in README; `docs/demo.md` (2:45, live-measured
-  numbers); `docs/submission.md` draft; 6 UI screenshots in
-  `docs/screenshots/` (incl. live-seeded results page); video intentionally
+  numbers); `docs/jobsetu/hackathon/submission.md` draft; 6 UI screenshots in
+  `docs/jobsetu/hackathon/screenshots/` (incl. live-seeded results page); video intentionally
   skipped; deploy pending.
 
 P1 slices (only after Slice 8 green): News, Maps, Trends, PDF upload — each behind its flag, each independently revertible.

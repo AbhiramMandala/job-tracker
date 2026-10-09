@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Student Job Application Tracker (Cloudflare Full-Stack)
 
 A production-style portfolio project for CSE graduates: track job applications, interviews,
@@ -7,6 +6,8 @@ notes, follow-ups, and resumes on **100% Cloudflare free-tier-friendly** infrast
 ![Status](https://img.shields.io/badge/stack-Cloudflare-orange) ![CI](https://img.shields.io/badge/ci-GitHub_Actions-blue)
 
 > Screenshots: add `docs/screenshot-dashboard.png`, `docs/screenshot-applications.png` after first run.
+
+> **Two applications, one repository.** The **Cloudflare Tracker** (`frontend/`, `worker/`) is documented first below. The **JobSetu service** (`app/`, Python/FastAPI) is a standalone job-intelligence app sharing this repo — see [JobSetu at a glance](#jobsetu-at-a-glance) and the [JobSetu service reference](#jobsetu-service-reference). Repository layout: [Project Structure](#project-structure).
 
 ## Features
 
@@ -20,26 +21,26 @@ notes, follow-ups, and resumes on **100% Cloudflare free-tier-friendly** infrast
 - **Notes** — per-application create/edit/delete.
 - **Follow-ups** — reminder flag + date + notes; overdue shown separately (`⚠ Follow up with Google, Due: …`).
 - **UI** — hamburger + drawer navigation (all breakpoints) with backdrop, Escape/backdrop close, scroll lock, focus return and background `inert`; sticky header with page context + avatar → profile; professional footer; cards, tables, status badges, modals, loading/empty/error states, toasts, confirm-before-delete, responsive, accessible labels + keyboard-focusable dialogs.
-=======
-# JobSetu
 
-Evidence-powered job intelligence for Indian freshers.
+## JobSetu at a glance
 
-## What it does
+Evidence-powered job intelligence for Indian freshers. (Full reference: [JobSetu service reference](#jobsetu-service-reference).)
+
+### What it does
 
 JobSetu turns a raw job search into a decision card. Search a role + city →
 get deduplicated listings, each with a deterministic match score against your
 profile, a VERIFY section backed by cited search evidence, recent company news
 context, and an aggregate "what should I learn next?" skill-gap panel.
 
-## Why it exists
+### Why it exists
 
 Fresher job boards answer "what exists" but never the three questions that
 matter: **is this relevant to me, can I trust this company, what am I
 missing?** JobSetu answers all three on one card per job — with sources, not
 black-box scores.
 
-## Key features
+### Key features
 
 - Live fresher job search (Hyderabad-first, works for any Indian city)
 - Exact + TF-IDF similarity deduplication with honest pipeline counts
@@ -55,7 +56,7 @@ black-box scores.
 - Warm-cache demo seeding: `python -m app.demo_seed`
 - Landing guide (How it works, pillars, SerpApi story, FAQ), friendly 404 page
 
-## How SerpApi is used
+### How SerpApi is used
 
 SerpApi is the data backbone, not a search box. Remove it and the product has
 nothing — no listings, no evidence, no news. All traffic goes through the
@@ -75,17 +76,15 @@ warm 0 (SQLite cache: jobs 24h, evidence/news 7d). Every attempt is logged to
 `api_usage`, viewable at `/debug/usage`. Details: `docs/research.md`
 (verified params/responses), `docs/verification.md` (evidence rules).
 
-## Tech stack
+### Tech stack
 
 Python, FastAPI, SQLAlchemy, SQLite, Pydantic v2, Jinja2, vanilla CSS/JS,
 httpx, pytest. No LLM, no vector DB, no frontend framework — by design.
->>>>>>> e9c6929019e324b5af53fa75f10210ec7f411830
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-<<<<<<< HEAD
     Browser --> Pages[Cloudflare Pages\nReact + Vite + Tailwind]
     Pages --> Worker[Cloudflare Worker\nREST API + Auth + RBAC/PBAC]
     Worker --> D1[(Cloudflare D1\nsource of truth)]
@@ -306,12 +305,22 @@ Gotchas:
 project/
 ├── frontend/src/{components,pages,hooks,services,types,utils}
 ├── worker/src/{routes,middleware,validation,utils,db} + index.ts
-├── worker/tests/  migrations/  docs/competitive-analysis.md  .github/workflows/
+├── worker/tests/  migrations/  .github/workflows/
+├── app/  tests/  requirements.txt  Dockerfile  # JobSetu Python service (see below)
+├── docs/  # design docs for both products (sections are product-labeled)
 ├── README.md  .gitignore  package.json
 ```
 
 Frontend tests (`frontend/src/**/*.test.tsx`, vitest + jsdom + Testing Library) cover the Home command center, auth-gated routing (`/home` blocked when logged out, `/dashboard` → `/home`, retired discover URLs → `/home`), the navigation drawer (backdrop/Escape/nav-close, admin visibility) + footer, profile/admin pages, and permissions helpers.
-=======
+
+## JobSetu service reference
+
+The standalone Python job-intelligence service lives in `app/` (FastAPI + SQLite, Docker-ready). Everything below documents that service; paths are relative to the repository root.
+
+### Architecture
+
+```mermaid
+flowchart TD
     Browser --> FastAPI["FastAPI routes\n(thin: parse, call, render)"]
     FastAPI --> Services["Services\nSerpApiClient · JobSearch · Dedup · Matcher · Evidence · News · Cache"]
     Services --> SQLite[("SQLite\njobs · evidence · matches · cache")]
@@ -325,7 +334,7 @@ Flow: Browser → FastAPI routes → services → SQLAlchemy → SQLite.
 Details: `docs/architecture.md`. Verification rules: `docs/verification.md`.
 Matching formula: `docs/matching.md`. Demo tour: `docs/demo.md`.
 
-## Prerequisites
+### Prerequisites
 
 - Python 3.12+ (`python --version`)
 - `pip`
@@ -333,11 +342,10 @@ Matching formula: `docs/matching.md`. Demo tour: `docs/demo.md`.
   Without a key the app still boots and all tests pass, but live search
   returns a friendly "not configured" page instead of fake data.
 
-## Installation
+### Installation
 
 ```powershell
-git clone https://github.com/AbhiramMandala/jobsetu.git
-cd jobsetu
+# from the repository root
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -350,7 +358,7 @@ Then add your key to `.env` (never commit it):
 SERPAPI_KEY=your-key-here
 ```
 
-## Environment variables
+### Environment variables
 
 | Name | Default | Notes |
 |---|---|---|
@@ -363,7 +371,7 @@ SERPAPI_KEY=your-key-here
 | `ENABLE_TRENDS` | `false` | Reserved P1 flag. |
 | `ENABLE_PDF` | `false` | Reserved P1 flag. |
 
-## Running locally
+### Running locally
 
 ```powershell
 python -m uvicorn app.main:app --reload
@@ -393,7 +401,7 @@ python -m pytest
 
 88 passed.
 
-## Example workflow
+### Example workflow
 
 1. Create a profile at `/profile`: Python, FastAPI, Django, PostgreSQL, Git.
 2. Search `Python Backend Developer` in `Hyderabad` as `Fresher`.
@@ -405,23 +413,23 @@ python -m pytest
 6. Read NEWS CONTEXT (e.g. funding/expansion with source + date), then the
    "What should I learn next?" panel. Apply or learn the missing skill first.
 
-## Screenshots / demo
+### Screenshots / demo
 
 Real UI captures (no demo data fabricated; profile shows clearly-labeled
 sample data):
 
-- `docs/screenshots/01-landing.png` — search form
-- `docs/screenshots/02-profile.png` — profile with labeled sample prefill
-- `docs/screenshots/03-usage.png` — dev credit dashboard
-- `docs/screenshots/results.png` — search form (landing, live-seeded DB)
-- `docs/screenshots/profile.png` — profile page with demo fresher data
-- `docs/screenshots/usage-live.png` — live-seeded results page: 19 listings,
+- `docs/jobsetu/hackathon/screenshots/01-landing.png` — search form
+- `docs/jobsetu/hackathon/screenshots/02-profile.png` — profile with labeled sample prefill
+- `docs/jobsetu/hackathon/screenshots/03-usage.png` — dev credit dashboard
+- `docs/jobsetu/hackathon/screenshots/results.png` — search form (landing, live-seeded DB)
+- `docs/jobsetu/hackathon/screenshots/profile.png` — profile page with demo fresher data
+- `docs/jobsetu/hackathon/screenshots/usage-live.png` — live-seeded results page: 19 listings,
   CACHED badge, 63% top MATCH, VERIFY supporting evidence, skill gaps
 
 Evidence-detail and `/debug/usage` captures are optional extras.
 Demo script (2:45, video intentionally skipped): `docs/demo.md`.
 
-## Project structure
+### Project structure (JobSetu)
 
 ```
 app/
@@ -441,7 +449,7 @@ docs/                # architecture, matching, verification, research, demo…
 Dockerfile  .dockerignore  requirements.txt  .env.example
 ```
 
-## API / search flow
+### API / search flow
 
 `POST /search` (form: `role`, `location`, `experience`) is the fast path —
 discovery only, then renders useful cards immediately:
@@ -461,7 +469,7 @@ discovery only, then renders useful cards immediately:
    friendly 503. Never fake data. Optional-enrichment failure never breaks
    the core search. Details: `docs/performance.md`.
 
-## Selection process
+### Selection process
 
 Each card also shows a SELECTION PROCESS section built only from
 SerpApi organic-search results — JobSetu never scrapes review sites and
@@ -472,7 +480,7 @@ labeled anecdotal, and everything is marked candidate-reported — never
 official company policy. Every stage links to its sources for inspection.
 Details, taxonomy, and limits: `docs/interviews.md`.
 
-## Appearance & tools
+### Appearance & tools
 
 - **Light/dark theme:** toggle in the header (sun/moon button), persisted in
   `localStorage`, falls back to the OS `prefers-color-scheme` setting, applied
@@ -488,12 +496,12 @@ Details, taxonomy, and limits: `docs/interviews.md`.
   facts (type estimate + confidence, official site), role skills, interview
   prep topics with report counts, selection process, news, and sources.
 
-## Credit visibility
+### Credit visibility
 
 `/debug/usage` (dev-only, no auth) shows real per-engine call counts,
 cache entries, and stored rows. The API key is never displayed.
 
-## Deployment
+### Deployment
 
 ```powershell
 # Environment (never commit .env)
@@ -519,14 +527,14 @@ Health: `GET /health` (no secrets). Then warm the demo:
 Status: Dockerfile + `.dockerignore` ready; image build and platform deploy
 not yet executed (no Docker daemon/credentials in this environment).
 
-## Matching
+### Matching
 
 Deterministic and explainable: Skills 50 + Title 20 + Experience 15 +
 Location 10 + Type 5 = 100. Same candidate + same job always gives the same
 score. Missing data yields neutral sub-scores with explicit flags, never
 fake precision. Full formula, weights, and limitations: `docs/matching.md`.
 
-## Verification
+### Verification
 
 Each search enriches the top-`EVIDENCE_MAX_JOBS` listings with live Google
 Search evidence (cached 7 days): official-site detection, company/role
@@ -535,7 +543,7 @@ verification, or Warning signals — no numeric trust scores, and every claim
 links to its source on `GET /jobs/{id}/evidence`. Rules and limitations:
 `docs/verification.md`.
 
-## Job Authenticity
+### Job Authenticity
 
 Each card also carries an evidence-based authenticity score (0–100) with
 explained signals — and a clear statement of what the score is NOT:
@@ -558,7 +566,7 @@ explained signals — and a clear statement of what the score is NOT:
 > is legitimate or fraudulent. Always verify the employer and application
 > channel before sharing sensitive information or making payments."
 
-## Limitations
+### Limitations
 
 - Closed skill vocabulary (curated list; misses niche/brand-new skills).
 - Keyword-based experience/news parsing (can misread unusual phrasing).
@@ -569,14 +577,14 @@ explained signals — and a clear statement of what the score is NOT:
 - Plain server-rendered visuals; no maps/trends depth, alerts, or LLM
   explanations.
 
-## Future improvements
+### Future improvements (JobSetu)
 
 - Maps/Trends depth behind the existing `ENABLE_*` flags.
 - Search alerts for new matching listings.
 - Larger/industry-specific skill vocabularies.
 - LLM-generated match explanations (deterministic scores stay as-is).
 
-## Hackathon information
+### Hackathon information
 
 - Event: SerpApi India Hackathon 2026 — "Build with Live Search Data"
   (Sep 1–Oct 10, 2026; deadline Oct 10, 2026 23:59 IST).
@@ -584,8 +592,7 @@ explained signals — and a clear statement of what the score is NOT:
   include jobs, news, research, and education; JobSetu is a jobs + news-literacy
   tool for Indian freshers.
 - Entry: solo contributor (Abhiram Mandala).
-- Submission docs: `HACKATHON_SUBMISSION.md` (full package),
-  `SUBMISSION_FORM_DRAFT.md` (copy-paste form answers), `docs/demo.md` (2:45 demo).
+- Submission docs: `docs/jobsetu/hackathon/HACKATHON_SUBMISSION.md` (full package),
+  `docs/jobsetu/hackathon/SUBMISSION_FORM_DRAFT.md` (copy-paste form answers), `docs/demo.md` (2:45 demo).
 - Disclosures: project built during the hackathon window (see git history);
-  AI assistance used (OpenCode + ChatGPT, see `HACKATHON_SUBMISSION.md`).
->>>>>>> e9c6929019e324b5af53fa75f10210ec7f411830
+  AI assistance used (OpenCode + ChatGPT, see `docs/jobsetu/hackathon/HACKATHON_SUBMISSION.md`).

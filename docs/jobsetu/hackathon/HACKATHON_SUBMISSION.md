@@ -86,7 +86,7 @@ httpx, pytest. No LLM, no vector DB.
 
 Skipped intentionally by user — no URL.
 NOTE: if the submission form mandates a video URL, this is a manual blocker
-for the author (record per `docs/demo.md` or accept form validation limits).
+for the author (record per `../../demo.md` or accept form validation limits).
 
 ## Solo contributor
 
@@ -106,7 +106,7 @@ Existing project before the hackathon: **No.**
 
 JobSetu was started during the SerpApi India Hackathon 2026 period
 (author-confirmed). The repository's first Git commit was on September 28,
-2026 (hackathon runs Sep 1–Oct 10, 2026), `docs/research.md` records an empty
+2026 (hackathon runs Sep 1–Oct 10, 2026), `../../research.md` records an empty
 workspace at project start, and no JobSetu code existed anywhere before
 September 2026.
 
@@ -139,5 +139,5 @@ Skipped intentionally by user — no URL (see Demo video above).
   stays hermetic).
 - Honest limits: deploy + video pending (video intentionally skipped); live
   seed done 2026-09-29 (19 jobs, 5/5 supporting, news 2/3) with results
-  screenshot in `docs/screenshots/usage-live.png`. Never claims scam/safe;
+  screenshot in `screenshots/usage-live.png`. Never claims scam/safe;
   never fabricates data.

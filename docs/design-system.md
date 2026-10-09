@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Career workspace design system
 
 Single source of truth for visual consistency. Implemented in
@@ -69,7 +68,9 @@ Hierarchy comes from size/spacing, not from bolding everything.
 ## When NOT to animate / use 3D
 
 No WebGL anywhere (see ui-technology-decisions). No animation on: tables, form inputs, filter selects, settings, tab switches that move focus, anything where motion could hide information. When in doubt, static + fast wins.
-=======
+
+---
+
 # JobSetu design system
 
 Server-rendered Jinja + one stylesheet + two tiny scripts. No frameworks,
@@ -124,4 +125,3 @@ audited in both themes.
   useanimations (external animated-icon scripts: licensing + weight),
   Thiings 3D assets (VPN-gated, heavy), text-rotate libraries (12-line
   script instead).
->>>>>>> e9c6929019e324b5af53fa75f10210ec7f411830

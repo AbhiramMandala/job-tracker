@@ -56,7 +56,7 @@ https://github.com/AbhiramMandala/jobsetu
 ## Demo URL
 
 Skipped intentionally by user — no URL. (If the form mandates it, record per
-`docs/demo.md` and paste the public/unlisted link here.)
+`../../demo.md` and paste the public/unlisted link here.)
 
 ## Solo contributor details
 
