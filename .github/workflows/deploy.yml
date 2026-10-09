@@ -1,43 +1,69 @@
-
+```yaml
 name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
+    name: Test, Build and Deploy
     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v4
+    # Must match the GitHub Environment containing your Cloudflare secrets.
+    environment: production
 
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.19.0
           cache: npm
           cache-dependency-path: package-lock.json
+
+      - name: Show runtime versions
+        run: |
+          node --version
+          npm --version
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Typecheck, test, and build
-        run: |
-          npm run typecheck --workspace=student-job-tracker-worker
-          npm test --workspace=student-job-tracker-worker
-          npm run typecheck --workspace=student-job-tracker-frontend
-          npm test --workspace=student-job-tracker-frontend
-          npm run build --workspace=student-job-tracker-frontend
+      - name: Show relevant dependency versions
+        run: npm ls undici jsdom vitest --all
 
-      - name: Deploy Worker
+      - name: Worker typecheck
+        run: npm run typecheck --workspace=student-job-tracker-worker
+
+      - name: Worker tests
+        run: npm test --workspace=student-job-tracker-worker
+
+      - name: Frontend typecheck
+        run: npm run typecheck --workspace=student-job-tracker-frontend
+
+      - name: Frontend tests
+        run: npm test --workspace=student-job-tracker-frontend
+
+      - name: Build frontend
+        run: npm run build --workspace=student-job-tracker-frontend
+
+      - name: Deploy Cloudflare Worker
         working-directory: worker
         run: npx wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Deploy Pages
+      - name: Deploy Cloudflare Pages
         run: npx wrangler pages deploy frontend/dist --project-name=student-job-tracker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+```
