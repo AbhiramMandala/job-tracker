@@ -1,26 +1,41 @@
-
+```yaml
 name: CI
 
 on:
   pull_request:
   push:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   build-test:
+    name: Typecheck, Test and Build
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.19.0
           cache: npm
           cache-dependency-path: package-lock.json
 
+      - name: Show runtime versions
+        run: |
+          node --version
+          npm --version
+
       - name: Install dependencies
         run: npm ci
+
+      - name: Show relevant dependency versions
+        run: npm ls undici jsdom vitest --all
 
       - name: Worker typecheck
         run: npm run typecheck --workspace=student-job-tracker-worker
@@ -34,5 +49,6 @@ jobs:
       - name: Frontend tests
         run: npm test --workspace=student-job-tracker-frontend
 
-      - name: Frontend build
+      - name: Build frontend
         run: npm run build --workspace=student-job-tracker-frontend
+```
