@@ -71,4 +71,4 @@ instant); Maps/Trends depth, alerts, and LLM explanations are future work.
 1. `pip install -r requirements.txt && cp .env.example .env` (add SERPAPI_KEY)
 2. `python -m app.demo_seed` (warms jobs + evidence + news, prints credits)
 3. `python -m uvicorn app.main:app` → open `/`, use the sample profile
-4. Follow `docs/demo.md` (90 seconds)
+4. Follow `../../demo.md` (90 seconds)

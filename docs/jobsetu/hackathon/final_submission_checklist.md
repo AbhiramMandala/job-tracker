@@ -27,34 +27,34 @@ SCREENSHOT 1 — results page:
 URL: `http://127.0.0.1:8000` → search `Python Backend Developer` / `Hyderabad` / `Fresher` → results.
 Must show: pipeline counts, LIVE/CACHED badge, match scores, VERIFY badges.
 Must NOT show: API key, terminal env output, personal data.
-Save as: `docs/screenshots/04-results.png`
+Save as: `screenshots/04-results.png`
 
 SCREENSHOT 2 — verification evidence:
 URL: results → VIEW EVIDENCE on top card (`/jobs/{id}/evidence`).
 Must show: 2–3 cited sources with queries + retrieval times + reasons.
-Save as: `docs/screenshots/05-evidence.png`
+Save as: `screenshots/05-evidence.png`
 
 SCREENSHOT 3 — usage proof:
 URL: `http://127.0.0.1:8000/debug/usage`.
 Must show: per-engine rows (`google_jobs`, `google`, `google_news`) with counts.
 Must NOT show: API key (page never renders it — verify visually).
-Save as: `docs/screenshots/06-usage-live.png`
+Save as: `screenshots/06-usage-live.png`
 
 - [ ] Screenshots captured (real app only, no fabrication) — BLOCKED
-- [ ] Demo script finalized (`docs/demo.md`, 2:45) — READY
+- [ ] Demo script finalized (`../../demo.md`, 2:45) — READY
 
 ## Demo — recording checklist
 
 PRE-RECORDING (manual): `.env` has key · `python -m app.demo_seed` succeeded ·
 `python -m uvicorn app.main:app` running · browser at `/` · cache warm (badges
 CACHED) · close terminals/editors showing secrets · hide bookmarks/personal tabs.
-RECORDING: follow `docs/demo.md` timestamps exactly — same role/city, same
+RECORDING: follow `../../demo.md` timestamps exactly — same role/city, same
 clicks (search → top card → WHY → VIEW EVIDENCE → `/debug/usage` → news panel).
 POST-RECORDING: duration < 3:00 · no key/secrets visible or audible · upload as
 public/unlisted (YouTube or Drive) · test link in incognito.
 
 - [ ] Video — SKIPPED intentionally by user (no URL; if the form mandates one,
-  record per `docs/demo.md` and test the link in incognito) — USER DECISION
+  record per `../../demo.md` and test the link in incognito) — USER DECISION
 
 ## Submission
 

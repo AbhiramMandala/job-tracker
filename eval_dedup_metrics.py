@@ -1,5 +1,9 @@
 """One-off evaluation: precision / recall / F1 of the duplicate-listing filter.
 
+Must be executed from the repository root: the `app.*` imports below only
+resolve when the working directory is the repo root. Do not move this file
+into a subdirectory without also updating how it is run.
+
 Runs hand-labeled listing pairs through `is_duplicate_norms` and reports
 metrics plus every miss. Labels are the author's judgments on synthetic
 fixtures — this measures performance on THESE fixtures, not real-world
